@@ -1,5 +1,7 @@
 package cn.superid.collector;
 
+import static org.apache.spark.sql.functions.col;
+
 import cn.superid.collector.entity.PageView;
 import java.util.Collections;
 import java.util.stream.Collectors;
@@ -22,19 +24,15 @@ import org.springframework.stereotype.Service;
 public class Structured {
 
   private final KafkaProperties kafkaProperties;
+  private final SparkSession spark;
 
   @Autowired
-  public Structured(KafkaProperties kafkaProperties) {
+  public Structured(KafkaProperties kafkaProperties, SparkSession spark) {
     this.kafkaProperties = kafkaProperties;
+    this.spark = spark;
   }
 
   void run() throws StreamingQueryException {
-    SparkSession spark = SparkSession
-        .builder()
-        .master("local")
-        .appName("Windowed count")
-        .getOrCreate();
-
     String servers = kafkaProperties.getBootstrapServers().stream().collect(
         Collectors.joining(","));
     Dataset<Row> df = spark
@@ -49,20 +47,25 @@ public class Structured {
             .singletonList(new PageView(new String((byte[]) x.get(1)).split(" "))).iterator(),
         Encoders.bean(PageView.class));
 
-    Dataset<Row> pageCounts = views.groupBy(
-        functions.window(views.col("epoch"), "10 minutes", "5 minutes"),
-        views.col("pageUri")).count();
+    Dataset<Row> pageCounts = views
+//        .withWatermark("epoch", "10 minutes")
+        .groupBy(
+        functions.window(col("epoch"), "10 minutes", "5 minutes"),
+        col("pageUri")).count();
     Dataset<Row> idCounts = views
-        .groupBy(functions.window(views.col("epoch"), "10 minutes", "5 minutes"),
-            views.col("id")).count();
+//        .withWatermark("epoch", "10 minutes")
+        .groupBy(functions.window(col("epoch"), "10 minutes", "5 minutes"),
+            col("id")).count();
 
     // Start running the query that prints the running counts to the console
-    StreamingQuery pageQuery = pageCounts.writeStream()
-        .outputMode("append")
+    StreamingQuery pageQuery = pageCounts
+        .writeStream()
+        .outputMode("complete")
         .format("console")
         .start();
-    StreamingQuery idQuery = idCounts.writeStream()
-        .outputMode("append")
+    StreamingQuery idQuery = idCounts
+        .writeStream()
+        .outputMode("complete")
         .format("console")
         .start();
 

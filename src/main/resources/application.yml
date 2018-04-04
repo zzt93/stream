@@ -12,25 +12,11 @@ server:
   port: 8888
 
 
+collector.buffer.size: 1000
+#collector.spark.master.uri: http://192.168.1.204
 ---
 
 spring:
   profiles:
     active: ${ACTIVE_PROFILE:dev}
 
----
-spring:
-  profiles: integration
-  cloud:
-    consul:
-      host: ${CONSUL_ADDRESS:192.168.1.100}
-      port: ${CONSUL_PORT:8501}
-
-
----
-spring:
-  profiles: stable
-  cloud:
-    consul:
-      host: ${CONSUL_ADDRESS:192.168.1.200}
-      port: ${CONSUL_PORT:8501}
