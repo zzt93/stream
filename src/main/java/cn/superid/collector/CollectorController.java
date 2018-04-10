@@ -6,7 +6,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.support.GenericMessage;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,7 +37,11 @@ public class CollectorController {
   private static final String DIR = "hdfs://192.168.1.204:14000/collector/page/";
   private final KafkaTemplate<String, String> kafkaTemplate;
   private final SparkSession spark;
-  private final ThreadLocal<List<PageView>> lists = ThreadLocal.withInitial(LinkedList::new);
+  /**
+   * estimatedSize <= queue.size()
+   */
+  private ConcurrentLinkedQueue<PageView> queue = new ConcurrentLinkedQueue<>();
+  private AtomicLong estimatedSize = new AtomicLong();
   @Value("${collector.buffer.size}")
   private int size = 1000;
 
@@ -55,12 +61,16 @@ public class CollectorController {
     sendMessage("collector.page", pageView);
   }
 
-  private void save(SparkSession spark, PageView pageView) {
-    lists.get().add(pageView);
-    if (lists.get().size() >= size) {
-      Dataset<Row> ds = spark
-          .createDataFrame(lists.get(), PageView.class);
-      lists.set(new LinkedList<>());
+  @Async
+  void save(SparkSession spark, PageView pageView) {
+    queue.add(pageView);
+    estimatedSize.incrementAndGet();
+    if (estimatedSize.updateAndGet(x -> x >= size ? 0 : x) >= size) {
+      ConcurrentLinkedQueue<PageView> tmp = this.queue;
+      this.queue = new ConcurrentLinkedQueue<>();
+      estimatedSize.set(0);
+
+      Dataset<Row> ds = spark.createDataFrame(new LinkedList<>(tmp), PageView.class);
       ds.write().mode(SaveMode.Append).parquet(DIR);
     }
   }
