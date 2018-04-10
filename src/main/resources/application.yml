@@ -12,7 +12,7 @@ server:
   port: 8888
 
 
-collector.buffer.size: 1000
+collector.buffer.size: 1
 #collector.spark.master.uri: http://192.168.1.204
 ---
 

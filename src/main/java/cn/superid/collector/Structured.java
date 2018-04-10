@@ -5,6 +5,7 @@ import static org.apache.spark.sql.functions.col;
 import cn.superid.collector.entity.PageView;
 import java.util.Collections;
 import java.util.stream.Collectors;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoders;
@@ -15,6 +16,7 @@ import org.apache.spark.sql.streaming.StreamingQuery;
 import org.apache.spark.sql.streaming.StreamingQueryException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.stereotype.Service;
 
 /**
@@ -40,21 +42,23 @@ public class Structured {
         .format("kafka")
         .option("kafka.bootstrap.servers", servers)
         .option("subscribe", "collector.page")
+        .option(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+            JsonDeserializer.class.getCanonicalName())
         .load();
 
     Dataset<PageView> views = df.flatMap(
         (FlatMapFunction<Row, PageView>) x -> Collections
-            .singletonList(new PageView(new String((byte[]) x.get(1)).split(" "))).iterator(),
+            .singletonList(PageView.fromString(new String((byte[]) x.get(1)))).iterator(),
         Encoders.bean(PageView.class));
 
     Dataset<Row> pageCounts = views
 //        .withWatermark("epoch", "10 minutes")
         .groupBy(
-        functions.window(col("epoch"), "10 minutes", "5 minutes"),
-        col("pageUri")).count();
+            functions.window(col("epoch"), "1 hour", "5 minutes"),
+            col("pageUri")).count();
     Dataset<Row> idCounts = views
 //        .withWatermark("epoch", "10 minutes")
-        .groupBy(functions.window(col("epoch"), "10 minutes", "5 minutes"),
+        .groupBy(functions.window(col("epoch"), "1 hour", "5 minutes"),
             col("id")).count();
 
     // Start running the query that prints the running counts to the console
