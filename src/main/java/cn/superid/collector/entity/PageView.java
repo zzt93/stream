@@ -22,18 +22,6 @@ public class PageView {
   public PageView() {
   }
 
-  /**
-   * @param split The order of is same with {@link #toString()}
-   */
-  public PageView(String[] split) {
-    epoch = Timestamp.from(Instant.ofEpochMilli(Long.parseLong(split[0])));
-    ip = split[1];
-    userId = split[2];
-    id = split[3];
-    device = split[4];
-    pageUri = split[5];
-  }
-
   public static PageView fromString(String string) {
     return gson.fromJson(string, PageView.class);
   }

@@ -21,6 +21,8 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,26 +54,32 @@ public class CollectorController {
     this.spark = spark;
   }
 
+  @CrossOrigin(origins = "*")
   @PostMapping("/page")
   public void queryFile(@RequestBody PageView pageView, HttpServletRequest request) {
     pageView.setEpoch(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))));
     pageView.setIp(request.getRemoteAddr());
     pageView.setDevice(request.getHeader("User-Agent"));
-    save(spark, pageView);
+    save(pageView);
     sendMessage("collector.page", pageView);
   }
 
+  @GetMapping("/flush")
+  public void flush() {
+    ConcurrentLinkedQueue<PageView> tmp = this.queue;
+    this.queue = new ConcurrentLinkedQueue<>();
+    estimatedSize.set(queue.size());
+
+    Dataset<Row> ds = spark.createDataFrame(new LinkedList<>(tmp), PageView.class);
+    ds.write().mode(SaveMode.Append).parquet(DIR);
+  }
+
   @Async
-  void save(SparkSession spark, PageView pageView) {
+  void save(PageView pageView) {
     queue.add(pageView);
     estimatedSize.incrementAndGet();
     if (estimatedSize.updateAndGet(x -> x >= size ? 0 : x) >= size) {
-      ConcurrentLinkedQueue<PageView> tmp = this.queue;
-      this.queue = new ConcurrentLinkedQueue<>();
-      estimatedSize.set(0);
-
-      Dataset<Row> ds = spark.createDataFrame(new LinkedList<>(tmp), PageView.class);
-      ds.write().mode(SaveMode.Append).parquet(DIR);
+      flush();
     }
   }
 
