@@ -1,6 +1,7 @@
 package cn.superid.collector;
 
 import org.apache.spark.SparkConf;
+import org.apache.spark.SparkContext;
 import org.apache.spark.sql.SparkSession;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +31,8 @@ public class SparkConfig {
     return new SparkConf()
         .setAppName(appName)
         .setMaster(masterUri)
+//        .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .setJars(new String[]{"out/artifacts/collector_jar/collector.jar"})
 //        .set("fs.alluxio.impl", "alluxio.client.file.BaseFileSystem")
 //        .set("spark.driver.extraClassPath", "/<PATH_TO_ALLUXIO>/client/alluxio-1.8.0-SNAPSHOT-client.jar")
 //        .set("spark.executor.extraClassPath", "/<PATH_TO_ALLUXIO>/client/alluxio-1.8.0-SNAPSHOT-client.jar")

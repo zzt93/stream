@@ -10,8 +10,14 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableAsync
 public class CollectorApplication implements CommandLineRunner {
 
+  private final Structured structured;
+  private final CollectorController controller;
+
   @Autowired
-  private Structured structured;
+  public CollectorApplication(Structured structured, CollectorController controller) {
+    this.structured = structured;
+    this.controller = controller;
+  }
 
   public static void main(String[] args) {
     SpringApplication.run(CollectorApplication.class, args);
@@ -19,6 +25,7 @@ public class CollectorApplication implements CommandLineRunner {
 
   @Override
   public void run(String... strings) throws Exception {
+    Runtime.getRuntime().addShutdownHook(new Thread(new FlushHook(controller)));
     structured.run();
   }
 }

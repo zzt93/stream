@@ -9,11 +9,12 @@ spring:
   application:
     name: collector
 server:
-  port: 8888
+  port: 8889
 
 
 collector.buffer.size: 100000
-#collector.spark.master.uri: http://192.168.1.204
+#collector.spark.master.uri: spark://192.168.1.204:7077
+#collector.spark.master.uri: yarn
 ---
 
 spring:

@@ -3,10 +3,10 @@ package cn.superid.collector;
 import static org.apache.spark.sql.functions.col;
 
 import cn.superid.collector.entity.PageView;
-import java.util.Collections;
+import java.io.Serializable;
 import java.util.stream.Collectors;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.spark.api.java.function.FlatMapFunction;
+import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
@@ -23,20 +23,19 @@ import org.springframework.stereotype.Service;
  * @author zzt
  */
 @Service
-public class Structured {
+public class Structured implements Serializable {
 
-  private final KafkaProperties kafkaProperties;
   private final SparkSession spark;
+  private final String servers;
 
   @Autowired
   public Structured(KafkaProperties kafkaProperties, SparkSession spark) {
-    this.kafkaProperties = kafkaProperties;
     this.spark = spark;
+    servers = kafkaProperties.getBootstrapServers().stream().collect(
+        Collectors.joining(","));
   }
 
   void run() throws StreamingQueryException {
-    String servers = kafkaProperties.getBootstrapServers().stream().collect(
-        Collectors.joining(","));
     Dataset<Row> df = spark
         .readStream()
         .format("kafka")
@@ -46,10 +45,8 @@ public class Structured {
             JsonDeserializer.class.getCanonicalName())
         .load();
 
-    Dataset<PageView> views = df.flatMap(
-        (FlatMapFunction<Row, PageView>) x -> Collections
-            .singletonList(PageView.fromString(new String((byte[]) x.get(1)))).iterator(),
-        Encoders.bean(PageView.class));
+    Dataset<PageView> views = df.map(
+        (MapFunction<Row, PageView>) value -> PageView.fromString(new String((byte[]) value.get(1))), Encoders.bean(PageView.class));
 
     Dataset<Row> pageCounts = views
 //        .withWatermark("epoch", "10 minutes")
