@@ -10,12 +10,12 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableAsync
 public class CollectorApplication implements CommandLineRunner {
 
-  private final Structured structured;
+  private final StreamQuery streamQuery;
   private final CollectorController controller;
 
   @Autowired
-  public CollectorApplication(Structured structured, CollectorController controller) {
-    this.structured = structured;
+  public CollectorApplication(StreamQuery streamQuery, CollectorController controller) {
+    this.streamQuery = streamQuery;
     this.controller = controller;
   }
 
@@ -26,6 +26,6 @@ public class CollectorApplication implements CommandLineRunner {
   @Override
   public void run(String... strings) throws Exception {
     Runtime.getRuntime().addShutdownHook(new Thread(new FlushHook(controller)));
-    structured.run();
+    streamQuery.run();
   }
 }

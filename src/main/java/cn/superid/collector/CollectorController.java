@@ -63,9 +63,9 @@ public class CollectorController {
   public void queryFile(@RequestBody PageView pageView, HttpServletRequest request) {
 //    if (pageView.getFrontVersion() == null) return;
     pageView.setEpoch(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))));
-    pageView.setIp(request.getRemoteAddr());
+    pageView.setClientIp(request.getRemoteAddr());
     pageView.setDevice(request.getHeader("User-Agent"));
-    pageView.setHost(request.getHeader("Host"));
+    pageView.setServerIp(request.getHeader("Host"));
     save(pageView);
     sendMessage("collector.page", pageView);
   }

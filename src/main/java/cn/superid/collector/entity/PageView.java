@@ -10,14 +10,14 @@ import java.sql.Timestamp;
 public class PageView implements Serializable {
 
   private static final Gson gson = new Gson();
-  private Timestamp epoch;
-  private String ip;
-  private String userId;
-  private String id;
+  private String clientIp;
   private String device;
-  private String pageUri;
-  private String host;
+  private Timestamp epoch;
   private String frontVersion;
+  private String id;
+  private String pageUri;
+  private String serverIp;
+  private String userId;
 
   public PageView() {
   }
@@ -34,12 +34,12 @@ public class PageView implements Serializable {
     this.epoch = epoch;
   }
 
-  public String getIp() {
-    return ip;
+  public String getClientIp() {
+    return clientIp;
   }
 
-  public void setIp(String ip) {
-    this.ip = ip;
+  public void setClientIp(String clientIp) {
+    this.clientIp = clientIp;
   }
 
   public String getUserId() {
@@ -74,12 +74,12 @@ public class PageView implements Serializable {
     this.pageUri = pageUri;
   }
 
-  public String getHost() {
-    return host;
+  public String getServerIp() {
+    return serverIp;
   }
 
-  public void setHost(String host) {
-    this.host = host;
+  public void setServerIp(String serverIp) {
+    this.serverIp = serverIp;
   }
 
   public String getFrontVersion() {
@@ -112,8 +112,8 @@ public class PageView implements Serializable {
       pageView.setPageUri(userId);
       pageView.setEpoch(epoch);
       pageView.setDevice(dev);
-      pageView.setIp(clientIp);
-      pageView.setHost(serverIp);
+      pageView.setClientIp(clientIp);
+      pageView.setServerIp(serverIp);
       return pageView;
     }
 
