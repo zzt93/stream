@@ -1,5 +1,8 @@
-package cn.superid.collector;
+package cn.superid.streamer.compute;
 
+import com.mongodb.spark.config.ReadConfig;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
 import org.apache.spark.sql.SparkSession;
@@ -17,6 +20,14 @@ public class SparkConfig {
   private String appName;
   @Value("${collector.spark.master.uri:local}")
   private String masterUri;
+  @Value("${spring.data.mongodb.uri}")
+  private String mongoUri;
+
+  static ReadConfig readConfig(SparkSession sparkSession, String collection) {
+    Map<String, String> overrides = new HashMap<>();
+    overrides.put("spark.mongodb.input.collection", collection);
+    return ReadConfig.create(sparkSession).withOptions(overrides);
+  }
 
   @Bean
   public SparkSession sparkSession(SparkConf conf) {
@@ -31,11 +42,10 @@ public class SparkConfig {
     return new SparkConf()
         .setAppName(appName)
         .setMaster(masterUri)
-//        .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+        .set("spark.mongodb.input.uri", mongoUri)
+        .set("spark.mongodb.output.uri", mongoUri)
         .setJars(new String[]{"out/artifacts/collector_jar/collector.jar"})
-//        .set("fs.alluxio.impl", "alluxio.client.file.BaseFileSystem")
-//        .set("spark.driver.extraClassPath", "/<PATH_TO_ALLUXIO>/client/alluxio-1.8.0-SNAPSHOT-client.jar")
-//        .set("spark.executor.extraClassPath", "/<PATH_TO_ALLUXIO>/client/alluxio-1.8.0-SNAPSHOT-client.jar")
+//        .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
         ;
   }
 

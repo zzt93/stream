@@ -1,4 +1,4 @@
-package cn.superid.collector;
+package cn.superid.streamer.compute;
 
 import static org.apache.spark.sql.functions.approx_count_distinct;
 import static org.apache.spark.sql.functions.col;
@@ -26,19 +26,19 @@ import org.springframework.stereotype.Service;
  * @author zzt
  */
 @Service
-public class StreamQuery implements Serializable {
+public class StructuredStreamQuery implements Serializable {
 
   private final SparkSession spark;
   private final String servers;
 
   @Autowired
-  public StreamQuery(KafkaProperties kafkaProperties, SparkSession spark) {
+  public StructuredStreamQuery(KafkaProperties kafkaProperties, SparkSession spark) {
     this.spark = spark;
     servers = kafkaProperties.getBootstrapServers().stream().collect(
         Collectors.joining(","));
   }
 
-  void run() throws StreamingQueryException {
+  public void run() throws StreamingQueryException {
     Dataset<Row> df = spark
         .readStream()
         .format("kafka")
@@ -53,16 +53,16 @@ public class StreamQuery implements Serializable {
             .fromString(new String((byte[]) value.get(1))), Encoders.bean(PageView.class));
 
     Dataset<Row> pageCounts = views
-        .withWatermark("epoch", "10 minutes")
-        .groupBy(functions.window(col("epoch"), "24 hours", "1 hour"))
+        .withWatermark("epoch", "1 minute")
+        .groupBy(functions.window(col("epoch"), "30 minutes", "1 minute"))
         .agg(count(col("*")).as("pv"));
     Dataset<Row> idCounts = views.select(col("id"), col("epoch"))
-        .withWatermark("epoch", "10 minutes")
-        .groupBy(functions.window(col("epoch"), "24 hours", "1 hour"))
+        .withWatermark("epoch", "1 minute")
+        .groupBy(functions.window(col("epoch"), "30 minutes", "1 minute"))
         .agg(approx_count_distinct("id").alias("uv"));
     Dataset<Row> userCount = views.select(col("userId"), col("epoch"))
-        .withWatermark("epoch", "10 minutes")
-        .groupBy(functions.window(col("epoch"), "24 hours", "1 hour"))
+        .withWatermark("epoch", "1 minute")
+        .groupBy(functions.window(col("epoch"), "30 minutes", "1 minute"))
         .agg(approx_count_distinct("userId").alias("uv (signed user)"));
 
     for (StreamingQuery query : getStreamingQuery(pageCounts, idCounts, userCount)) {

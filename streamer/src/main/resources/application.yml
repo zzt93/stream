@@ -12,9 +12,10 @@ spring:
     mongodb:
       uri: mongodb://192.168.1.100:27020/collector.pages
 server:
-  port: 8888
+  port: 18888
 
 
+collector.spark.master.uri: spark://192.168.1.204:7077
 collector.mongo.page: pages
 ---
 
