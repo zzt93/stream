@@ -4,7 +4,6 @@ import com.mongodb.spark.config.ReadConfig;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.spark.SparkConf;
-import org.apache.spark.SparkContext;
 import org.apache.spark.sql.SparkSession;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -44,7 +43,7 @@ public class SparkConfig {
         .setMaster(masterUri)
         .set("spark.mongodb.input.uri", mongoUri)
         .set("spark.mongodb.output.uri", mongoUri)
-        .setJars(new String[]{"out/artifacts/collector_jar/collector.jar"})
+        .setJars(new String[]{"out/artifacts/streamer_jar/streamer.jar"})
 //        .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
         ;
   }

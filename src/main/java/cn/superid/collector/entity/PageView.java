@@ -1,5 +1,6 @@
 package cn.superid.collector.entity;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.google.gson.Gson;
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -14,10 +15,11 @@ public class PageView implements Serializable {
   private String device;
   private Timestamp epoch;
   private String frontVersion;
-  private String id;
+  @JsonAlias("id")
+  private String viewId;
   private String pageUri;
   private String serverIp;
-  private String userId;
+  private long userId;
 
   public PageView() {
   }
@@ -42,20 +44,20 @@ public class PageView implements Serializable {
     this.clientIp = clientIp;
   }
 
-  public String getUserId() {
+  public long getUserId() {
     return userId;
   }
 
-  public void setUserId(String userId) {
+  public void setUserId(long userId) {
     this.userId = userId;
   }
 
-  public String getId() {
-    return id;
+  public String getViewId() {
+    return viewId;
   }
 
-  public void setId(String id) {
-    this.id = id;
+  public void setViewId(String viewId) {
+    this.viewId = viewId;
   }
 
   public String getDevice() {
@@ -107,8 +109,8 @@ public class PageView implements Serializable {
 
     public PageView build() {
       PageView pageView = new PageView();
-      pageView.setId(id);
-      pageView.setId(pageUri);
+      pageView.setViewId(id);
+      pageView.setViewId(pageUri);
       pageView.setPageUri(userId);
       pageView.setEpoch(epoch);
       pageView.setDevice(dev);

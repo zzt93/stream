@@ -56,10 +56,10 @@ public class StructuredStreamQuery implements Serializable {
         .withWatermark("epoch", "1 minute")
         .groupBy(functions.window(col("epoch"), "30 minutes", "1 minute"))
         .agg(count(col("*")).as("pv"));
-    Dataset<Row> idCounts = views.select(col("id"), col("epoch"))
+    Dataset<Row> idCounts = views.select(col("viewId"), col("epoch"))
         .withWatermark("epoch", "1 minute")
         .groupBy(functions.window(col("epoch"), "30 minutes", "1 minute"))
-        .agg(approx_count_distinct("id").alias("uv"));
+        .agg(approx_count_distinct("viewId").alias("uv"));
     Dataset<Row> userCount = views.select(col("userId"), col("epoch"))
         .withWatermark("epoch", "1 minute")
         .groupBy(functions.window(col("epoch"), "30 minutes", "1 minute"))

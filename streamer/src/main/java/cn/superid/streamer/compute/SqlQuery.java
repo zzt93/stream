@@ -17,15 +17,11 @@ import org.springframework.stereotype.Service;
 public class SqlQuery {
 
   private final Dataset<PageView> pageView;
-  private final SparkSession spark;
-  @Value("${collector.mongo.page}")
-  private String pages;
 
   @Autowired
-  public SqlQuery(SparkSession spark) {
-    this.spark = spark;
-    pageView = MongoSpark.load(spark, SparkConfig.readConfig(spark, this.pages), PageView.class);
-    pageView.createOrReplaceTempView("pages");
+  public SqlQuery(SparkSession spark, @Value("${collector.mongo.page}")String pages) {
+    pageView = MongoSpark.load(spark, SparkConfig.readConfig(spark, pages), PageView.class);
+    pageView.createOrReplaceTempView(pages);
   }
 
   public String query(String query) {

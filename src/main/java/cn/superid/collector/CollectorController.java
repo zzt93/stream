@@ -1,6 +1,7 @@
 package cn.superid.collector;
 
 import cn.superid.collector.entity.PageView;
+import cn.superid.collector.entity.SimpleResponse;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -48,7 +49,7 @@ public class CollectorController {
 
   @CrossOrigin(origins = "*")
   @PostMapping("/page")
-  public void queryFile(@RequestBody PageView pageView, HttpServletRequest request) {
+  public SimpleResponse queryFile(@RequestBody PageView pageView, HttpServletRequest request) {
 //    if (pageView.getFrontVersion() == null) return;
     pageView.setEpoch(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))));
     pageView.setClientIp(request.getRemoteAddr());
@@ -56,6 +57,7 @@ public class CollectorController {
     pageView.setServerIp(request.getHeader("Host"));
     save(pageView);
     sendMessage("collector.page", pageView);
+    return new SimpleResponse(0);
   }
 
   @GetMapping("/peek")
@@ -72,7 +74,7 @@ public class CollectorController {
   @Async
   void save(PageView pageView) {
     try {
-      mongo.save(pageView, pages);
+      mongo.insert(pageView, pages);
     } catch (Exception e) {
       logger.error("", e);
     }
