@@ -1,7 +1,10 @@
 package cn.superid.streamer.compute;
 
-import static cn.superid.streamer.compute.SparkConfig.readConfig;
+import static cn.superid.streamer.compute.MongoConfig.readConfig;
 import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.count;
+import static org.apache.spark.sql.functions.countDistinct;
+import static org.apache.spark.sql.functions.lit;
 
 import cn.superid.collector.entity.PageStatistic;
 import cn.superid.collector.entity.PageView;
@@ -15,13 +18,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.SparkSession;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.mongodb.core.CollectionOptions;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -33,10 +36,11 @@ import org.springframework.stereotype.Service;
 public class RegularQuery implements Serializable {
 
   private static final Logger logger = LoggerFactory.getLogger(RegularQuery.class);
-  private static final int SIZE_OF_PAGE_VIEW = 500;
-  private final String hours = "hours";
-  private final String days = "days";
   private final MongoTemplate mongo;
+  @Value("${collector.mongo.hour}")
+  private String hours;
+  @Value("${collector.mongo.day}")
+  private String days;
   private Dataset<PageView> pageSet;
 
 
@@ -47,14 +51,14 @@ public class RegularQuery implements Serializable {
     pageSet = MongoSpark.load(sparkSession, readConfig(sparkSession, pages), PageView.class);
   }
 
-  @Scheduled(fixedRate = 1000 * 60, initialDelay = 1000 * 30)
+  @Scheduled(fixedRate = 1000 * 60, initialDelay = 1000 * 100)
   public void everyHour() {
     Timestamp now = Timestamp
         .valueOf(LocalDateTime.now(ZoneId.of("UTC")).truncatedTo(ChronoUnit.HOURS));
     repeat(hours, now, Unit.HOUR);
   }
 
-  @Scheduled(fixedRate = 1000 * 60 * 24, initialDelay = 1000 * 60)
+  @Scheduled(fixedRate = 1000 * 60 * 24, initialDelay = 1000 * 10)
   public void everyDay() {
     Timestamp now = Timestamp
         .valueOf(LocalDateTime.now(ZoneId.of("UTC")).truncatedTo(ChronoUnit.DAYS));
@@ -63,7 +67,7 @@ public class RegularQuery implements Serializable {
 
   private void repeat(String collection, Timestamp now, Unit unit) {
     try {
-      createIfNotExist(collection, unit.range * 10);
+      MongoConfig.createIfNotExist(mongo, collection, unit.range * 10);
       Document lastDoc = mongo.getCollection(collection).find()
           .sort(new BasicDBObject("epoch", -1))
           .first();
@@ -75,33 +79,25 @@ public class RegularQuery implements Serializable {
         last = Timestamp.valueOf(unit.update(now, -unit.range));
         size = unit.range;
       } else {
-        size = now.toLocalDateTime().getHour() - last.toLocalDateTime().getHour();
-        if (size <= 0) {
+        size = unit.getUnit(now) - unit.getUnit(last);
+        if (size < 0) {
           size += unit.range;
         }
       }
       for (int offset = 0; offset < size; offset++) {
-        PageStatistic pageStatistic = new PageStatistic();
         Dataset<PageView> inTimeRange = getInTimeRange(pageSet, last, unit, offset);
-        pageStatistic.setEpoch(Timestamp.valueOf(unit.update(last, offset + 1)));
-        pageStatistic.setPv(inTimeRange.count());
-        pageStatistic.setUv(inTimeRange.select(col("viewId")).distinct().count());
-        pageStatistic.setUvSigned(inTimeRange.select(col("userId")).distinct().count());
-        list.add(pageStatistic);
+        Timestamp epoch = Timestamp.valueOf(unit.update(last, offset + 1));
+        Dataset<PageStatistic> stat = inTimeRange
+            .agg(count("*").as("pv"), countDistinct(col("viewId")).as("uv"),
+                countDistinct(col("userId")).as("uvSigned"))
+            .withColumn("epoch", lit(epoch))
+            .as(Encoders.bean(PageStatistic.class));
+        list.add(stat.first());
       }
       mongo.insert(list, collection);
     } catch (Exception e) {
       logger.error("", e);
     }
-  }
-
-  private void createIfNotExist(String collection, int max) {
-    if (mongo.collectionExists(collection)) {
-      return;
-    }
-    CollectionOptions options = CollectionOptions.empty().capped().maxDocuments(max)
-        .size(max * SIZE_OF_PAGE_VIEW);
-    mongo.createCollection(collection, options);
   }
 
   private Dataset<PageView> getInTimeRange(Dataset<PageView> pages, Timestamp epoch, Unit unit,
@@ -119,10 +115,30 @@ public class RegularQuery implements Serializable {
       public LocalDateTime update(Timestamp dateTime, int offset) {
         return dateTime.toLocalDateTime().plusDays(offset);
       }
+
+      @Override
+      public int getUnit(Timestamp timestamp) {
+        return timestamp.toLocalDateTime().getDayOfMonth();
+      }
     }, HOUR(24) {
       @Override
       public LocalDateTime update(Timestamp dateTime, int offset) {
         return dateTime.toLocalDateTime().plusHours(offset);
+      }
+
+      @Override
+      public int getUnit(Timestamp timestamp) {
+        return timestamp.toLocalDateTime().getHour();
+      }
+    }, Minute(30) {
+      @Override
+      public LocalDateTime update(Timestamp dateTime, int offset) {
+        return dateTime.toLocalDateTime().plusMinutes(offset);
+      }
+
+      @Override
+      public int getUnit(Timestamp timestamp) {
+        return timestamp.toLocalDateTime().getMinute();
       }
     };
 
@@ -137,6 +153,8 @@ public class RegularQuery implements Serializable {
     }
 
     public abstract LocalDateTime update(Timestamp dateTime, int offset);
+
+    public abstract int getUnit(Timestamp timestamp);
   }
 
 }

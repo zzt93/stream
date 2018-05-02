@@ -8,10 +8,19 @@ import java.sql.Timestamp;
  */
 public class PageStatistic implements Serializable {
 
+  private long id;
   private Timestamp epoch;
   private long pv;
   private long uv;
   private long uvSigned;
+
+  public long getId() {
+    return id;
+  }
+
+  public void setId(long id) {
+    this.id = id;
+  }
 
   public Timestamp getEpoch() {
     return epoch;

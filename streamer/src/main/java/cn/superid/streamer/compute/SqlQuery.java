@@ -20,7 +20,7 @@ public class SqlQuery {
 
   @Autowired
   public SqlQuery(SparkSession spark, @Value("${collector.mongo.page}")String pages) {
-    pageView = MongoSpark.load(spark, SparkConfig.readConfig(spark, pages), PageView.class);
+    pageView = MongoSpark.load(spark, MongoConfig.readConfig(spark, pages), PageView.class);
     pageView.createOrReplaceTempView(pages);
   }
 

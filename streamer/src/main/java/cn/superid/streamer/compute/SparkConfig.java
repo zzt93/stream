@@ -1,11 +1,9 @@
 package cn.superid.streamer.compute;
 
-import com.mongodb.spark.config.ReadConfig;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.spark.SparkConf;
 import org.apache.spark.sql.SparkSession;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.mongo.MongoProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,12 +19,8 @@ public class SparkConfig {
   private String masterUri;
   @Value("${spring.data.mongodb.uri}")
   private String mongoUri;
-
-  static ReadConfig readConfig(SparkSession sparkSession, String collection) {
-    Map<String, String> overrides = new HashMap<>();
-    overrides.put("spark.mongodb.input.collection", collection);
-    return ReadConfig.create(sparkSession).withOptions(overrides);
-  }
+  @Value("${collector.mongo.minute}")
+  private String minute;
 
   @Bean
   public SparkSession sparkSession(SparkConf conf) {
@@ -46,6 +40,11 @@ public class SparkConfig {
         .setJars(new String[]{"out/artifacts/streamer_jar/streamer.jar"})
 //        .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
         ;
+  }
+
+  @Bean
+  public MongoForeachWriter writer(MongoProperties properties) {
+    return new MongoForeachWriter(properties.getUri(), minute);
   }
 
 }
