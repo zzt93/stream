@@ -17,7 +17,7 @@ server:
 
 collector.spark.master.uri: spark://192.168.1.204:7077
 collector.mongo.page: pages
-collector.mongo.minute: minute
+collector.mongo.minute: minutes
 collector.mongo.hour: hours
 collector.mongo.day: days
 

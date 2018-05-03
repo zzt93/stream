@@ -30,7 +30,7 @@ public class MinuteWriter {
 
   @KafkaListener(topics = "${streamer.kafka.minute}")
   public void listen(String message) {
-    logger.info("Received Messasge in group foo: " + message);
+    logger.info("Received Messasge in group: " + message);
     PageStatistic pageStatistic = gson.fromJson(message, PageStatistic.class);
     pageStatistic.setId(pageStatistic.getEpoch().getTime());
     mongo.save(pageStatistic, minute);

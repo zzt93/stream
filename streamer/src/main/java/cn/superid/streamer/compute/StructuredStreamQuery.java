@@ -77,7 +77,7 @@ public class StructuredStreamQuery implements Serializable {
           .option("kafka.bootstrap.servers", servers)
           .option("topic", streamerTopic)
           .option("checkpointLocation", "hdfs://192.168.1.204:14000/streamer/minute")
-          .trigger(ProcessingTime("30 seconds"))
+          .trigger(ProcessingTime("20 seconds"))
 //          .format("console")
 //          .option("truncate", false)
 //          .option("numRows", 24)

@@ -14,6 +14,14 @@ public class PageStatistic implements Serializable {
   private long uv;
   private long uvSigned;
 
+  public PageStatistic() {
+  }
+
+  public PageStatistic(Timestamp epoch) {
+    this.epoch = epoch;
+    setId(epoch.getTime());
+  }
+
   public long getId() {
     return id;
   }

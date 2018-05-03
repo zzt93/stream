@@ -51,7 +51,7 @@ public class CollectorController {
   @PostMapping("/page")
   public SimpleResponse queryFile(@RequestBody PageView pageView, HttpServletRequest request) {
 //    if (pageView.getFrontVersion() == null) return;
-    pageView.setEpoch(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("UTC"))));
+    pageView.setEpoch(Timestamp.valueOf(LocalDateTime.now()));
     pageView.setClientIp(request.getRemoteAddr());
     pageView.setDevice(request.getHeader("User-Agent"));
     pageView.setServerIp(request.getHeader("Host"));

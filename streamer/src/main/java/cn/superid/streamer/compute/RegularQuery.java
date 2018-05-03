@@ -54,14 +54,14 @@ public class RegularQuery implements Serializable {
   @Scheduled(fixedRate = 1000 * 60, initialDelay = 1000 * 100)
   public void everyHour() {
     Timestamp now = Timestamp
-        .valueOf(LocalDateTime.now(ZoneId.of("UTC")).truncatedTo(ChronoUnit.HOURS));
+        .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS));
     repeat(hours, now, Unit.HOUR);
   }
 
   @Scheduled(fixedRate = 1000 * 60 * 24, initialDelay = 1000 * 10)
   public void everyDay() {
     Timestamp now = Timestamp
-        .valueOf(LocalDateTime.now(ZoneId.of("UTC")).truncatedTo(ChronoUnit.DAYS));
+        .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.DAYS));
     repeat(days, now, Unit.DAY);
   }
 
@@ -90,7 +90,7 @@ public class RegularQuery implements Serializable {
         Dataset<PageStatistic> stat = inTimeRange
             .agg(count("*").as("pv"), countDistinct(col("viewId")).as("uv"),
                 countDistinct(col("userId")).as("uvSigned"))
-            .withColumn("epoch", lit(epoch))
+            .withColumn("epoch", lit(epoch)).withColumn("id", lit(epoch.getTime()))
             .as(Encoders.bean(PageStatistic.class));
         list.add(stat.first());
       }
