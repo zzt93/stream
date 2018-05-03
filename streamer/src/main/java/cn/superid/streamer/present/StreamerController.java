@@ -13,7 +13,6 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -76,6 +75,7 @@ public class StreamerController {
 
   @PostMapping("/day/detail")
   public List<PageView> dayDetail(@RequestBody TimeRange range) {
+    Preconditions.checkNotNull(range.pageRequest(), "No pagination info or too deep pagination");
     return queryMongo(range, page, ChronoUnit.DAYS, PageView.class);
   }
 
@@ -86,13 +86,14 @@ public class StreamerController {
 
   @PostMapping("/hour/detail")
   public List<PageView> hourDetail(@RequestBody TimeRange range) {
+    Preconditions.checkNotNull(range.pageRequest(), "No pagination info or too deep pagination");
     return queryMongo(range, page, ChronoUnit.HOURS, PageView.class);
   }
 
-  private <T> List<T> queryMongo( TimeRange range, String collection, ChronoUnit unit, Class<T> tClass) {
+  private <T> List<T> queryMongo(TimeRange range, String collection, ChronoUnit unit, Class<T> tClass) {
     Criteria criteria = Criteria.where("epoch").gte(truncate(range.getFrom(), unit))
         .andOperator(Criteria.where("epoch").lt(truncate(range.getTo(), unit)));
-    Query query = Query.query(criteria);
+    Query query = Query.query(criteria).with(range.pageRequest());
     return mongo.find(query, tClass, collection);
   }
 
