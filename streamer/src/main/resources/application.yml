@@ -1,8 +1,10 @@
 spring:
   kafka:
     consumer:
-      auto-offset-reset: earliest
+      auto-offset-reset: latest
+#      auto-offset-reset: earliest
       group-id: streamer
+      enable-auto-commit: true
     producer:
       client-id: streamer
     bootstrap-servers: ["192.168.1.204:9092"]

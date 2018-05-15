@@ -60,7 +60,7 @@ public class StreamerController {
     this.hour = hour;
     this.day = day;
     this.page = page;
-    MongoConfig.createIfNotExist(mongo, this.minute, Unit.Minute.getRange() * 10);
+    MongoConfig.createIfNotExist(mongo, this.minute, Unit.Minute.getRange() * 50);
   }
 
   @PostMapping("/query")
@@ -90,7 +90,14 @@ public class StreamerController {
     return queryMongo(range, page, ChronoUnit.HOURS, PageView.class);
   }
 
+  @PostMapping("/minute/detail")
+  public List<PageView> minuteDetail(@RequestBody TimeRange range) {
+    Preconditions.checkNotNull(range.pageRequest(), "No pagination info or too deep pagination");
+    return queryMongo(range, page, ChronoUnit.MINUTES, PageView.class);
+  }
+
   private <T> List<T> queryMongo(TimeRange range, String collection, ChronoUnit unit, Class<T> tClass) {
+    Preconditions.checkArgument(range.getFrom() != null && range.getTo() != null, "No time range");
     Criteria criteria = Criteria.where("epoch").gte(truncate(range.getFrom(), unit))
         .andOperator(Criteria.where("epoch").lt(truncate(range.getTo(), unit)));
     Query query = Query.query(criteria).with(range.pageRequest());

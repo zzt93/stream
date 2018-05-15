@@ -47,6 +47,8 @@ public class StructuredStreamQuery implements Serializable {
         .format("kafka")
         .option("kafka.bootstrap.servers", servers)
         .option("subscribe", "collector.page")
+        .option("enable.auto.commit", true)
+        .option("auto.offset.reset", "latest")
         .load();
 
     Dataset<PageView> views = df.map(
@@ -72,7 +74,7 @@ public class StructuredStreamQuery implements Serializable {
     for (int i = 0; i < datasets.length; i++) {
       res[i] = datasets[i]
           .writeStream()
-          .outputMode("complete")
+          .outputMode("update")
           .format("kafka")
           .option("kafka.bootstrap.servers", servers)
           .option("topic", streamerTopic)
@@ -80,7 +82,7 @@ public class StructuredStreamQuery implements Serializable {
           .trigger(ProcessingTime("20 seconds"))
 //          .format("console")
 //          .option("truncate", false)
-//          .option("numRows", 24)
+//          .option("numRows", 50)
           .start();
     }
     return res;

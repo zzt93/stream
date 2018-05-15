@@ -20,12 +20,21 @@ public class PageView implements Serializable {
   private String pageUri;
   private String serverIp;
   private long userId;
+  private String domain;
 
   public PageView() {
   }
 
   public static PageView fromString(String string) {
     return gson.fromJson(string, PageView.class);
+  }
+
+  public String getDomain() {
+    return domain;
+  }
+
+  public void setDomain(String domain) {
+    this.domain = domain;
   }
 
   public Timestamp getEpoch() {

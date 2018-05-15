@@ -55,6 +55,7 @@ public class CollectorController {
     pageView.setClientIp(request.getRemoteAddr());
     pageView.setDevice(request.getHeader("User-Agent"));
     pageView.setServerIp(request.getHeader("Host"));
+    pageView.setDomain(request.getHeader("x-original"));
     save(pageView);
     sendMessage("collector.page", pageView);
     return new SimpleResponse(0);
