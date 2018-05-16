@@ -7,23 +7,24 @@ spring:
       enable-auto-commit: true
     producer:
       client-id: streamer
-    bootstrap-servers: ["192.168.1.204:9092"]
+    bootstrap-servers: ["${KAFKA}:9092"]
   application:
     name: streamer
   data:
     mongodb:
-      uri: mongodb://192.168.1.100:27020/collector.pages
+      uri: mongodb://${MONGO}:27020/collector.pages
 server:
   port: 18888
 
 
-collector.spark.master.uri: spark://192.168.1.204:7077
+collector.spark.master.uri: spark://${SPARK}:7077
 collector.mongo.page: pages
 collector.mongo.minute: minutes
 collector.mongo.hour: hours
 collector.mongo.day: days
 
 streamer.kafka.minute: "streamer.minute"
+streamer.hdfs.minute: "hdfs://${HDFS}:14000/streamer/minute"
 
 ---
 

@@ -31,14 +31,17 @@ public class StructuredStreamQuery implements Serializable {
   private final SparkSession spark;
   private final String servers;
   private final String streamerTopic;
+  private final String hdfsCheckpoint;
 
   @Autowired
   public StructuredStreamQuery(KafkaProperties kafkaProperties, SparkSession spark,
-      @Value("${streamer.kafka.minute}") String streamerTopic) {
+      @Value("${streamer.kafka.minute}") String streamerTopic,
+      @Value("${streamer.hdfs.minute}") String hdfsCheckpoint) {
     this.spark = spark;
     servers = kafkaProperties.getBootstrapServers().stream().collect(
         Collectors.joining(","));
     this.streamerTopic = streamerTopic;
+    this.hdfsCheckpoint = hdfsCheckpoint;
   }
 
   public void run() throws StreamingQueryException {
@@ -78,7 +81,7 @@ public class StructuredStreamQuery implements Serializable {
           .format("kafka")
           .option("kafka.bootstrap.servers", servers)
           .option("topic", streamerTopic)
-          .option("checkpointLocation", "hdfs://192.168.1.204:14000/streamer/minute")
+          .option("checkpointLocation", hdfsCheckpoint)
           .trigger(ProcessingTime("20 seconds"))
 //          .format("console")
 //          .option("truncate", false)
