@@ -37,7 +37,7 @@ public class SparkConfig {
         .setMaster(masterUri)
         .set("spark.mongodb.input.uri", mongoUri)
         .set("spark.mongodb.output.uri", mongoUri)
-        .setJars(new String[]{"out/artifacts/streamer_jar/streamer.jar"})
+        .setJars(new String[]{"/app.jar"})
 //        .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
         ;
   }
