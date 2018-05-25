@@ -13,38 +13,39 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SparkConfig {
 
-  @Value("${collector.spark.app.name:collector}")
-  private String appName;
-  @Value("${collector.spark.master.uri:local}")
-  private String masterUri;
-  @Value("${spring.data.mongodb.uri}")
-  private String mongoUri;
-  @Value("${collector.mongo.minute}")
-  private String minute;
+    @Value("${collector.spark.app.name:streamer}")
+    private String appName;
+    @Value("${collector.spark.master.uri:local}")
+    private String masterUri;
+    @Value("${spring.data.mongodb.uri}")
+    private String mongoUri;
+    @Value("${collector.mongo.minute}")
+    private String minute;
 
-  @Bean
-  public SparkSession sparkSession(SparkConf conf) {
-    return SparkSession
-        .builder()
-        .config(conf)
-        .getOrCreate();
-  }
+    @Bean
+    public SparkSession sparkSession(SparkConf conf) {
+        return SparkSession
+                .builder()
+                .config(conf)
+                .getOrCreate();
+    }
 
-  @Bean
-  public SparkConf sparkConf() {
-    return new SparkConf()
-        .setAppName(appName)
-        .setMaster(masterUri)
-        .set("spark.mongodb.input.uri", mongoUri)
-        .set("spark.mongodb.output.uri", mongoUri)
-        .setJars(new String[]{"/app.jar"})
+    @Bean
+    public SparkConf sparkConf() {
+        return new SparkConf()
+                .setAppName(appName)
+                .setMaster(masterUri)
+                .set("spark.mongodb.input.uri", mongoUri)
+                .set("spark.mongodb.output.uri", mongoUri)
+                .set("spark.driver.port", "40000")
+                .setJars(new String[]{"/app.jar"})
 //        .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-        ;
-  }
+                ;
+    }
 
-  @Bean
-  public MongoForeachWriter writer(MongoProperties properties) {
-    return new MongoForeachWriter(properties.getUri(), minute);
-  }
+    @Bean
+    public MongoForeachWriter writer(MongoProperties properties) {
+        return new MongoForeachWriter(properties.getUri(), minute);
+    }
 
 }
