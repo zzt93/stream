@@ -136,7 +136,7 @@
                                     <artifact>cn.superid:collector</artifact>
                                     <excludes>
                                         <!--把collector中含有main方法的类排除掉,否则影响spring插件打包-->
-                                        <exclude>cn/superid/collector/**</exclude>
+                                        <exclude>cn/superid/collector/Collector*.*</exclude>
                                     </excludes>
                                 </filter>
                             </filters>

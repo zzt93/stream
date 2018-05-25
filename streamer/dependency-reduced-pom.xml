@@ -32,7 +32,7 @@
                 <filter>
                   <artifact>cn.superid:collector</artifact>
                   <excludes>
-                    <exclude>cn/superid/collector/**</exclude>
+                    <exclude>cn/superid/collector/Collector*.*</exclude>
                   </excludes>
                 </filter>
               </filters>
