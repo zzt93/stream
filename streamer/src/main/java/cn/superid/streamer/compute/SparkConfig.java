@@ -37,8 +37,8 @@ public class SparkConfig {
                 .setMaster(masterUri)
                 .set("spark.mongodb.input.uri", mongoUri)
                 .set("spark.mongodb.output.uri", mongoUri)
-                .set("spark.driver.host","ali-18")
-                .set("spark.driver.port", "40000")
+//                .set("spark.driver.host","ali-18")
+//                .set("spark.driver.port", "40000")
                 .setJars(new String[]{"/app.jar"})
 //        .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
                 ;
