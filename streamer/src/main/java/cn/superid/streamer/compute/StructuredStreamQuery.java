@@ -16,6 +16,8 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.functions;
 import org.apache.spark.sql.streaming.StreamingQuery;
 import org.apache.spark.sql.streaming.StreamingQueryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class StructuredStreamQuery implements Serializable {
+  private static final Logger LOGGER = LoggerFactory.getLogger(StructuredStreamQuery.class);
 
   private final SparkSession spark;
   private final String servers;
@@ -55,8 +58,12 @@ public class StructuredStreamQuery implements Serializable {
         .load();
 
     Dataset<PageView> views = df.map(
-        (MapFunction<Row, PageView>) value -> PageView
-            .fromString(new String((byte[]) value.get(1))), Encoders.bean(PageView.class));
+        (MapFunction<Row, PageView>) value -> {
+          LOGGER.info("value.get(1)="+value.get(1));
+          LOGGER.info("new String((byte[]) value.get(1))="+new String((byte[]) value.get(1)));
+          return PageView
+            .fromString(new String((byte[]) value.get(1)));
+        }, Encoders.bean(PageView.class));
 
     Dataset<String> pageCounts = views
 //        .withWatermark("epoch", "1 minute")
