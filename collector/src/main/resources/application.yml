@@ -2,12 +2,12 @@ spring:
   kafka:
     producer:
       client-id: collector
-    bootstrap-servers: ["192.168.1.204:9092"]
+    bootstrap-servers: ["${KAFKA}:9092"]
   application:
     name: collector
   data:
     mongodb:
-      uri: mongodb://192.168.1.100:27020/collector.pages
+      uri: mongodb://${MONGO}:27020/collector.pages
 server:
   port: 8888
 
