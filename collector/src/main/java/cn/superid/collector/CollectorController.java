@@ -88,6 +88,7 @@ public class CollectorController {
   private void sendMessage(String topicName, PageView msg) {
     HashMap<String, Object> map = new HashMap<>();
     map.put(KafkaHeaders.TOPIC, topicName);
+    logger.info("send msg: " + msg.toString());
     kafkaTemplate.send(new GenericMessage<>(msg.toString(), map));
   }
 

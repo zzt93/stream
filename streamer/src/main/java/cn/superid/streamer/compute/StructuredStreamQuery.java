@@ -62,7 +62,7 @@ public class StructuredStreamQuery implements Serializable {
 
         Dataset<PageView> views = df.map(
                 (MapFunction<Row, PageView>) value -> {
-                    LOGGER.info("===new String((byte[]) value.get(1))=" + new String((byte[]) value.get(1)));
+                    LOGGER.info("=====receive msg :" + new String((byte[]) value.get(1)));
                     return PageView
                             .fromString(new String((byte[]) value.get(1)));
                 }, Encoders.bean(PageView.class));
