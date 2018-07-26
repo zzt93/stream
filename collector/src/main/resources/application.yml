@@ -4,15 +4,14 @@ spring:
   kafka:
     producer:
       client-id: collector
-#    bootstrap-servers: ["${KAFKA}:9092"]
-    bootstrap-servers: ["localhost:9092"]
+    bootstrap-servers: ["${KAFKA}:9092"]
   application:
     name: collector
   data:
     mongodb:
     #uri写到db层即可
-#      uri: mongodb://${MONGO}:27020/collector
-      uri: mongodb://localhost:27017/collector
+      uri: mongodb://${MONGO}:27020/collector
+
 server:
   port: 8888
 
