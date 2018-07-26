@@ -1,3 +1,5 @@
+#可以看maven依赖中的spring autoconfig 包中的spring.factories文件中的KafkaConfig和MongoConfig
+#在具体的配置类中可以看到相应的Template类和Properties类，Properties类中用到的属性的路径就是yml文件中的
 spring:
   kafka:
     producer:
@@ -7,12 +9,19 @@ spring:
     name: collector
   data:
     mongodb:
-      uri: mongodb://${MONGO}:27020/collector.pages
+    #uri写到db层即可
+      uri: mongodb://${MONGO}:27020/collector
+
 server:
   port: 8888
 
-
+#页面浏览信息存放的mongo集合
 collector.mongo.page: pages
+#页面浏览信息存放的mongo集合
+collector.mongo.option: options
+
+kafka.topic.page: collector.page
+kafka.topic.option: collector.option
 ---
 
 spring:
