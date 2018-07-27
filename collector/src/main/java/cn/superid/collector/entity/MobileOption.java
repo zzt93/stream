@@ -16,7 +16,7 @@ import java.util.Map;
  * @author dufeng
  * @create: 2018-07-18 16:25
  */
-@ApiModel("移动端上报用户行为")
+@ApiModel()
 public class MobileOption extends AbstractEntity implements Serializable {
     private static final Gson gson = new Gson();
 
@@ -168,7 +168,7 @@ public class MobileOption extends AbstractEntity implements Serializable {
     /**
      * 存放变动部分的记录
      */
-    @ApiModel("用户操作条目")
+    @ApiModel()
     public static class InnerEntry{
         /**
          * 行业线

@@ -13,7 +13,7 @@ import java.sql.Timestamp;
  *
  * @author zzt
  */
-@ApiModel("页面访问信息")
+@ApiModel()
 public class PageView implements Serializable {
 
     private static final Gson gson = new Gson();
