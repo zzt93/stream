@@ -62,7 +62,7 @@ public class CollectorController {
   @ApiOperation(value = "上报用户浏览页面信息接口（要对请求body做base64加密）", notes = "", response = SimpleResponse.class)
   @CrossOrigin(origins = "*")
   @PostMapping("/page")
-  @RequestBodyNeedDecrypt
+//  @RequestBodyNeedDecrypt
   public SimpleResponse queryFile(@RequestBody PageView pageView, HttpServletRequest request) {
     System.out.println("Controller pageView="+pageView);
     LocalDateTime now = LocalDateTime.now();
@@ -96,7 +96,7 @@ public class CollectorController {
   @ApiOperation(value = "移动端上报用户浏览记录接口（要对请求body做base64加密）", notes = "", response = SimpleResponse.class)
   @CrossOrigin(origins = "*")
   @PostMapping("/mobile_page")
-  @RequestBodyNeedDecrypt
+//  @RequestBodyNeedDecrypt
   public SimpleResponse uploadMobilePageView(@RequestBody MobilePageView view, HttpServletRequest request) {
     System.out.println("Controller MobilePageView="+view);
     LocalDateTime now = LocalDateTime.now();
@@ -126,7 +126,7 @@ public class CollectorController {
   @ApiOperation(value = "web端上报用户操作记录接口（要对请求body做base64加密）", notes = "", response = SimpleResponse.class)
   @CrossOrigin(origins = "*")
   @PostMapping("/option")
-  @RequestBodyNeedDecrypt
+//  @RequestBodyNeedDecrypt
   public SimpleResponse uploadOption(@RequestBody Option option, HttpServletRequest request) {
     System.out.println("Controller option="+option);
     LocalDateTime now = LocalDateTime.now();
@@ -151,7 +151,7 @@ public class CollectorController {
   @ApiOperation(value = "移动端上报用户操作记录接口（要对请求body做base64加密）", notes = "", response = SimpleResponse.class)
   @CrossOrigin(origins = "*")
   @PostMapping("/mobile_option")
-  @RequestBodyNeedDecrypt
+//  @RequestBodyNeedDecrypt
   public SimpleResponse uploadMobileOption(@RequestBody MobileOption option, HttpServletRequest request) {
     System.out.println("Controller option="+option);
     LocalDateTime now = LocalDateTime.now();
