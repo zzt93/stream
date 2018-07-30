@@ -127,7 +127,7 @@ public class CollectorServiceImpl implements CollectorService {
     @Override
     public List<Option> extractOption(MobileOption mobileOption) {
         List<Option> options = new ArrayList<>();
-        for (MobileOption.InnerEntry innerEntry : mobileOption.getInnerEntries()) {
+        for (MobileOption.OptionEntry innerEntry : mobileOption.getInnerEntries()) {
             options.add(new Option.Builder().viewId(mobileOption.getViewId())
                     .userId(mobileOption.getUserId())
                     .clientIp(mobileOption.getClientIp())

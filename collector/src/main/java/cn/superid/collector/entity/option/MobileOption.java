@@ -37,7 +37,7 @@ public class MobileOption extends AbstractEntity implements Serializable {
     /**
      * 客户端ip地址
      */
-    @ApiModelProperty(value ="客户端ip" , example = "116.6.2.1")
+    @ApiModelProperty(value ="上报信息时客户端ip地址" , example = "116.6.2.1")
     private String clientIp;
 
     /**
@@ -56,7 +56,7 @@ public class MobileOption extends AbstractEntity implements Serializable {
      * 用户操作记录集合
      */
     @ApiModelProperty(value = "用户操作记录批次")
-    private List<InnerEntry> innerEntries;
+    private List<OptionEntry> innerEntries;
 
     /**
      * 服务端收到客户端上报请求的时间
@@ -142,11 +142,11 @@ public class MobileOption extends AbstractEntity implements Serializable {
         this.appVer = appVer;
     }
 
-    public List<InnerEntry> getInnerEntries() {
+    public List<OptionEntry> getInnerEntries() {
         return innerEntries;
     }
 
-    public void setInnerEntries(List<InnerEntry> innerEntries) {
+    public void setInnerEntries(List<OptionEntry> innerEntries) {
         this.innerEntries = innerEntries;
     }
 
@@ -170,7 +170,7 @@ public class MobileOption extends AbstractEntity implements Serializable {
      * 存放变动部分的记录
      */
     @ApiModel()
-    public static class InnerEntry{
+    public static class OptionEntry {
         /**
          * 行业线
          */
