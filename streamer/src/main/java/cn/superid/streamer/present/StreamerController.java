@@ -2,8 +2,8 @@ package cn.superid.streamer.present;
 
 import static cn.superid.streamer.util.TimestampUtils.truncate;
 
-import cn.superid.collector.entity.PageStatistic;
-import cn.superid.collector.entity.PageView;
+import cn.superid.collector.entity.view.PageStatistic;
+import cn.superid.collector.entity.view.PageView;
 import cn.superid.streamer.compute.MongoConfig;
 import cn.superid.streamer.compute.RegularQuery.Unit;
 import cn.superid.streamer.compute.SqlQuery;

@@ -1,6 +1,6 @@
 package cn.superid.streamer.compute;
 
-import cn.superid.collector.entity.PageStatistic;
+import cn.superid.collector.entity.view.PageStatistic;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import java.io.Serializable;

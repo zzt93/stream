@@ -1,33 +1,25 @@
 package cn.superid.collector.controller;
 
 import cn.superid.collector.annotation.RequestBodyNeedDecrypt;
-import cn.superid.collector.entity.MobileOption;
-import cn.superid.collector.entity.Option;
-import cn.superid.collector.entity.PageView;
-import cn.superid.collector.entity.SimpleResponse;
+import cn.superid.collector.entity.*;
+
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.http.HttpServletRequest;
 
+import cn.superid.collector.entity.option.MobileOption;
+import cn.superid.collector.entity.option.Option;
+import cn.superid.collector.entity.view.MobilePageView;
+import cn.superid.collector.entity.view.PageView;
 import cn.superid.collector.service.CollectorService;
 import cn.superid.collector.util.TimeUtil;
-import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.messaging.support.GenericMessage;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -92,6 +84,42 @@ public class CollectorController {
 
     collectorService.save(pageView);
     collectorService.sendMessage(pageTopic, pageView);
+    return new SimpleResponse(0);
+  }
+
+  /**
+   * 移动端上报的用户浏览记录接口
+   * @param view
+   * @param request
+   * @return
+   */
+  @ApiOperation(value = "移动端上报用户浏览记录接口（要对请求body做base64加密）", notes = "", response = SimpleResponse.class)
+  @CrossOrigin(origins = "*")
+  @PostMapping("/mobile_page")
+  @RequestBodyNeedDecrypt
+  public SimpleResponse uploadMobilePageView(@RequestBody MobilePageView view, HttpServletRequest request) {
+    System.out.println("Controller MobilePageView="+view);
+    LocalDateTime now = LocalDateTime.now();
+    view.setEpoch(Timestamp.valueOf(now));
+    view.setUploadTime(TimeUtil.getDateTimeStr(now));
+
+    if(StringUtils.isEmpty(view.getClientIp())){
+      view.setClientIp(request.getRemoteAddr());
+    }
+
+    view.setServerIp(request.getHeader("Host"));
+
+    view.setDevice(request.getHeader("User-Agent"));
+
+    view.setDomain(request.getHeader("x-original"));
+
+    List<PageView> views = collectorService.extractPageView(view);
+
+    for(PageView v: views){
+      collectorService.save(v);
+      collectorService.sendMessage(pageTopic, v);
+    }
+
     return new SimpleResponse(0);
   }
 

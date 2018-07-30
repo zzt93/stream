@@ -1,4 +1,4 @@
-package cn.superid.collector.entity;
+package cn.superid.collector.entity.view;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.google.gson.Gson;
@@ -226,9 +226,10 @@ public class PageView implements Serializable {
 
         private String id;
         private String pageUri;
-        private String userId;
+        private long userId;
         private Timestamp epoch;
         private String dev;
+        private String domain;
         private String serverIp;
         private String clientIp;
         private int businessLine;
@@ -242,10 +243,11 @@ public class PageView implements Serializable {
         public PageView build() {
             PageView pageView = new PageView();
             pageView.setViewId(id);
-            pageView.setViewId(pageUri);
-            pageView.setPageUri(userId);
+            pageView.setUserId(userId);
+            pageView.setPageUri(pageUri);
             pageView.setEpoch(epoch);
             pageView.setDevice(dev);
+            pageView.setDomain(domain);
             pageView.setClientIp(clientIp);
             pageView.setServerIp(serverIp);
             pageView.setBusinessLine(businessLine);
@@ -268,13 +270,8 @@ public class PageView implements Serializable {
             return this;
         }
 
-        public PageBuilder setUserId(String userId) {
+        public PageBuilder setUserId(long userId) {
             this.userId = userId;
-            return this;
-        }
-
-        public PageBuilder setTimestamp(Timestamp epoch) {
-            this.epoch = epoch;
             return this;
         }
 
@@ -324,6 +321,21 @@ public class PageView implements Serializable {
         }
         public PageBuilder setUserAgent(String userAgent) {
             this.userAgent = userAgent;
+            return this;
+        }
+
+        public PageBuilder setEpoch(Timestamp epoch) {
+            this.epoch = epoch;
+            return this;
+        }
+
+        public PageBuilder setDev(String dev) {
+            this.dev = dev;
+            return this;
+        }
+
+        public PageBuilder setDomain(String domain) {
+            this.domain = domain;
             return this;
         }
     }

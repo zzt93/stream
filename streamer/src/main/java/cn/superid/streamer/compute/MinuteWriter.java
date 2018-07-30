@@ -1,6 +1,6 @@
 package cn.superid.streamer.compute;
 
-import cn.superid.collector.entity.PageStatistic;
+import cn.superid.collector.entity.view.PageStatistic;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

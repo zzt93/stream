@@ -48,5 +48,5 @@ public abstract class AbstractEntity {
      * 对上报数据进行合法性校验
      * @return
      */
-    abstract boolean validate();
+    protected abstract boolean validate();
 }

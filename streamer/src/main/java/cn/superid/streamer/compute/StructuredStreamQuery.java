@@ -5,7 +5,7 @@ import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.count;
 import static org.apache.spark.sql.streaming.Trigger.ProcessingTime;
 
-import cn.superid.collector.entity.PageView;
+import cn.superid.collector.entity.view.PageView;
 
 import java.io.Serializable;
 import java.util.stream.Collectors;
