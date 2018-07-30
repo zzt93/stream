@@ -1,8 +1,9 @@
 package cn.superid.collector.service.impl;
 
-import cn.superid.collector.entity.MobileOption;
-import cn.superid.collector.entity.Option;
-import cn.superid.collector.entity.PageView;
+import cn.superid.collector.entity.option.MobileOption;
+import cn.superid.collector.entity.view.MobilePageView;
+import cn.superid.collector.entity.option.Option;
+import cn.superid.collector.entity.view.PageView;
 import cn.superid.collector.service.CollectorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,7 +99,7 @@ public class CollectorServiceImpl implements CollectorService {
 //    @Override
 //    public void save(MobileOption option) {
 //        List<Option> options = new ArrayList<>();
-//        for (MobileOption.InnerEntry innerEntry : option.getInnerEntries()) {
+//        for (MobileOption.ViewEntry innerEntry : option.getInnerEntries()) {
 //            options.add(new Option.Builder().viewId(option.getViewId())
 //                        .userId(option.getUserId())
 //                        .clientIp(option.getClientIp())
@@ -147,6 +148,35 @@ public class CollectorServiceImpl implements CollectorService {
 
         return options;
     }
+
+    @Override
+    public List<PageView> extractPageView(MobilePageView mobilePageView) {
+        List<PageView> views = new ArrayList<>();
+        for (MobilePageView.ViewEntry innerEntry : mobilePageView.getInnerEntries()) {
+            views.add(new PageView.PageBuilder().setId(mobilePageView.getViewId())
+                    .setUserId(mobilePageView.getUserId())
+                    .setClientIp(mobilePageView.getClientIp())
+                    .setDevType(mobilePageView.getDevType())
+                    .setDevice(mobilePageView.getDevice())
+                    .setDomain(mobilePageView.getDomain())
+                    .setAppVer(mobilePageView.getAppVer())
+                    .setEpoch(mobilePageView.getEpoch())
+                    .setServerIp(mobilePageView.getServerIp())
+                    .setUploadTime(mobilePageView.getUploadTime())
+                    .setBusinessLine(innerEntry.getBusinessLine())
+                    .setPageUri(innerEntry.getPageUri())
+                    .setReferer(innerEntry.getReferer())
+                    .setCollectTime(innerEntry.getCollectTime())
+                    .build());
+        }
+
+        if(CollectionUtils.isEmpty(views)){
+            return Collections.EMPTY_LIST;
+        }
+
+        return views;
+    }
+
 
     @Override
     public String peekPage() {

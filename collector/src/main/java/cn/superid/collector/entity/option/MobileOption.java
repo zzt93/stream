@@ -1,5 +1,6 @@
-package cn.superid.collector.entity;
+package cn.superid.collector.entity.option;
 
+import cn.superid.collector.entity.AbstractEntity;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.google.gson.Gson;
 import io.swagger.annotations.ApiModel;

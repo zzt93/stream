@@ -1,7 +1,7 @@
 package cn.superid.streamer.compute;
 
 
-import cn.superid.collector.entity.PageView;
+import cn.superid.collector.entity.view.PageView;
 import com.mongodb.spark.MongoSpark;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;

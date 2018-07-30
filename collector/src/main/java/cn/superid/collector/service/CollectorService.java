@@ -1,8 +1,9 @@
 package cn.superid.collector.service;
 
-import cn.superid.collector.entity.MobileOption;
-import cn.superid.collector.entity.Option;
-import cn.superid.collector.entity.PageView;
+import cn.superid.collector.entity.option.MobileOption;
+import cn.superid.collector.entity.view.MobilePageView;
+import cn.superid.collector.entity.option.Option;
+import cn.superid.collector.entity.view.PageView;
 
 import java.util.List;
 
@@ -18,6 +19,8 @@ public interface CollectorService {
 //    void save(MobileOption option);
 
     List<Option> extractOption(MobileOption mobileOption);
+
+    List<PageView> extractPageView(MobilePageView mobilePageView);
 
     String peekPage();
 

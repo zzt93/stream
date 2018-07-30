@@ -5,16 +5,19 @@ spring:
     producer:
       client-id: collector
     bootstrap-servers: ["${BROKER_LIST}"]
+#    bootstrap-servers: ["localhost:9092"]
   application:
     name: collector
   data:
     mongodb:
     #uri写到db层即可
       uri: mongodb://${MONGO}/collector
+#      uri: mongodb://localhost:27017/collector
 
 server:
 #web接口对应的端口号
   port: ${WEB_PORT}
+#  port: 8888
 
 #页面浏览信息存放的mongo集合
 collector.mongo.page: pages

@@ -1,4 +1,4 @@
-package cn.superid.collector.entity;
+package cn.superid.collector.entity.view;
 
 import java.io.Serializable;
 import java.sql.Timestamp;

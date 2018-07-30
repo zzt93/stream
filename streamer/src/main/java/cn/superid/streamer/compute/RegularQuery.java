@@ -6,14 +6,13 @@ import static org.apache.spark.sql.functions.count;
 import static org.apache.spark.sql.functions.countDistinct;
 import static org.apache.spark.sql.functions.lit;
 
-import cn.superid.collector.entity.PageStatistic;
-import cn.superid.collector.entity.PageView;
+import cn.superid.collector.entity.view.PageStatistic;
+import cn.superid.collector.entity.view.PageView;
 import com.mongodb.BasicDBObject;
 import com.mongodb.spark.MongoSpark;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
