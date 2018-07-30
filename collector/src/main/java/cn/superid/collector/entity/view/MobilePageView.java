@@ -35,7 +35,7 @@ public class MobilePageView implements Serializable {
     @JsonAlias("id")
     @ApiModelProperty(value = "硬件唯一标识", example = "21f5fb45-9f72-592f-8bcf-def1167b1f56")
     private String viewId;
-
+    @ApiModelProperty(hidden = true)
     private String serverIp;
     @ApiModelProperty(value = "用户id", example = "54321")
     private long userId;

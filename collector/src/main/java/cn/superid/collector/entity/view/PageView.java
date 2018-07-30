@@ -36,6 +36,7 @@ public class PageView implements Serializable {
     private String viewId;
     @ApiModelProperty(value= "页面地址",example = "/index")
     private String pageUri;
+    @ApiModelProperty(hidden = true)
     private String serverIp;
     @ApiModelProperty(value = "用户id",example = "54321")
     private long userId;
