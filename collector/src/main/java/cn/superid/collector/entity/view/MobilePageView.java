@@ -18,7 +18,7 @@ import java.util.List;
 public class MobilePageView implements Serializable {
 
     private static final Gson gson = new Gson();
-    @ApiModelProperty(value = "客户端ip地址", example = "116.62.3.4")
+    @ApiModelProperty(value = "上报信息时客户端的ip地址", example = "116.62.3.4")
     private String clientIp;
     @ApiModelProperty(hidden = true)
     private String device;
