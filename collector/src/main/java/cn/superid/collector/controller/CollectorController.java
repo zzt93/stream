@@ -73,7 +73,7 @@ public class CollectorController {
       pageView.setClientIp(request.getRemoteAddr());
     }
     if(StringUtils.isEmpty(pageView.getUserAgent())){
-      pageView.setClientIp(request.getHeader("User-Agent"));
+      pageView.setUserAgent(request.getHeader("User-Agent"));
     }
 
     pageView.setServerIp(request.getHeader("Host"));
@@ -105,6 +105,9 @@ public class CollectorController {
 
     if(StringUtils.isEmpty(view.getClientIp())){
       view.setClientIp(request.getRemoteAddr());
+    }
+    if(StringUtils.isEmpty(view.getUserAgent())){
+      view.setUserAgent(request.getHeader("User-Agent"));
     }
 
     view.setServerIp(request.getHeader("Host"));
