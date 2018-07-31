@@ -65,7 +65,7 @@ public class CollectorServiceImpl implements CollectorService {
     @Async
     @Override
     public void save(PageView pageView) {
-        System.out.println("save pageView="+pageView);
+        System.out.println("save pageView to mongo : \n"+pageView);
         try {
             mongo.insert(pageView, pageCollection);
         } catch (Exception e) {
@@ -82,6 +82,7 @@ public class CollectorServiceImpl implements CollectorService {
     @Async
     @Override
     public void save(Option option) {
+        System.out.println("save option to mongo : \n"+option);
         try {
             mongo.insert(option, optionCollection);
         } catch (Exception e) {
@@ -202,8 +203,7 @@ public class CollectorServiceImpl implements CollectorService {
     public void sendMessage(String topicName, Object msg) {
         HashMap<String, Object> map = new HashMap<>();
         map.put(KafkaHeaders.TOPIC, topicName);
-        LOGGER.info("send msg: " + msg.toString());
-        System.out.println("send message:"+ msg.toString());
+        System.out.println("send message to kafka : \n"+ msg.toString());
         kafkaTemplate.send(new GenericMessage<>(msg.toString(), map));
     }
 }
