@@ -164,6 +164,7 @@ public class CollectorServiceImpl implements CollectorService {
                     .setEpoch(mobilePageView.getEpoch())
                     .setServerIp(mobilePageView.getServerIp())
                     .setUploadTime(mobilePageView.getUploadTime())
+                    .setUserAgent(mobilePageView.getUserAgent())
                     .setBusinessLine(innerEntry.getBusinessLine())
                     .setPageUri(innerEntry.getPageUri())
                     .setReferer(innerEntry.getReferer())
