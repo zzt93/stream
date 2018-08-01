@@ -18,8 +18,7 @@ import java.util.List;
 public class MobilePageView implements Serializable {
 
     private static final Gson gson = new Gson();
-    @ApiModelProperty(value = "上报信息时客户端的ip地址", example = "116.62.3.4")
-    private String clientIp;
+
     @ApiModelProperty(hidden = true)
     private String device;
     /**
@@ -94,14 +93,6 @@ public class MobilePageView implements Serializable {
 
     public void setEpoch(Timestamp epoch) {
         this.epoch = epoch;
-    }
-
-    public String getClientIp() {
-        return clientIp;
-    }
-
-    public void setClientIp(String clientIp) {
-        this.clientIp = clientIp;
     }
 
     public long getUserId() {
@@ -191,6 +182,9 @@ public class MobilePageView implements Serializable {
 
     @ApiModel()
     public static class ViewEntry {
+        @ApiModelProperty(value = "采集信息时客户端的ip地址", example = "116.62.3.4")
+        private String clientIp;
+
         @ApiModelProperty(value = "页面地址", example = "/index")
         private String pageUri;
 
@@ -244,6 +238,12 @@ public class MobilePageView implements Serializable {
             this.collectTime = collectTime;
         }
 
+        public String getClientIp() {
+            return clientIp;
+        }
 
+        public void setClientIp(String clientIp) {
+            this.clientIp = clientIp;
+        }
     }
 }

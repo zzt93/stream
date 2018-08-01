@@ -156,7 +156,6 @@ public class CollectorServiceImpl implements CollectorService {
         for (MobilePageView.ViewEntry innerEntry : mobilePageView.getInnerEntries()) {
             views.add(new PageView.PageBuilder().setId(mobilePageView.getViewId())
                     .setUserId(mobilePageView.getUserId())
-                    .setClientIp(mobilePageView.getClientIp())
                     .setDevType(mobilePageView.getDevType())
                     .setDevice(mobilePageView.getDevice())
                     .setDomain(mobilePageView.getDomain())
@@ -169,6 +168,7 @@ public class CollectorServiceImpl implements CollectorService {
                     .setPageUri(innerEntry.getPageUri())
                     .setReferer(innerEntry.getReferer())
                     .setCollectTime(innerEntry.getCollectTime())
+                    .setClientIp(innerEntry.getClientIp())
                     .build());
         }
 
