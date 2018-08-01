@@ -103,9 +103,6 @@ public class CollectorController {
     view.setEpoch(Timestamp.valueOf(now));
     view.setUploadTime(TimeUtil.getDateTimeStr(now));
 
-    if(StringUtils.isEmpty(view.getClientIp())){
-      view.setClientIp(request.getRemoteAddr());
-    }
     if(StringUtils.isEmpty(view.getUserAgent())){
       view.setUserAgent(request.getHeader("User-Agent"));
     }
