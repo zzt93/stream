@@ -131,7 +131,6 @@ public class CollectorServiceImpl implements CollectorService {
         for (MobileOption.OptionEntry innerEntry : mobileOption.getInnerEntries()) {
             options.add(new Option.Builder().viewId(mobileOption.getViewId())
                     .userId(mobileOption.getUserId())
-                    .clientIp(mobileOption.getClientIp())
                     .devType(mobileOption.getDevType())
                     .appVer(mobileOption.getAppVer())
                     .uploadTime(mobileOption.getUploadTime())
@@ -139,6 +138,7 @@ public class CollectorServiceImpl implements CollectorService {
                     .pageUri(innerEntry.getPageUri())
                     .eleId(innerEntry.getEleId())
                     .attrs(innerEntry.getAttrs())
+                    .clientIp(innerEntry.getClientIp())
                     .opTime(innerEntry.getOpTime())
                     .build());
         }

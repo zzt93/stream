@@ -34,11 +34,7 @@ public class MobileOption extends AbstractEntity implements Serializable {
     @ApiModelProperty(value = "用户id" ,example = "546211")
     private long userId;
 
-    /**
-     * 客户端ip地址
-     */
-    @ApiModelProperty(value ="上报信息时客户端ip地址" , example = "116.6.2.1")
-    private String clientIp;
+
 
     /**
      * 设备类型(web、android、ios)
@@ -91,9 +87,6 @@ public class MobileOption extends AbstractEntity implements Serializable {
     @Override
     public boolean validate() {
 
-        if (validIp(this.clientIp)) {
-            return true;
-        }
 
         return false;
     }
@@ -116,14 +109,6 @@ public class MobileOption extends AbstractEntity implements Serializable {
 
     public void setUserId(long userId) {
         this.userId = userId;
-    }
-
-    public String getClientIp() {
-        return clientIp;
-    }
-
-    public void setClientIp(String clientIp) {
-        this.clientIp = clientIp;
     }
 
     public String getDevType() {
@@ -171,6 +156,12 @@ public class MobileOption extends AbstractEntity implements Serializable {
      */
     @ApiModel()
     public static class OptionEntry {
+
+        /**
+         * 客户端ip地址
+         */
+        @ApiModelProperty(value ="用户操作时客户端ip地址" , example = "116.6.2.1")
+        private String clientIp;
         /**
          * 行业线
          */
@@ -239,6 +230,14 @@ public class MobileOption extends AbstractEntity implements Serializable {
 
         public void setOpTime(String opTime) {
             this.opTime = opTime;
+        }
+
+        public String getClientIp() {
+            return clientIp;
+        }
+
+        public void setClientIp(String clientIp) {
+            this.clientIp = clientIp;
         }
     }
 }
