@@ -158,10 +158,6 @@ public class CollectorController {
     option.setEpoch(Timestamp.valueOf(now));
     option.setUploadTime(TimeUtil.getDateTimeStr(now));
 
-    if(StringUtils.isEmpty(option.getClientIp())){
-      option.setClientIp(request.getRemoteAddr());
-    }
-
     List<Option> options = collectorService.extractOption(option);
 
     for(Option o: options){
