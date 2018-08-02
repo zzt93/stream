@@ -94,7 +94,7 @@ public class MyRequestBodyAdvice implements RequestBodyAdvice {
 
             //目前先兼容明文和base64编码的
             //base64编码的
-            if (bodyStr.endsWith("=")) {
+            if (bodyStr.startsWith("ey")) {
                 byte[] b = EncryptionUtil.base64Decode(bodyStr);
                 this.body = IOUtils.toInputStream(IOUtils.toString(b, "UTF-8"), "UTF-8");
             } else {//非base64编码的明文
