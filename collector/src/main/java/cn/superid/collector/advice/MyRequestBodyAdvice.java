@@ -88,19 +88,9 @@ public class MyRequestBodyAdvice implements RequestBodyAdvice {
         public MyHttpInputMessage(HttpInputMessage inputMessage) throws Exception {
             this.headers = inputMessage.getHeaders();
 
-            InputStreamHolder holder = new InputStreamHolder(inputMessage.getBody());
+            byte[] b = EncryptionUtil.base64Decode(IOUtils.toString(inputMessage.getBody(), "UTF-8"));
 
-            String bodyStr = IOUtils.toString(holder.getInputStream(), "UTF-8");
-
-            //目前先兼容明文和base64编码的
-            //base64编码的
-            if (bodyStr.startsWith("ey")) {
-                byte[] b = EncryptionUtil.base64Decode(bodyStr);
-                this.body = IOUtils.toInputStream(IOUtils.toString(b, "UTF-8"), "UTF-8");
-            } else {//非base64编码的明文
-                this.body = holder.getInputStream();
-            }
-
+            this.body = IOUtils.toInputStream(IOUtils.toString(b,"UTF-8"),"UTF-8");
         }
 
         @Override
