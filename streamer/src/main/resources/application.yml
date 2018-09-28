@@ -16,7 +16,7 @@ spring:
 server:
   port: 18888
 
-
+#根据设置的master.uri来决定部署模式是什么样的，这儿是用standalone模式，也可以运行在yarn上
 collector.spark.master.uri: spark://${SPARK}:7077
 collector.mongo.page: pages
 collector.mongo.minute: minutes
