@@ -54,34 +54,55 @@ public class StructuredStreamQuery implements Serializable {
                 .readStream()
                 .format("kafka")
                 .option("kafka.bootstrap.servers", servers)
+                //消费页面浏览信息
                 .option("subscribe", "collector.page")
                 .option("enable.auto.commit", true)
                 .option("auto.offset.reset", "latest")
                 .option("failOnDataLoss", false)
                 .load();
 
+        //df.map需要两个参数，一个是MapFunction，一个是Encoder
         Dataset<PageView> views = df.map(
-                (MapFunction<Row, PageView>) value -> {
-                    LOGGER.info("=====receive msg :" + new String((byte[]) value.get(1)));
-                    return PageView
-                            .fromString(new String((byte[]) value.get(1)));
+                new MapFunction<Row, PageView>() {
+                    @Override
+                    public PageView call(Row value) throws Exception {
+                        return PageView.fromString(new String((byte[]) value.get(1)));
+                    }
                 }, Encoders.bean(PageView.class));
 
         Dataset<String> pageCounts = views
 //        .withWatermark("epoch", "1 minute")
                 .groupBy(functions.window(col("epoch"), "1 minute", "1 minute").as("epoch"))
                 .agg(count(col("*")).as("pv"), approx_count_distinct("viewId").alias("uv"),
+                        //uvSigned是登陆用户数
                         approx_count_distinct("userId").alias("uvSigned"))
                 .withColumn("epoch", col("epoch.end"))
                 .toJSON().as("value");
 
-        for (StreamingQuery query : getStreamingQuery(pageCounts)) {
+        for (StreamingQuery query : getStreamingQuery(streamerTopic,pageCounts)) {
+            query.awaitTermination();
+        }
+
+        Dataset<String> richPvAndUv = views
+//        .withWatermark("epoch", "1 minute")
+                .groupBy(functions.window(col("epoch"), "1 minute", "1 minute").as("epoch"),
+                        col("deviceType"),
+                        col("allianceId"),
+                        col("affairId"),
+                        col("targetId")
+                )
+                .agg(count(col("*")).as("pv"), approx_count_distinct("viewId").alias("uv"),
+                        approx_count_distinct("userId").alias("uvSigned"))
+                .withColumn("epoch", col("epoch.end"))
+                .toJSON().as("value");
+
+        for (StreamingQuery query : getStreamingQuery("rich_pv_uv",richPvAndUv)) {
             query.awaitTermination();
         }
     }
 
     @SafeVarargs
-    private final StreamingQuery[] getStreamingQuery(Dataset<String>... datasets) {
+    private final StreamingQuery[] getStreamingQuery(String kafkaTopic,Dataset<String>... datasets) {
         StreamingQuery[] res = new StreamingQuery[datasets.length];
         for (int i = 0; i < datasets.length; i++) {
             res[i] = datasets[i]
@@ -89,7 +110,7 @@ public class StructuredStreamQuery implements Serializable {
                     .outputMode("update")
                     .format("kafka")
                     .option("kafka.bootstrap.servers", servers)
-                    .option("topic", streamerTopic)
+                    .option("topic", kafkaTopic)
                     .option("checkpointLocation", hdfsCheckpoint)
                     .trigger(ProcessingTime("20 seconds"))
 //          .format("console")
@@ -99,6 +120,5 @@ public class StructuredStreamQuery implements Serializable {
         }
         return res;
     }
-
 
 }

@@ -68,34 +68,68 @@ public class StreamerController {
     return sqlQuery.query(query);
   }
 
+  /**
+   * 按天查询统计信息
+   * @param range
+   * @return
+   */
   @PostMapping("/day")
   public List<PageStatistic> dayStatistics(@RequestBody TimeRange range) {
     return queryMongo(range, day, ChronoUnit.DAYS, PageStatistic.class);
   }
 
+  /**
+   * 按天查询详情
+   * @param range
+   * @return
+   */
   @PostMapping("/day/detail")
   public List<PageView> dayDetail(@RequestBody TimeRange range) {
     Preconditions.checkNotNull(range.pageRequest(), "No pagination info or too deep pagination");
     return queryMongo(range, page, ChronoUnit.DAYS, PageView.class);
   }
 
+  /**
+   * 按小时查询统计信息
+   * @param range
+   * @return
+   */
   @PostMapping("/hour")
   public List<PageStatistic> hourStatistics(@RequestBody TimeRange range) {
     return queryMongo(range, hour, ChronoUnit.HOURS, PageStatistic.class);
   }
 
+  /**
+   * 按小时查询详情
+   * @param range
+   * @return
+   */
   @PostMapping("/hour/detail")
   public List<PageView> hourDetail(@RequestBody TimeRange range) {
     Preconditions.checkNotNull(range.pageRequest(), "No pagination info or too deep pagination");
     return queryMongo(range, page, ChronoUnit.HOURS, PageView.class);
   }
 
+  /**
+   * 按分钟查询详情
+   * @param range
+   * @return
+   */
   @PostMapping("/minute/detail")
   public List<PageView> minuteDetail(@RequestBody TimeRange range) {
     Preconditions.checkNotNull(range.pageRequest(), "No pagination info or too deep pagination");
     return queryMongo(range, page, ChronoUnit.MINUTES, PageView.class);
   }
 
+  /**
+   * 从mongodb中查询指定"集合"中的某个时间范围内的数据
+   * @param range 时间范围
+   * @param collection mongodb的集合
+   * @param unit 时间单位
+   * @param tClass 结果类型
+   * @param <T> 范型参数
+   * @return
+   */
   private <T> List<T> queryMongo(TimeRange range, String collection, ChronoUnit unit, Class<T> tClass) {
     Preconditions.checkArgument(range.getFrom() != null && range.getTo() != null, "No time range");
     Criteria criteria = Criteria.where("epoch").gte(truncate(range.getFrom(), unit))
@@ -104,6 +138,10 @@ public class StreamerController {
     return mongo.find(query, tClass, collection);
   }
 
+  /**
+   * 查询最近30分钟的浏览统计信息（刷新页面或者刚打开页面的时候，一次性加载30分钟的数据，后续只增量更新一分钟的数据）
+   * @return
+   */
   @PostMapping("/last30")
   public List<PageStatistic> minutesStatistic() {
     LocalDateTime truncate = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
@@ -131,6 +169,10 @@ public class StreamerController {
     return pageStatistics;
   }
 
+  /**
+   * 前端页面每一分钟调用一次接口，获取最新的一分钟的页面浏览统计信息
+   * @return
+   */
   @PostMapping("/last1")
   public PageStatistic minute() {
     Timestamp now = Timestamp.valueOf(LocalDateTime.now());

@@ -70,9 +70,6 @@ public class CollectorController {
     pageView.setEpoch(Timestamp.valueOf(now));
     pageView.setUploadTime(TimeUtil.getDateTimeStr(now));
 
-    System.out.println("remoteAddress="+request.getRemoteAddr());
-    System.out.println("X-Forwarded-For="+request.getHeader("X-Forwarded-For"));
-    
     if(StringUtils.isEmpty(pageView.getClientIp())){
       //nginx做了代理，要从请求头中才能拿到ip地址
       String ip = request.getHeader("X-Forwarded-For");
@@ -87,6 +84,8 @@ public class CollectorController {
     pageView.setDevice(request.getHeader("User-Agent"));
 
     pageView.setDomain(request.getHeader("x-original"));
+
+    pageView.postProcess();
 
     collectorService.save(pageView);
     collectorService.sendMessage(pageTopic, pageView);
@@ -122,6 +121,7 @@ public class CollectorController {
     List<PageView> views = collectorService.extractPageView(view);
 
     for(PageView v: views){
+      v.postProcess();
       collectorService.save(v);
       collectorService.sendMessage(pageTopic, v);
     }

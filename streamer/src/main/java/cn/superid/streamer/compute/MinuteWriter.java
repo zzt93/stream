@@ -11,6 +11,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 /**
+ * spark计算好的pv uv 等信息放到kafka的"streamer.minute"topic中
+ * 该类消费"streamer.minute"topic，然后写入mongodb，给前端页面调用StreamerController的时候查询
  * @author zzt
  */
 @Service

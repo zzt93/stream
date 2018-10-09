@@ -12,8 +12,16 @@ import java.util.List;
  * @create: 2018-07-18 17:26
  */
 public interface CollectorService {
-
+    /**
+     * 保存页面浏览信息到mongodb
+     * @param pageView
+     */
     void save(PageView pageView);
+
+    /**
+     * 保存用户操作信息到mongodb
+     * @param option
+     */
     void save(Option option);
 
 //    void save(MobileOption option);
@@ -26,5 +34,10 @@ public interface CollectorService {
 
     String peekOption();
 
+    /**
+     * 发送消息到Kafka
+     * @param topicName
+     * @param msg
+     */
     void sendMessage(String topicName, Object msg);
 }
