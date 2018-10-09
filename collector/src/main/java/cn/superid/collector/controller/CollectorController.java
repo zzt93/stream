@@ -13,6 +13,7 @@ import cn.superid.collector.entity.option.Option;
 import cn.superid.collector.entity.view.MobilePageView;
 import cn.superid.collector.entity.view.PageView;
 import cn.superid.collector.service.CollectorService;
+import cn.superid.collector.util.IpUtil;
 import cn.superid.collector.util.TimeUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -64,13 +65,18 @@ public class CollectorController {
   @PostMapping("/page")
   @RequestBodyNeedDecrypt
   public SimpleResponse queryFile(@RequestBody PageView pageView, HttpServletRequest request) {
-    System.out.println("Controller pageView="+pageView);
+    System.out.println("**Controller pageView="+pageView);
     LocalDateTime now = LocalDateTime.now();
     pageView.setEpoch(Timestamp.valueOf(now));
     pageView.setUploadTime(TimeUtil.getDateTimeStr(now));
 
+    System.out.println("remoteAddress="+request.getRemoteAddr());
+    System.out.println("X-Forwarded-For="+request.getHeader("X-Forwarded-For"));
+    
     if(StringUtils.isEmpty(pageView.getClientIp())){
-      pageView.setClientIp(request.getRemoteAddr());
+      //nginx做了代理，要从请求头中才能拿到ip地址
+      String ip = request.getHeader("X-Forwarded-For");
+      pageView.setClientIp(IpUtil.getIpFrom(ip));
     }
     if(StringUtils.isEmpty(pageView.getUserAgent())){
       pageView.setUserAgent(request.getHeader("User-Agent"));
@@ -98,7 +104,7 @@ public class CollectorController {
   @PostMapping("/mobile_page")
   @RequestBodyNeedDecrypt
   public SimpleResponse uploadMobilePageView(@RequestBody MobilePageView view, HttpServletRequest request) {
-    System.out.println("Controller mobilePageView="+view);
+    System.out.println("**Controller mobilePageView="+view);
     LocalDateTime now = LocalDateTime.now();
     view.setEpoch(Timestamp.valueOf(now));
     view.setUploadTime(TimeUtil.getDateTimeStr(now));
