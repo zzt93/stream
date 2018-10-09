@@ -1,7 +1,5 @@
 package cn.superid.collector.util;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
-
 import java.util.regex.Pattern;
 
 /**
