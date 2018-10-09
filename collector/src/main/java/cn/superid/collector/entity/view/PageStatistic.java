@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 
 /**
+ * 页面浏览的统计信息
  * @author zzt
  */
 public class PageStatistic implements Serializable {

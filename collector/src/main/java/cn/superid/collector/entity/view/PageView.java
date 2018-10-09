@@ -1,12 +1,16 @@
 package cn.superid.collector.entity.view;
 
+import cn.superid.collector.util.DevUtil;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.google.gson.Gson;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * 用户浏览信息
@@ -15,9 +19,14 @@ import java.sql.Timestamp;
  */
 @ApiModel()
 public class PageView implements Serializable {
+    /**
+     * 内网ip正则
+     */
+    private static final Pattern INNER_IP = Pattern.compile("(^10\\..*)|(^172\\.(1[6-9]|2[0-9]|3[01]))|(^192\\.168)|(^127\\.)");
+
 
     private static final Gson gson = new Gson();
-    @ApiModelProperty(value="客户端ip地址",example = "116.62.3.4")
+    @ApiModelProperty(value = "客户端ip地址", example = "116.62.3.4")
     private String clientIp;
     @ApiModelProperty(hidden = true)
     private String device;
@@ -32,13 +41,13 @@ public class PageView implements Serializable {
      * 硬件唯一标识id
      */
     @JsonAlias("id")
-    @ApiModelProperty(value = "硬件唯一标识" , example = "21f5fb45-9f72-592f-8bcf-def1167b1f56")
+    @ApiModelProperty(value = "硬件唯一标识", example = "21f5fb45-9f72-592f-8bcf-def1167b1f56")
     private String viewId;
-    @ApiModelProperty(value= "页面地址",example = "/index")
+    @ApiModelProperty(value = "页面地址", example = "/index")
     private String pageUri;
     @ApiModelProperty(hidden = true)
     private String serverIp;
-    @ApiModelProperty(value = "用户id",example = "54321")
+    @ApiModelProperty(value = "用户id", example = "54321")
     private long userId;
     @ApiModelProperty(hidden = true)
     private String domain;
@@ -46,42 +55,83 @@ public class PageView implements Serializable {
     /**
      * 行业线
      */
-    @ApiModelProperty(value = "行业线",example = "0")
+    @ApiModelProperty(value = "行业线", example = "0")
     private int businessLine;
 
     /**
      * 上一个页面url
      */
-    @ApiModelProperty(value = "上一个页面",example = "/main.html")
+    @ApiModelProperty(value = "上一个页面", example = "/main.html")
     private String referer;
     /**
      * 客户端采集时间(由于上报可能不是实时的，需要了解客户端采集的时间)，10或13位时间戳
      */
-    @ApiModelProperty(value = "客户端采集时间",example ="1532413668" )
+    @ApiModelProperty(value = "客户端采集时间", example = "1532413668")
     private String collectTime;
     /**
      * 客户端类型(web、android、ios)
      */
-    @ApiModelProperty(value = "客户端设备类型",example ="web" )
+    @ApiModelProperty(value = "客户端设备类型", example = "web")
     private String devType;
 
     /**
      * app版本信息，web端就上报前端版本，其实觉得没有必要上报前端版本
      */
-    @ApiModelProperty(value = "客户端版本" ,example = "4.5")
+    @ApiModelProperty(value = "客户端版本", example = "4.5")
     private String appVer;
 
     /**
-     * 客户端类型(web、android、ios)
+     * 客户端类型
      */
-    @ApiModelProperty(value = "客户端类型",example ="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6)" )
+    @ApiModelProperty(value = "客户端类型", example = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6)")
     private String userAgent;
+
+    /**
+     * 存放当前页面涉及的资源信息，比如事务id、目标id
+     */
+    @ApiModelProperty(value = "资源id信息", example = "{'affairId':123,'targetId':456}")
+    private Map<String, Long> resources;
+
+    /**
+     * 设备类型：iphone、android、mac、windows、ios(iPad是什么样的？)
+     */
+    @ApiModelProperty(hidden = true)
+    private String deviceType;
+    /**
+     * 客户端ip是否是公网ip
+     */
+    @ApiModelProperty(hidden = true)
+    private boolean publicIp = true;
+
+    private long affairId;
+    private long targetId;
+    private long allianceId;
 
     /**
      * 服务端接收到上报数据的时间
      */
     @ApiModelProperty(hidden = true)
     private String uploadTime;
+
+    /**
+     * 前端传过来之后，处理一下字段信息，根据前端传递的信息，来填补publicIp、deviceType字段
+     */
+    public void postProcess() {
+        if (INNER_IP.matcher(clientIp).find()) {
+            publicIp = false;
+        } else {
+            publicIp = true;
+        }
+
+        deviceType = DevUtil.getDeviceType(this.userAgent);
+
+        if (!CollectionUtils.isEmpty(resources)) {
+            affairId = resources.get("affairId") == null ? 0 : resources.get("affairId");
+            targetId = resources.get("targetId") == null ? 0 : resources.get("targetId");
+            allianceId = resources.get("allianceId") == null ? 0 : resources.get("allianceId");
+        }
+    }
+
 
     public PageView() {
     }
@@ -320,6 +370,7 @@ public class PageView implements Serializable {
             this.uploadTime = uploadTime;
             return this;
         }
+
         public PageBuilder setUserAgent(String userAgent) {
             this.userAgent = userAgent;
             return this;

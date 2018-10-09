@@ -30,6 +30,12 @@ public class MongoConfig {
 
   private static final int SIZE_OF_PAGE_VIEW = 500;
 
+  /**
+   * 如果mongodb的指定集合（类似传统数据库中的database的概念）不存在的话，就创建
+   * @param mongo
+   * @param collection
+   * @param max
+   */
   public static void createIfNotExist(MongoTemplate mongo, String collection, int max) {
     if (mongo.collectionExists(collection)) {
       return;
