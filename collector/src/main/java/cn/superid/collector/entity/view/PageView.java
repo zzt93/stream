@@ -24,7 +24,6 @@ public class PageView implements Serializable {
      */
     private static final Pattern INNER_IP = Pattern.compile("(^10\\..*)|(^172\\.(1[6-9]|2[0-9]|3[01]))|(^192\\.168)|(^127\\.)");
 
-
     private static final Gson gson = new Gson();
     @ApiModelProperty(value = "客户端ip地址", example = "116.62.3.4")
     private String clientIp;
@@ -101,7 +100,7 @@ public class PageView implements Serializable {
      * 客户端ip是否是公网ip
      */
     @ApiModelProperty(hidden = true)
-    private boolean publicIp = true;
+    private boolean publicIp = false;
 
     private long affairId;
     private long targetId;
@@ -266,6 +265,54 @@ public class PageView implements Serializable {
 
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
+    }
+
+    public Map<String, Long> getResources() {
+        return resources;
+    }
+
+    public void setResources(Map<String, Long> resources) {
+        this.resources = resources;
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
+    }
+
+    public boolean isPublicIp() {
+        return publicIp;
+    }
+
+    public void setPublicIp(boolean publicIp) {
+        this.publicIp = publicIp;
+    }
+
+    public long getAffairId() {
+        return affairId;
+    }
+
+    public void setAffairId(long affairId) {
+        this.affairId = affairId;
+    }
+
+    public long getTargetId() {
+        return targetId;
+    }
+
+    public void setTargetId(long targetId) {
+        this.targetId = targetId;
+    }
+
+    public long getAllianceId() {
+        return allianceId;
+    }
+
+    public void setAllianceId(long allianceId) {
+        this.allianceId = allianceId;
     }
 
     @Override
