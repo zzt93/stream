@@ -7,12 +7,12 @@ spring:
       enable-auto-commit: true
     producer:
       client-id: streamer
-    bootstrap-servers: ["${KAFKA}:9092"]
+    bootstrap-servers: ["${BROKER_LIST}"]
   application:
     name: streamer
   data:
     mongodb:
-      uri: mongodb://${MONGO}:27020/collector.pages
+      uri: mongodb://${MONGO}/collector.pages
 server:
   port: 18888
 
@@ -24,7 +24,7 @@ collector.mongo.hour: hours
 collector.mongo.day: days
 
 streamer.kafka.minute: "streamer.minute"
-streamer.hdfs.minute: "hdfs://${HDFS}:14000/streamer/minute"
+streamer.hdfs.minute: "hdfs://${HDFS}/streamer/minute"
 
 ---
 
