@@ -131,7 +131,7 @@ public class RegularQuery implements Serializable {
       for (int offset = 0; offset < size; offset++) {
         Dataset<PageView> inTimeRange = getInTimeRange(pageSet, last, unit, offset);
         Timestamp epoch = Timestamp.valueOf(unit.update(last, offset + 1));
-        System.out.println("inTimeRange.collect()="+ Arrays.toString(inTimeRange.collect()));
+        System.out.println("inTimeRange.collect()="+ Arrays.toString((Object[]) inTimeRange.collect()));
         Dataset<RichPageStatistic> stat = inTimeRange
                 .groupBy(inTimeRange.col("deviceType"),
                         inTimeRange.col("allianceId"),
@@ -142,7 +142,7 @@ public class RegularQuery implements Serializable {
                         countDistinct(col("userId")).as("uvSigned"))
                 .withColumn("epoch", lit(epoch)).withColumn("id", lit(epoch.getTime()))
                 .as(Encoders.bean(RichPageStatistic.class));
-        System.out.println("stat.collect()=" + Arrays.toString(stat.collect()));
+        System.out.println("stat.collect()=" + Arrays.toString((Object[])stat.collect()));
         list.add(stat.first());
       }
       mongo.insert(list, collection);
@@ -159,6 +159,5 @@ public class RegularQuery implements Serializable {
     Timestamp low = Timestamp.valueOf(lower), up = Timestamp.valueOf(upper);
     return pages.where(col("epoch").between(low, up));
   }
-
 
 }
