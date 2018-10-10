@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 移动端上报用户浏览信息
@@ -206,6 +207,12 @@ public class MobilePageView implements Serializable {
         @ApiModelProperty(value = "客户端采集时间", example = "1532413660")
         private String collectTime;
 
+        /**
+         * 存放当前页面涉及的资源信息，比如事务id、目标id
+         */
+        @ApiModelProperty(value = "资源id信息", example = "{'affairId':123,'targetId':456}")
+        private Map<String, Long> resources;
+
         public String getPageUri() {
             return pageUri;
         }
@@ -244,6 +251,14 @@ public class MobilePageView implements Serializable {
 
         public void setClientIp(String clientIp) {
             this.clientIp = clientIp;
+        }
+
+        public Map<String, Long> getResources() {
+            return resources;
+        }
+
+        public void setResources(Map<String, Long> resources) {
+            this.resources = resources;
         }
     }
 }

@@ -349,6 +349,7 @@ public class PageView implements Serializable {
         private String appVer;
         private String uploadTime;
         private String userAgent;
+        private Map<String,Long> resources;
 
         public PageView build() {
             PageView pageView = new PageView();
@@ -367,6 +368,7 @@ public class PageView implements Serializable {
             pageView.setAppVer(appVer);
             pageView.setUploadTime(uploadTime);
             pageView.setUserAgent(userAgent);
+            pageView.setResources(resources);
             return pageView;
         }
 
@@ -447,6 +449,11 @@ public class PageView implements Serializable {
 
         public PageBuilder setDomain(String domain) {
             this.domain = domain;
+            return this;
+        }
+
+        public PageBuilder setResources(Map<String, Long> resources) {
+            this.resources = resources;
             return this;
         }
     }

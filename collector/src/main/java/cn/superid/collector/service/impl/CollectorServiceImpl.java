@@ -169,6 +169,7 @@ public class CollectorServiceImpl implements CollectorService {
                     .setReferer(innerEntry.getReferer())
                     .setCollectTime(innerEntry.getCollectTime())
                     .setClientIp(innerEntry.getClientIp())
+                    .setResources(innerEntry.getResources())
                     .build());
         }
 
