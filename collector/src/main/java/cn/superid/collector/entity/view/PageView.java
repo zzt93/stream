@@ -102,8 +102,20 @@ public class PageView implements Serializable {
     @ApiModelProperty(hidden = true)
     private boolean publicIp = false;
 
+    /**
+     * 事务id
+     */
+    @ApiModelProperty(hidden = true)
     private long affairId;
+    /**
+     * 目标id
+     */
+    @ApiModelProperty(hidden = true)
     private long targetId;
+    /**
+     * 盟id
+     */
+    @ApiModelProperty(hidden = true)
     private long allianceId;
 
     /**
