@@ -25,7 +25,7 @@ collector.mongo.day: days
 
 streamer.kafka.minute: "streamer.minute"
 streamer.hdfs.minute: "hdfs://${HDFS}/streamer/minute"
-
+streamer.hdfs.rich.minute: "hdfs://${HDFS}/streamer/rich_minute"
 ---
 
 spring:

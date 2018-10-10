@@ -37,16 +37,19 @@ public class StructuredStreamQuery implements Serializable {
     private final String servers;
     private final String streamerTopic;
     private final String hdfsCheckpoint;
+    private final String richHdfsCheckpoint;
 
     @Autowired
     public StructuredStreamQuery(KafkaProperties kafkaProperties, SparkSession spark,
                                  @Value("${streamer.kafka.minute}") String streamerTopic,
-                                 @Value("${streamer.hdfs.minute}") String hdfsCheckpoint) {
+                                 @Value("${streamer.hdfs.minute}") String hdfsCheckpoint,
+                                 @Value("${streamer.hdfs.rich.minute}") String richHdfsCheckpoint) {
         this.spark = spark;
         servers = kafkaProperties.getBootstrapServers().stream().collect(
                 Collectors.joining(","));
         this.streamerTopic = streamerTopic;
         this.hdfsCheckpoint = hdfsCheckpoint;
+        this.richHdfsCheckpoint = richHdfsCheckpoint;
     }
 
     public void run() throws StreamingQueryException {
@@ -79,7 +82,7 @@ public class StructuredStreamQuery implements Serializable {
                 .withColumn("epoch", col("epoch.end"))
                 .toJSON().as("value");
 
-        for (StreamingQuery query : getStreamingQuery(streamerTopic,pageCounts)) {
+        for (StreamingQuery query : getStreamingQuery(streamerTopic,hdfsCheckpoint,pageCounts)) {
             query.awaitTermination();
         }
 
@@ -95,15 +98,14 @@ public class StructuredStreamQuery implements Serializable {
                         approx_count_distinct("userId").alias("uvSigned"))
                 .withColumn("epoch", col("epoch.end"))
                 .toJSON().as("value");
-        System.out.println("richPvAndUv="+richPvAndUv.collect());
 
-        for (StreamingQuery query : getStreamingQuery("rich_pv_uv",richPvAndUv)) {
+        for (StreamingQuery query : getStreamingQuery("rich_pv_uv",richHdfsCheckpoint,richPvAndUv)) {
             query.awaitTermination();
         }
     }
 
     @SafeVarargs
-    private final StreamingQuery[] getStreamingQuery(String kafkaTopic,Dataset<String>... datasets) {
+    private final StreamingQuery[] getStreamingQuery(String kafkaTopic,String checkPoint,Dataset<String>... datasets) {
         StreamingQuery[] res = new StreamingQuery[datasets.length];
         for (int i = 0; i < datasets.length; i++) {
             res[i] = datasets[i]
@@ -112,12 +114,13 @@ public class StructuredStreamQuery implements Serializable {
                     .format("kafka")
                     .option("kafka.bootstrap.servers", servers)
                     .option("topic", kafkaTopic)
-                    .option("checkpointLocation", hdfsCheckpoint)
+                    .option("checkpointLocation", checkPoint)
                     .trigger(ProcessingTime("20 seconds"))
 //          .format("console")
 //          .option("truncate", false)
 //          .option("numRows", 50)
                     .start();
+            System.out.println("~~~datasets["+i+"]="+datasets[i].collect());
         }
         return res;
     }
