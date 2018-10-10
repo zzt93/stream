@@ -131,7 +131,8 @@ public class RegularQuery implements Serializable {
       for (int offset = 0; offset < size; offset++) {
         Dataset<PageView> inTimeRange = getInTimeRange(pageSet, last, unit, offset);
         Timestamp epoch = Timestamp.valueOf(unit.update(last, offset + 1));
-        if((inTimeRange.collect()).length>0){
+        //不加Object[]强制转换，jenkins编译会报错
+        if(((Object[])inTimeRange.collect()).length>0){
           Dataset<RichPageStatistic> stat = inTimeRange
                   .groupBy(inTimeRange.col("deviceType"),
                           inTimeRange.col("allianceId"),
