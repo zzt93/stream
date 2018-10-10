@@ -18,13 +18,29 @@ server:
 
 #根据设置的master.uri来决定部署模式是什么样的，这儿是用standalone模式，也可以运行在yarn上
 collector.spark.master.uri: spark://${SPARK}:7077
+#mongodb collection名字，用于保存三端上报的页面浏览信息
 collector.mongo.page: pages
+#mongodb collection名字，用于保存按时间维度计算出的每分钟的pv uv结果
 collector.mongo.minute: minutes
+#mongodb collection名字，用于保存按时间维度计算出的每小时的pv uv结果
 collector.mongo.hour: hours
+#mongodb collection名字，用于保存按时间维度计算出的每天的pv uv结果
 collector.mongo.day: days
+#mongodb collection名字，用于保存按更多维度计算出的每分钟的pv uv结果
+collector.mongo.minute.rich: minutes_rich
+#mongodb collection名字，用于保存按更多维度计算出的每小时的pv uv结果
+collector.mongo.hour.rich: hours_rich
+#mongodb collection名字，用于保存按更多维度计算出的每天的pv uv结果
+collector.mongo.day.rich: days_rich
 
+
+#按时间维度计算每分钟的pv uv结果保存的kafka topic
 streamer.kafka.minute: "streamer.minute"
+#按更多维度计算每分钟的pv uv结果保存的kafka topic
+streamer.kafka.minute.rich: "streamer.minute.rich"
+#按时间维度计算每分钟的pv uv的检查点路径
 streamer.hdfs.minute: "hdfs://${HDFS}/streamer/minute"
+#按更多维度计算每分钟的pv uv的检查点路径
 streamer.hdfs.rich.minute: "hdfs://${HDFS}/streamer/rich_minute"
 ---
 

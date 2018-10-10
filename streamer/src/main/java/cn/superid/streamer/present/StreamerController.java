@@ -4,8 +4,9 @@ import static cn.superid.streamer.util.TimestampUtils.truncate;
 
 import cn.superid.collector.entity.view.PageStatistic;
 import cn.superid.collector.entity.view.PageView;
+import cn.superid.collector.entity.view.RichPageStatistic;
 import cn.superid.streamer.compute.MongoConfig;
-import cn.superid.streamer.compute.RegularQuery.Unit;
+import cn.superid.streamer.compute.Unit;
 import cn.superid.streamer.compute.SqlQuery;
 import cn.superid.streamer.present.query.TimeRange;
 import com.google.common.base.Preconditions;
@@ -43,23 +44,25 @@ public class StreamerController {
   private static final Logger logger = LoggerFactory.getLogger(StreamerController.class);
   private final SqlQuery sqlQuery;
   private final MongoTemplate mongo;
-  private final String day;
-  private final String hour;
-  private final String minute;
-  private final String page;
+  @Value("${collector.mongo.day}")
+  private  String day;
+  @Value("${collector.mongo.hour}")
+  private  String hour;
+  @Value("${collector.mongo.minute}")
+  private  String minute;
+  @Value("${collector.mongo.day.rich}")
+  private  String dayRich;
+  @Value("${collector.mongo.hour.rich}")
+  private  String hourRich;
+  @Value("${collector.mongo.minute.rich}")
+  private  String minuteRich;
+  @Value("${collector.mongo.page}")
+  private  String page;
 
   @Autowired
-  public StreamerController(SqlQuery sqlQuery, MongoTemplate mongo,
-      @Value("${collector.mongo.page}") String page,
-      @Value("${collector.mongo.minute}") String minute,
-      @Value("${collector.mongo.hour}") String hour,
-      @Value("${collector.mongo.day}") String day) {
+  public StreamerController(SqlQuery sqlQuery, MongoTemplate mongo) {
     this.sqlQuery = sqlQuery;
     this.mongo = mongo;
-    this.minute = minute;
-    this.hour = hour;
-    this.day = day;
-    this.page = page;
     MongoConfig.createIfNotExist(mongo, this.minute, Unit.Minute.getRange() * 50);
   }
 
@@ -76,6 +79,16 @@ public class StreamerController {
   @PostMapping("/day")
   public List<PageStatistic> dayStatistics(@RequestBody TimeRange range) {
     return queryMongo(range, day, ChronoUnit.DAYS, PageStatistic.class);
+  }
+
+  /**
+   * 按天查询统计信息
+   * @param range
+   * @return
+   */
+  @PostMapping("/day_rich")
+  public List<RichPageStatistic> dayRichStatistics(@RequestBody TimeRange range) {
+    return queryMongo(range, dayRich, ChronoUnit.DAYS, RichPageStatistic.class);
   }
 
   /**
@@ -97,6 +110,16 @@ public class StreamerController {
   @PostMapping("/hour")
   public List<PageStatistic> hourStatistics(@RequestBody TimeRange range) {
     return queryMongo(range, hour, ChronoUnit.HOURS, PageStatistic.class);
+  }
+
+  /**
+   * 按小时查询统计信息
+   * @param range
+   * @return
+   */
+  @PostMapping("/hour_rich")
+  public List<RichPageStatistic> hourRichStatistics(@RequestBody TimeRange range) {
+    return queryMongo(range, hourRich, ChronoUnit.HOURS, RichPageStatistic.class);
   }
 
   /**
@@ -170,6 +193,37 @@ public class StreamerController {
   }
 
   /**
+   * 查询最近30分钟的浏览统计信息（刷新页面或者刚打开页面的时候，一次性加载30分钟的数据，后续只增量更新一分钟的数据）
+   * @return
+   */
+  @PostMapping("/last30rich")
+  public List<RichPageStatistic> minutesRichStatistic() {
+    LocalDateTime truncate = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
+    Criteria criteria = Criteria.where("epoch")
+            .gt(Timestamp.valueOf(truncate.minusMinutes(MINUTES_COUNT)))
+            .andOperator(Criteria.where("epoch").lte(Timestamp.valueOf(truncate)));
+    Query query = Query.query(criteria).limit(MINUTES_COUNT).with(Sort.by(Direction.ASC, "epoch"));
+    LinkedList<RichPageStatistic> pageStatistics = new LinkedList<>(mongo.find(query, RichPageStatistic.class, minuteRich));
+    if (pageStatistics.size() != MINUTES_COUNT) {
+      ListIterator<RichPageStatistic> it = pageStatistics.listIterator();
+      for (int i = MINUTES_COUNT - 1; i >= 0; i--) {
+        LocalDateTime time = truncate.minusMinutes(i);
+        boolean hasMore = it.hasNext();
+        if (hasMore && time.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli() == it.next().getId()) {
+        } else {
+          if (it.hasPrevious() && hasMore) {
+            it.previous();
+          }
+          RichPageStatistic pageStatistic = new RichPageStatistic(Timestamp.valueOf(time));
+          it.add(pageStatistic);
+        }
+      }
+    }
+    Preconditions.checkState(pageStatistics.size() == MINUTES_COUNT, "Wrong logic");
+    return pageStatistics;
+  }
+
+  /**
    * 前端页面每一分钟调用一次接口，获取最新的一分钟的页面浏览统计信息
    * @return
    */
@@ -182,4 +236,16 @@ public class StreamerController {
     return one == null ? new PageStatistic(now) : one;
   }
 
+  /**
+   * 前端页面每一分钟调用一次接口，获取最新的一分钟的页面浏览统计信息
+   * @return
+   */
+  @PostMapping("/last1rich")
+  public RichPageStatistic minuteRich() {
+    Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+    Criteria criteria = Criteria.where("epoch").is(truncate(now, ChronoUnit.MINUTES));
+    Query query = Query.query(criteria);
+    RichPageStatistic one = mongo.findOne(query, RichPageStatistic.class, minuteRich);
+    return one == null ? new RichPageStatistic(now) : one;
+  }
 }

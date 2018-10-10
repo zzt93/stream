@@ -1,6 +1,7 @@
 package cn.superid.streamer.compute;
 
 import cn.superid.collector.entity.view.PageStatistic;
+import cn.superid.collector.entity.view.RichPageStatistic;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,24 +17,24 @@ import org.springframework.stereotype.Service;
  * @author zzt
  */
 @Service
-public class MinuteWriter {
+public class RichMinuteWriter {
 
-  private static final Logger logger = LoggerFactory.getLogger(MinuteWriter.class);
+  private static final Logger logger = LoggerFactory.getLogger(RichMinuteWriter.class);
   private static final Gson gson = new Gson();
   private final MongoTemplate mongo;
-  @Value("${collector.mongo.minute}")
+  @Value("${collector.mongo.minute.rich}")
   private String minute;
 
   @Autowired
-  public MinuteWriter(MongoTemplate mongo) {
+  public RichMinuteWriter(MongoTemplate mongo) {
     this.mongo = mongo;
   }
 
 
-  @KafkaListener(topics = "${streamer.kafka.minute}")
+  @KafkaListener(topics = "${streamer.kafka.minute.rich}")
   public void listen(String message) {
     logger.info("Received message in group: " + message);
-    PageStatistic pageStatistic = gson.fromJson(message, PageStatistic.class);
+    RichPageStatistic pageStatistic = gson.fromJson(message, RichPageStatistic.class);
     pageStatistic.setId(pageStatistic.getEpoch().getTime());
     mongo.save(pageStatistic, minute);
   }

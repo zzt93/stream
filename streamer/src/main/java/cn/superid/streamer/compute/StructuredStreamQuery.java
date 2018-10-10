@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 
 /**
+ * 从kafka中读取页面浏览信息，计算pv uv 后保存到kafka的另外的topic中
  * @author zzt
  */
 @Service
@@ -35,7 +36,7 @@ public class StructuredStreamQuery implements Serializable {
     private static final Logger LOGGER = LoggerFactory.getLogger(StructuredStreamQuery.class);
 
     private final SparkSession spark;
-    private final String servers;
+    private final String kafkaBrokers;
     private final String streamerTopic;
     private final String hdfsCheckpoint;
     private final String richHdfsCheckpoint;
@@ -46,7 +47,7 @@ public class StructuredStreamQuery implements Serializable {
                                  @Value("${streamer.hdfs.minute}") String hdfsCheckpoint,
                                  @Value("${streamer.hdfs.rich.minute}") String richHdfsCheckpoint) {
         this.spark = spark;
-        servers = kafkaProperties.getBootstrapServers().stream().collect(
+        this.kafkaBrokers = kafkaProperties.getBootstrapServers().stream().collect(
                 Collectors.joining(","));
         this.streamerTopic = streamerTopic;
         this.hdfsCheckpoint = hdfsCheckpoint;
@@ -62,7 +63,7 @@ public class StructuredStreamQuery implements Serializable {
         Dataset<Row> df = spark
                 .readStream()
                 .format("kafka")
-                .option("kafka.bootstrap.servers", servers)
+                .option("kafka.bootstrap.servers", kafkaBrokers)
                 //消费页面浏览信息
                 .option("subscribe", "collector.page")
                 .option("enable.auto.commit", true)
@@ -79,18 +80,16 @@ public class StructuredStreamQuery implements Serializable {
                     }
                 }, Encoders.bean(PageView.class));
 
-        //只按照时间维度分组统计pv uv
-        Dataset<String> pageCounts = views
-//        .withWatermark("epoch", "1 minute")
-                .groupBy(functions.window(col("epoch"), "1 minute", "1 minute").as("epoch"))
-                .agg(count(col("*")).as("pv"), approx_count_distinct("viewId").alias("uv"),
-                        //uvSigned是登陆用户数
-                        approx_count_distinct("userId").alias("uvSigned"))
-                .withColumn("epoch", col("epoch.end"))
-                .toJSON().as("value");
+        minutePvAndUv(views);
+        richMinutePvAndUv(views);
 
-        new Thread(new StructuredStreamQueryRunner(servers,streamerTopic,hdfsCheckpoint,pageCounts)).run();
+    }
 
+    /**
+     * 每分钟，按照更多维度计算pv uv
+     * @param views
+     */
+    private void richMinutePvAndUv(Dataset<PageView> views) {
         //按照时间、设备、盟id、事务id、目标id、是否是公网ip维度统计pv uv
         Dataset<String> richPvAndUv = views
 //        .withWatermark("epoch", "1 minute")
@@ -106,37 +105,26 @@ public class StructuredStreamQuery implements Serializable {
                 .withColumn("epoch", col("epoch.end"))
                 .toJSON().as("value");
 
-        new Thread(new StructuredStreamQueryRunner(servers,"rich_pv_uv",richHdfsCheckpoint,richPvAndUv)).run();
-
+        new Thread(new StructuredStreamQueryRunner(kafkaBrokers,"rich_pv_uv_minute",richHdfsCheckpoint,richPvAndUv)).run();
     }
 
-    @SafeVarargs
-    private final StreamingQuery[] getStreamingQuery(String kafkaTopic, String checkPoint, Dataset<String>... datasets) {
-        System.out.println("output kafka topic :" + kafkaTopic);
-        StreamingQuery[] res = new StreamingQuery[datasets.length];
-        for (int i = 0; i < datasets.length; i++) {
-            res[i] = datasets[i]
-                    .writeStream()
-                    .outputMode("update")
-                    .format("kafka")
-                    .option("kafka.bootstrap.servers", servers)
-                    .option("topic", kafkaTopic)
-                    .option("checkpointLocation", checkPoint)
-                    .trigger(ProcessingTime("20 seconds"))
-//          .format("console")
-//          .option("truncate", false)
-//          .option("numRows", 50)
-                    .start();
+    /**
+     * 每分钟，按照时间维度计算pv uv
+     * @param views
+     */
+    private void minutePvAndUv(Dataset<PageView> views) {
+        //只按照时间维度分组统计pv uv
+        Dataset<String> pageCounts = views
+//        .withWatermark("epoch", "1 minute")
+                .groupBy(functions.window(col("epoch"), "1 minute", "1 minute").as("epoch"))
+                .agg(count(col("*")).as("pv"), approx_count_distinct("viewId").alias("uv"),
+                        //uvSigned是登陆用户数
+                        approx_count_distinct("userId").alias("uvSigned"))
+                .withColumn("epoch", col("epoch.end"))
+                .toJSON().as("value");
 
-            datasets[i].writeStream()
-                    .outputMode("update")
-                    .format("console")
-                    //truncate设置为false，控制台输出的才是完整的
-                    .option("truncate", false)
-                    .trigger(ProcessingTime("20 seconds"))
-                    .start();
-        }
-        return res;
+        new Thread(new StructuredStreamQueryRunner(kafkaBrokers,streamerTopic,hdfsCheckpoint,pageCounts)).run();
     }
+
 
 }
