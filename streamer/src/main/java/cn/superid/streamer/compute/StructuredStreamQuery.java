@@ -8,6 +8,7 @@ import static org.apache.spark.sql.streaming.Trigger.ProcessingTime;
 import cn.superid.collector.entity.view.PageView;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import org.apache.spark.api.java.function.MapFunction;
@@ -120,7 +121,11 @@ public class StructuredStreamQuery implements Serializable {
 //          .option("truncate", false)
 //          .option("numRows", 50)
                     .start();
-            System.out.println("~~~datasets["+i+"]="+datasets[i].collect());
+
+            System.out.println("~~~datasets["+i+"]="+ datasets[i]
+                    .writeStream()
+                    .format("console")
+                    .start());
         }
         return res;
     }
