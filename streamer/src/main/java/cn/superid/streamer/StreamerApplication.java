@@ -12,6 +12,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * 流计算程序，从kafka的"collector.page"topic中读取页面浏览信息，计算完了之后存入kafka的"streamer.minute"topic，
  * 然后由MinuteWriter类消费kafka中的消息，保存到mongodb。
  * 当前端调用StreamerController中的接口时，去mongodb中查询。
+ *
+ * RegularQuery类会定时从mongodb中查询数据计算pv uv 信息，然后保存到相应的mongodb集合中
  */
 @SpringBootApplication
 @EnableScheduling
