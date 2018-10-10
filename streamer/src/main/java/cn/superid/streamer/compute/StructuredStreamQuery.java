@@ -93,15 +93,22 @@ public class StructuredStreamQuery implements Serializable {
                         views.col("deviceType"),
                         views.col("allianceId"),
                         views.col("affairId"),
-                        views.col("targetId")
+                        views.col("targetId"),
+                        views.col("publicIp")
                 )
-                .agg(count(col("*")).as("pv"), approx_count_distinct("viewId").alias("uv"),
-                        approx_count_distinct("userId").alias("uvSigned"))
+                .agg(views.col("deviceType"),
+                        views.col("allianceId"),
+                        views.col("affairId"),
+                        views.col("targetId"),
+                        views.col("publicIp"),
+                        count(col("*")).as("pv"), approx_count_distinct("viewId").alias("uv"),
+                        approx_count_distinct("userId").alias("signedUv"))
                 .withColumn("epoch", col("epoch.end"))
-                .withColumn("deviceType", col("deviceType"))
-                .withColumn("allianceId", col("allianceId"))
-                .withColumn("affairId", col("affairId"))
-                .withColumn("targetId", col("targetId"))
+//                .withColumn("deviceType", col("deviceType"))
+//                .withColumn("allianceId", col("allianceId"))
+//                .withColumn("affairId", col("affairId"))
+//                .withColumn("targetId", col("targetId"))
+//                .withColumn("publicIp", col("publicIp"))
                 .toJSON().as("value");
 
         for (StreamingQuery query : getStreamingQuery("rich_pv_uv",richHdfsCheckpoint,richPvAndUv)) {
@@ -111,6 +118,7 @@ public class StructuredStreamQuery implements Serializable {
 
     @SafeVarargs
     private final StreamingQuery[] getStreamingQuery(String kafkaTopic,String checkPoint,Dataset<String>... datasets) {
+        System.out.println("output kafka topic :"+kafkaTopic);
         StreamingQuery[] res = new StreamingQuery[datasets.length];
         for (int i = 0; i < datasets.length; i++) {
             res[i] = datasets[i]
