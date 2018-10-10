@@ -46,13 +46,13 @@ public class StructuredStreamQueryRunner implements Runnable {
 //          .option("truncate", false)
 //          .option("numRows", 50)
                     .start();
-
-            dataset.writeStream()
-                    .outputMode("update")
-                    .format("console")
-                    //truncate设置为false，控制台输出的才是完整的
-                    .option("truncate", false)
-                    .trigger(ProcessingTime("20 seconds"))
-                    .start();
+//控制台输出内容
+//            dataset.writeStream()
+//                    .outputMode("update")
+//                    .format("console")
+//                    //truncate设置为false，控制台输出的才是完整的
+//                    .option("truncate", false)
+//                    .trigger(ProcessingTime("20 seconds"))
+//                    .start();
     }
 }
