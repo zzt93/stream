@@ -95,6 +95,7 @@ public class StructuredStreamQuery implements Serializable {
                         approx_count_distinct("userId").alias("uvSigned"))
                 .withColumn("epoch", col("epoch.end"))
                 .toJSON().as("value");
+        System.out.println("richPvAndUv="+richPvAndUv.collect());
 
         for (StreamingQuery query : getStreamingQuery("rich_pv_uv",richPvAndUv)) {
             query.awaitTermination();
