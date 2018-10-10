@@ -90,10 +90,10 @@ public class StructuredStreamQuery implements Serializable {
         Dataset<String> richPvAndUv = views
 //        .withWatermark("epoch", "1 minute")
                 .groupBy(functions.window(col("epoch"), "1 minute", "1 minute").as("epoch"),
-                        col("deviceType"),
-                        col("allianceId"),
-                        col("affairId"),
-                        col("targetId")
+                        views.col("deviceType"),
+                        views.col("allianceId"),
+                        views.col("affairId"),
+                        views.col("targetId")
                 )
                 .agg(count(col("*")).as("pv"), approx_count_distinct("viewId").alias("uv"),
                         approx_count_distinct("userId").alias("uvSigned"))
@@ -126,6 +126,7 @@ public class StructuredStreamQuery implements Serializable {
                     .writeStream()
                     .outputMode("update")
                     .format("console")
+                    .option("truncate", false)
                     .trigger(ProcessingTime("20 seconds"))
                     .start());
         }
