@@ -53,6 +53,11 @@ public class StructuredStreamQuery implements Serializable {
         this.richHdfsCheckpoint = richHdfsCheckpoint;
     }
 
+
+    /**
+     * 统计pv uv
+     * @throws StreamingQueryException
+     */
     public void run() throws StreamingQueryException {
         Dataset<Row> df = spark
                 .readStream()
@@ -74,19 +79,19 @@ public class StructuredStreamQuery implements Serializable {
                     }
                 }, Encoders.bean(PageView.class));
 
-//        Dataset<String> pageCounts = views
-////        .withWatermark("epoch", "1 minute")
-//                .groupBy(functions.window(col("epoch"), "1 minute", "1 minute").as("epoch"))
-//                .agg(count(col("*")).as("pv"), approx_count_distinct("viewId").alias("uv"),
-//                        //uvSigned是登陆用户数
-//                        approx_count_distinct("userId").alias("uvSigned"))
-//                .withColumn("epoch", col("epoch.end"))
-//                .toJSON().as("value");
-//
-//        for (StreamingQuery query : getStreamingQuery(streamerTopic,hdfsCheckpoint,pageCounts)) {
-//            query.awaitTermination();
-//        }
+        //只按照时间维度分组统计pv uv
+        Dataset<String> pageCounts = views
+//        .withWatermark("epoch", "1 minute")
+                .groupBy(functions.window(col("epoch"), "1 minute", "1 minute").as("epoch"))
+                .agg(count(col("*")).as("pv"), approx_count_distinct("viewId").alias("uv"),
+                        //uvSigned是登陆用户数
+                        approx_count_distinct("userId").alias("uvSigned"))
+                .withColumn("epoch", col("epoch.end"))
+                .toJSON().as("value");
 
+        new Thread(new StructuredStreamQueryRunner(servers,streamerTopic,hdfsCheckpoint,pageCounts)).run();
+
+        //按照时间、设备、盟id、事务id、目标id、是否是公网ip维度统计pv uv
         Dataset<String> richPvAndUv = views
 //        .withWatermark("epoch", "1 minute")
                 .groupBy(functions.window(col("epoch"), "1 minute", "1 minute").as("epoch"),
@@ -96,29 +101,18 @@ public class StructuredStreamQuery implements Serializable {
                         views.col("targetId"),
                         views.col("publicIp")
                 )
-                .agg(views.col("deviceType"),
-                        views.col("allianceId"),
-                        views.col("affairId"),
-                        views.col("targetId"),
-                        views.col("publicIp"),
-                        count(col("*")).as("pv"), approx_count_distinct("viewId").alias("uv"),
+                .agg(count(col("*")).as("pv"), approx_count_distinct("viewId").alias("uv"),
                         approx_count_distinct("userId").alias("signedUv"))
                 .withColumn("epoch", col("epoch.end"))
-//                .withColumn("deviceType", col("deviceType"))
-//                .withColumn("allianceId", col("allianceId"))
-//                .withColumn("affairId", col("affairId"))
-//                .withColumn("targetId", col("targetId"))
-//                .withColumn("publicIp", col("publicIp"))
                 .toJSON().as("value");
 
-        for (StreamingQuery query : getStreamingQuery("rich_pv_uv",richHdfsCheckpoint,richPvAndUv)) {
-            query.awaitTermination();
-        }
+        new Thread(new StructuredStreamQueryRunner(servers,"rich_pv_uv",richHdfsCheckpoint,richPvAndUv)).run();
+
     }
 
     @SafeVarargs
-    private final StreamingQuery[] getStreamingQuery(String kafkaTopic,String checkPoint,Dataset<String>... datasets) {
-        System.out.println("output kafka topic :"+kafkaTopic);
+    private final StreamingQuery[] getStreamingQuery(String kafkaTopic, String checkPoint, Dataset<String>... datasets) {
+        System.out.println("output kafka topic :" + kafkaTopic);
         StreamingQuery[] res = new StreamingQuery[datasets.length];
         for (int i = 0; i < datasets.length; i++) {
             res[i] = datasets[i]
