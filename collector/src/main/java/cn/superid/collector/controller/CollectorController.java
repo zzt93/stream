@@ -65,7 +65,7 @@ public class CollectorController {
   @PostMapping("/page")
   @RequestBodyNeedDecrypt
   public SimpleResponse queryFile(@RequestBody PageView pageView, HttpServletRequest request) {
-    System.out.println("**Controller pageView="+pageView);
+//    System.out.println("**Controller pageView="+pageView);
     LocalDateTime now = LocalDateTime.now();
     pageView.setEpoch(Timestamp.valueOf(now));
     pageView.setUploadTime(TimeUtil.getDateTimeStr(now));
@@ -103,7 +103,7 @@ public class CollectorController {
   @PostMapping("/mobile_page")
   @RequestBodyNeedDecrypt
   public SimpleResponse uploadMobilePageView(@RequestBody MobilePageView view, HttpServletRequest request) {
-    System.out.println("**Controller mobilePageView="+view);
+//    System.out.println("**Controller mobilePageView="+view);
     LocalDateTime now = LocalDateTime.now();
     view.setEpoch(Timestamp.valueOf(now));
     view.setUploadTime(TimeUtil.getDateTimeStr(now));
@@ -134,7 +134,7 @@ public class CollectorController {
   @PostMapping("/option")
   @RequestBodyNeedDecrypt
   public SimpleResponse uploadOption(@RequestBody Option option, HttpServletRequest request) {
-    System.out.println("Controller option="+option);
+//    System.out.println("Controller option="+option);
     LocalDateTime now = LocalDateTime.now();
     option.setEpoch(Timestamp.valueOf(now));
     option.setUploadTime(TimeUtil.getDateTimeStr(now));
@@ -159,7 +159,7 @@ public class CollectorController {
   @PostMapping("/mobile_option")
   @RequestBodyNeedDecrypt
   public SimpleResponse uploadMobileOption(@RequestBody MobileOption option, HttpServletRequest request) {
-    System.out.println("Controller mobileOption="+option);
+//    System.out.println("Controller mobileOption="+option);
     LocalDateTime now = LocalDateTime.now();
     option.setEpoch(Timestamp.valueOf(now));
     option.setUploadTime(TimeUtil.getDateTimeStr(now));
