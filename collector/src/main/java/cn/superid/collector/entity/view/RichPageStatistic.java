@@ -1,5 +1,7 @@
 package cn.superid.collector.entity.view;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
 
@@ -9,6 +11,7 @@ import java.sql.Timestamp;
  */
 public class RichPageStatistic implements Serializable {
 
+  private static final Gson gson = new Gson();
   private long id;
   private Timestamp epoch;
   private long pv;
@@ -106,5 +109,10 @@ public class RichPageStatistic implements Serializable {
 
   public void setDeviceType(String deviceType) {
     this.deviceType = deviceType;
+  }
+
+  @Override
+  public String toString() {
+    return gson.toJson(this);
   }
 }
