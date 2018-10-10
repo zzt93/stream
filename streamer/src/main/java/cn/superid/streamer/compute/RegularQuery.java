@@ -8,6 +8,7 @@ import static org.apache.spark.sql.functions.lit;
 
 import cn.superid.collector.entity.view.PageStatistic;
 import cn.superid.collector.entity.view.PageView;
+import cn.superid.collector.entity.view.RichPageStatistic;
 import com.mongodb.BasicDBObject;
 import com.mongodb.spark.MongoSpark;
 import java.io.Serializable;
@@ -115,7 +116,7 @@ public class RegularQuery implements Serializable {
               .first();
       Timestamp last =
               lastDoc == null ? null : Timestamp.from(lastDoc.get("epoch", Date.class).toInstant());
-      ArrayList<PageStatistic> list = new ArrayList<>();
+      ArrayList<RichPageStatistic> list = new ArrayList<>();
       int size;
       if (last == null) {
         last = Timestamp.valueOf(unit.update(now, -unit.range));
@@ -129,16 +130,16 @@ public class RegularQuery implements Serializable {
       for (int offset = 0; offset < size; offset++) {
         Dataset<PageView> inTimeRange = getInTimeRange(pageSet, last, unit, offset);
         Timestamp epoch = Timestamp.valueOf(unit.update(last, offset + 1));
-        Dataset<PageStatistic> stat = inTimeRange
+        Dataset<RichPageStatistic> stat = inTimeRange
                 .groupBy(inTimeRange.col("deviceType"),
                         inTimeRange.col("allianceId"),
                         inTimeRange.col("affairId"),
                         inTimeRange.col("targetId"),
                         inTimeRange.col("publicIp"))
                 .agg(count("*").as("pv"), countDistinct(col("viewId")).as("uv"),
-                        countDistinct(col("userId")).as("uvSigned"))
+                        countDistinct(col("userId")).as("signedUv"))
                 .withColumn("epoch", lit(epoch)).withColumn("id", lit(epoch.getTime()))
-                .as(Encoders.bean(PageStatistic.class));
+                .as(Encoders.bean(RichPageStatistic.class));
         list.add(stat.first());
       }
       mongo.insert(list, collection);
