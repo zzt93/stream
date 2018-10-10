@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * 从kafka中读取页面浏览信息，计算pv uv 后保存到kafka的另外的topic中
+ *
  * @author zzt
  */
 @Service
@@ -38,18 +39,21 @@ public class StructuredStreamQuery implements Serializable {
     private final SparkSession spark;
     private final String kafkaBrokers;
     private final String streamerTopic;
+    private final String streamerRichTopic;
     private final String hdfsCheckpoint;
     private final String richHdfsCheckpoint;
 
     @Autowired
     public StructuredStreamQuery(KafkaProperties kafkaProperties, SparkSession spark,
                                  @Value("${streamer.kafka.minute}") String streamerTopic,
+                                 @Value("${streamer.kafka.minute.rich}") String streamerRichTopic,
                                  @Value("${streamer.hdfs.minute}") String hdfsCheckpoint,
                                  @Value("${streamer.hdfs.rich.minute}") String richHdfsCheckpoint) {
         this.spark = spark;
         this.kafkaBrokers = kafkaProperties.getBootstrapServers().stream().collect(
                 Collectors.joining(","));
         this.streamerTopic = streamerTopic;
+        this.streamerRichTopic = streamerRichTopic;
         this.hdfsCheckpoint = hdfsCheckpoint;
         this.richHdfsCheckpoint = richHdfsCheckpoint;
     }
@@ -57,6 +61,7 @@ public class StructuredStreamQuery implements Serializable {
 
     /**
      * 统计pv uv
+     *
      * @throws StreamingQueryException
      */
     public void run() throws StreamingQueryException {
@@ -87,6 +92,7 @@ public class StructuredStreamQuery implements Serializable {
 
     /**
      * 每分钟，按照更多维度计算pv uv
+     *
      * @param views
      */
     private void richMinutePvAndUv(Dataset<PageView> views) {
@@ -101,15 +107,16 @@ public class StructuredStreamQuery implements Serializable {
                         views.col("publicIp")
                 )
                 .agg(count(col("*")).as("pv"), approx_count_distinct("viewId").alias("uv"),
-                        approx_count_distinct("userId").alias("signedUv"))
+                        approx_count_distinct("userId").alias("uvSigned"))
                 .withColumn("epoch", col("epoch.end"))
                 .toJSON().as("value");
 
-        new Thread(new StructuredStreamQueryRunner(kafkaBrokers,"rich_pv_uv_minute",richHdfsCheckpoint,richPvAndUv)).run();
+        new Thread(new StructuredStreamQueryRunner(kafkaBrokers, streamerRichTopic, richHdfsCheckpoint, richPvAndUv)).run();
     }
 
     /**
      * 每分钟，按照时间维度计算pv uv
+     *
      * @param views
      */
     private void minutePvAndUv(Dataset<PageView> views) {
@@ -123,7 +130,7 @@ public class StructuredStreamQuery implements Serializable {
                 .withColumn("epoch", col("epoch.end"))
                 .toJSON().as("value");
 
-        new Thread(new StructuredStreamQueryRunner(kafkaBrokers,streamerTopic,hdfsCheckpoint,pageCounts)).run();
+        new Thread(new StructuredStreamQueryRunner(kafkaBrokers, streamerTopic, hdfsCheckpoint, pageCounts)).run();
     }
 
 

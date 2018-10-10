@@ -137,7 +137,7 @@ public class RegularQuery implements Serializable {
                         inTimeRange.col("targetId"),
                         inTimeRange.col("publicIp"))
                 .agg(count("*").as("pv"), countDistinct(col("viewId")).as("uv"),
-                        countDistinct(col("userId")).as("signedUv"))
+                        countDistinct(col("userId")).as("uvSigned"))
                 .withColumn("epoch", lit(epoch)).withColumn("id", lit(epoch.getTime()))
                 .as(Encoders.bean(RichPageStatistic.class));
         list.add(stat.first());
