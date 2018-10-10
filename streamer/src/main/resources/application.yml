@@ -14,7 +14,7 @@ spring:
     mongodb:
       uri: mongodb://${MONGO}/collector.pages
 server:
-  port: 18888
+  port: ${SERVER_PORT}
 
 #根据设置的master.uri来决定部署模式是什么样的，这儿是用standalone模式，也可以运行在yarn上
 collector.spark.master.uri: spark://${SPARK}:7077
