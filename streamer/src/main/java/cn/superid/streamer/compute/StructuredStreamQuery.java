@@ -74,18 +74,18 @@ public class StructuredStreamQuery implements Serializable {
                     }
                 }, Encoders.bean(PageView.class));
 
-        Dataset<String> pageCounts = views
-//        .withWatermark("epoch", "1 minute")
-                .groupBy(functions.window(col("epoch"), "1 minute", "1 minute").as("epoch"))
-                .agg(count(col("*")).as("pv"), approx_count_distinct("viewId").alias("uv"),
-                        //uvSigned是登陆用户数
-                        approx_count_distinct("userId").alias("uvSigned"))
-                .withColumn("epoch", col("epoch.end"))
-                .toJSON().as("value");
-
-        for (StreamingQuery query : getStreamingQuery(streamerTopic,hdfsCheckpoint,pageCounts)) {
-            query.awaitTermination();
-        }
+//        Dataset<String> pageCounts = views
+////        .withWatermark("epoch", "1 minute")
+//                .groupBy(functions.window(col("epoch"), "1 minute", "1 minute").as("epoch"))
+//                .agg(count(col("*")).as("pv"), approx_count_distinct("viewId").alias("uv"),
+//                        //uvSigned是登陆用户数
+//                        approx_count_distinct("userId").alias("uvSigned"))
+//                .withColumn("epoch", col("epoch.end"))
+//                .toJSON().as("value");
+//
+//        for (StreamingQuery query : getStreamingQuery(streamerTopic,hdfsCheckpoint,pageCounts)) {
+//            query.awaitTermination();
+//        }
 
         Dataset<String> richPvAndUv = views
 //        .withWatermark("epoch", "1 minute")
