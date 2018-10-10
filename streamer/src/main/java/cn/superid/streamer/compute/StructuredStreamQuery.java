@@ -98,6 +98,10 @@ public class StructuredStreamQuery implements Serializable {
                 .agg(count(col("*")).as("pv"), approx_count_distinct("viewId").alias("uv"),
                         approx_count_distinct("userId").alias("uvSigned"))
                 .withColumn("epoch", col("epoch.end"))
+                .withColumn("deviceType", col("deviceType"))
+                .withColumn("allianceId", col("allianceId"))
+                .withColumn("affairId", col("affairId"))
+                .withColumn("targetId", col("targetId"))
                 .toJSON().as("value");
 
         for (StreamingQuery query : getStreamingQuery("rich_pv_uv",richHdfsCheckpoint,richPvAndUv)) {
@@ -122,13 +126,13 @@ public class StructuredStreamQuery implements Serializable {
 //          .option("numRows", 50)
                     .start();
 
-            System.out.println("~~~datasets["+i+"]="+ datasets[i]
-                    .writeStream()
+            datasets[i].writeStream()
                     .outputMode("update")
                     .format("console")
+                    //truncate设置为false，控制台输出的才是完整的
                     .option("truncate", false)
                     .trigger(ProcessingTime("20 seconds"))
-                    .start());
+                    .start();
         }
         return res;
     }
