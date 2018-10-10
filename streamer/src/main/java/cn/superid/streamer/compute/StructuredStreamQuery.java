@@ -124,7 +124,9 @@ public class StructuredStreamQuery implements Serializable {
 
             System.out.println("~~~datasets["+i+"]="+ datasets[i]
                     .writeStream()
+                    .outputMode("update")
                     .format("console")
+                    .trigger(ProcessingTime("20 seconds"))
                     .start());
         }
         return res;
