@@ -1,4 +1,4 @@
-package cn.superid.streamer.present;
+package cn.superid.streamer.controller;
 
 import static cn.superid.streamer.util.TimestampUtils.truncate;
 
@@ -8,13 +8,16 @@ import cn.superid.collector.entity.view.RichPageStatistic;
 import cn.superid.streamer.compute.MongoConfig;
 import cn.superid.streamer.compute.Unit;
 import cn.superid.streamer.compute.SqlQuery;
-import cn.superid.streamer.present.query.TimeRange;
+import cn.superid.collector.entity.RichForm;
+import cn.superid.streamer.form.TimeRange;
+import cn.superid.streamer.service.StreamerService;
 import com.google.common.base.Preconditions;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -53,6 +56,8 @@ public class StreamerController {
     private final String hourRich;
     private final String minuteRich;
     private final String page;
+    @Autowired
+    private StreamerService streamerService;
 
     @Autowired
     public StreamerController(SqlQuery sqlQuery, MongoTemplate mongo,
@@ -269,5 +274,25 @@ public class StreamerController {
         Query query = Query.query(criteria);
         RichPageStatistic one = mongo.findOne(query, RichPageStatistic.class, minuteRich);
         return one == null ? new RichPageStatistic(now) : one;
+    }
+
+
+    /**
+     * 指定范围内的更多维度的pv uv 信息
+     *
+     * @return
+     */
+    @PostMapping("/range/rich/pageview")
+    public List<RichPageStatistic> rangeRichPageviews(@RequestBody RichForm richForm) {
+        if ("minute".equalsIgnoreCase(richForm.getTimeUnit())) {
+            return streamerService.rangeRichPageviewsInMinutes(richForm);
+        } else if ("hour".equalsIgnoreCase(richForm.getTimeUnit())) {
+            return streamerService.rangeRichPageviewsInHours(richForm);
+        } else if ("day".equalsIgnoreCase(richForm.getTimeUnit())) {
+            return streamerService.rangeRichPageviewsInDays(richForm);
+        } else {
+            logger.error("未识别的时间单位{}", richForm.getTimeUnit());
+            return Collections.emptyList();
+        }
     }
 }

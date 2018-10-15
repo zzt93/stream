@@ -42,6 +42,7 @@ public class SparkConfig {
                 .set("spark.driver.memory","4g")
                 .set("spark.executor.memory","4g")
                 .set("spark.executor.cores","4")
+                .set("spark.debug.maxToStringFields","100")
 //                .set("spark.driver.host","ali-18")
 //                .set("spark.driver.port", "40000")
                 .setJars(new String[]{"/app.jar"})
