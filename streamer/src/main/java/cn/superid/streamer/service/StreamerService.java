@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.sql.Timestamp;
@@ -16,6 +17,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -108,12 +110,23 @@ public class StreamerService {
 
     private List<RichPageStatistic> getRichPageStatistics(LocalDateTime fromLocalDateTime, LocalDateTime toLocalDateTime,
                                                           RichForm richForm, String collectionName) {
+
+        //把前端传过来的条件放到列表中，然后转换成一个变长数组传递给andOperator方法
+        List<Criteria> criteriaList = new ArrayList<>();
+        criteriaList.add(Criteria.where("epoch").gt(Timestamp.valueOf(fromLocalDateTime)));
+        criteriaList.add(Criteria.where("epoch").lte(Timestamp.valueOf(toLocalDateTime)));
+        if(richForm.getAffairId()>0){
+            criteriaList.add(Criteria.where("affairId").is(richForm.getAffairId()));
+        }
+        if(richForm.getTargetId()>0){
+            Criteria.where("targetId").is(richForm.getTargetId());
+        }
+        if (!StringUtils.isEmpty(richForm.getDevType())) {
+            Criteria.where("deviceType").is(richForm.getDevType());
+        }
+
         Criteria criteria = Criteria.where("publicIp").is(true)
-                .andOperator(Criteria.where("epoch").gt(Timestamp.valueOf(fromLocalDateTime)),
-                        Criteria.where("epoch").lte(Timestamp.valueOf(toLocalDateTime)),
-                        Criteria.where("affairId").is(richForm.getAffairId()),
-                        Criteria.where("targetId").is(richForm.getTargetId()),
-                        Criteria.where("deviceType").is(richForm.getDevType())
+                .andOperator((Criteria[]) criteriaList.toArray()
                 );
 
         Query query = Query.query(criteria).with(Sort.by(Sort.Direction.ASC, "epoch"));
