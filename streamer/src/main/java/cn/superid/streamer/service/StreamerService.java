@@ -45,13 +45,14 @@ public class StreamerService {
 
     /**
      * 以分钟为单位获取pv uv信息
+     *
      * @param richForm
      * @return
      */
     public List<RichPageStatistic> rangeRichPageviewsInMinutes(@RequestBody RichForm richForm) {
         LocalDateTime fromLocalDateTime = richForm.getFrom().toLocalDateTime().truncatedTo(ChronoUnit.MINUTES);
         LocalDateTime toLocalDateTime = richForm.getTo().toLocalDateTime().truncatedTo(ChronoUnit.MINUTES);
-        if(toLocalDateTime.isAfter(LocalDateTime.now())){
+        if (toLocalDateTime.isAfter(LocalDateTime.now())) {
             toLocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         }
 
@@ -59,19 +60,20 @@ public class StreamerService {
             throw new RuntimeException("查询时间范围内包含的时间点过多！");
         }
 
-        return getRichPageStatistics(fromLocalDateTime,toLocalDateTime,richForm,minuteRich);
+        return getRichPageStatistics(fromLocalDateTime, toLocalDateTime, richForm, minuteRich);
     }
 
 
     /**
      * 以小时为单位获取pv uv信息
+     *
      * @param richForm
      * @return
      */
     public List<RichPageStatistic> rangeRichPageviewsInHours(@RequestBody RichForm richForm) {
         LocalDateTime fromLocalDateTime = richForm.getFrom().toLocalDateTime().truncatedTo(ChronoUnit.HOURS);
         LocalDateTime toLocalDateTime = richForm.getTo().toLocalDateTime().truncatedTo(ChronoUnit.HOURS);
-        if(toLocalDateTime.isAfter(LocalDateTime.now())){
+        if (toLocalDateTime.isAfter(LocalDateTime.now())) {
             toLocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS);
         }
 
@@ -79,19 +81,20 @@ public class StreamerService {
             throw new RuntimeException("查询时间范围内包含的时间点过多！");
         }
 
-        return getRichPageStatistics(fromLocalDateTime,toLocalDateTime,richForm,hourRich);
+        return getRichPageStatistics(fromLocalDateTime, toLocalDateTime, richForm, hourRich);
     }
 
 
     /**
      * 以天为单位获取pv uv信息
+     *
      * @param richForm
      * @return
      */
     public List<RichPageStatistic> rangeRichPageviewsInDays(@RequestBody RichForm richForm) {
         LocalDateTime fromLocalDateTime = richForm.getFrom().toLocalDateTime().truncatedTo(ChronoUnit.DAYS);
         LocalDateTime toLocalDateTime = richForm.getTo().toLocalDateTime().truncatedTo(ChronoUnit.DAYS);
-        if(toLocalDateTime.isAfter(LocalDateTime.now())){
+        if (toLocalDateTime.isAfter(LocalDateTime.now())) {
             toLocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
         }
 
@@ -99,21 +102,29 @@ public class StreamerService {
             throw new RuntimeException("查询时间范围内包含的时间点过多！");
         }
 
-        return getRichPageStatistics(fromLocalDateTime,toLocalDateTime,richForm,dayRich);
+        return getRichPageStatistics(fromLocalDateTime, toLocalDateTime, richForm, dayRich);
     }
 
 
     private List<RichPageStatistic> getRichPageStatistics(LocalDateTime fromLocalDateTime, LocalDateTime toLocalDateTime,
-                                                          RichForm richForm,String collectionName) {
+                                                          RichForm richForm, String collectionName) {
 
 
-        Criteria criteria = Criteria.where("epoch")
-                .gt(Timestamp.valueOf(fromLocalDateTime))
-                .andOperator(Criteria.where("epoch").lte(Timestamp.valueOf(toLocalDateTime))
-                        .andOperator(Criteria.where("affairId").is(richForm.getAffairId()))
-                        .andOperator(Criteria.where("targetId").is(richForm.getTargetId()))
-                        .andOperator(Criteria.where("deviceType").is(richForm.getDevType()))
-                        .andOperator(Criteria.where("publicIp").is(true))
+//        Criteria criteria = Criteria.where("epoch")
+//                .gt(Timestamp.valueOf(fromLocalDateTime))
+//                .andOperator(Criteria.where("epoch").lte(Timestamp.valueOf(toLocalDateTime))
+//                        .andOperator(Criteria.where("affairId").is(richForm.getAffairId()))
+//                        .andOperator(Criteria.where("targetId").is(richForm.getTargetId()))
+//                        .andOperator(Criteria.where("deviceType").is(richForm.getDevType()))
+//                        .andOperator(Criteria.where("publicIp").is(true))
+//                );
+
+        Criteria criteria = Criteria.where("publicIp").is(true)
+                .andOperator(Criteria.where("epoch").gt(Timestamp.valueOf(fromLocalDateTime)),
+                        Criteria.where("epoch").lte(Timestamp.valueOf(toLocalDateTime)),
+                        Criteria.where("targetId").is(richForm.getTargetId()),
+                        Criteria.where("deviceType").is(richForm.getDevType()),
+                        Criteria.where("publicIp").is(true)
                 );
 
         Query query = Query.query(criteria).limit(MINUTES_COUNT_LIMIT).with(Sort.by(Sort.Direction.ASC, "epoch"));
