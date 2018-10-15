@@ -108,32 +108,29 @@ public class StreamerService {
 
     private List<RichPageStatistic> getRichPageStatistics(LocalDateTime fromLocalDateTime, LocalDateTime toLocalDateTime,
                                                           RichForm richForm, String collectionName) {
-
-
-//        Criteria criteria = Criteria.where("epoch")
-//                .gt(Timestamp.valueOf(fromLocalDateTime))
-//                .andOperator(Criteria.where("epoch").lte(Timestamp.valueOf(toLocalDateTime))
-//                        .andOperator(Criteria.where("affairId").is(richForm.getAffairId()))
-//                        .andOperator(Criteria.where("targetId").is(richForm.getTargetId()))
-//                        .andOperator(Criteria.where("deviceType").is(richForm.getDevType()))
-//                        .andOperator(Criteria.where("publicIp").is(true))
-//                );
-
         Criteria criteria = Criteria.where("publicIp").is(true)
                 .andOperator(Criteria.where("epoch").gt(Timestamp.valueOf(fromLocalDateTime)),
                         Criteria.where("epoch").lte(Timestamp.valueOf(toLocalDateTime)),
+                        Criteria.where("affairId").is(richForm.getAffairId()),
                         Criteria.where("targetId").is(richForm.getTargetId()),
-                        Criteria.where("deviceType").is(richForm.getDevType()),
-                        Criteria.where("publicIp").is(true)
+                        Criteria.where("deviceType").is(richForm.getDevType())
                 );
 
-        Query query = Query.query(criteria).limit(MINUTES_COUNT_LIMIT).with(Sort.by(Sort.Direction.ASC, "epoch"));
+        Query query = Query.query(criteria).with(Sort.by(Sort.Direction.ASC, "epoch"));
 
         LinkedList<RichPageStatistic> pageStatistics = new LinkedList<>(mongo.find(query, RichPageStatistic.class, collectionName));
 
         ListIterator<RichPageStatistic> it = pageStatistics.listIterator();
         for (int i = pageStatistics.size() - 1; i >= 0; i--) {
-            LocalDateTime time = toLocalDateTime.minusMinutes(i);
+            LocalDateTime time = null;
+            if("minute".equals(richForm.getTimeUnit())){
+                time = toLocalDateTime.minusMinutes(i);
+            } else if ("hour".equals(richForm.getTimeUnit())) {
+                time = toLocalDateTime.minusHours(i);
+            } else if ("day".equals(richForm.getTimeUnit())) {
+                time = toLocalDateTime.minusDays(i);
+            }
+
             boolean hasMore = it.hasNext();
             if (hasMore && time.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli() == it.next().getId()) {
             } else {
