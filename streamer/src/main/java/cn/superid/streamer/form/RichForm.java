@@ -1,4 +1,4 @@
-package cn.superid.collector.entity;
+package cn.superid.streamer.form;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
