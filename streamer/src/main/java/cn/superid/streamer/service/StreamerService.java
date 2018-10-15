@@ -97,6 +97,7 @@ public class StreamerService {
     private List<RichPageStatistic> getRichPageStatistics(LocalDateTime fromLocalDateTime, LocalDateTime toLocalDateTime,
                                                           RichForm richForm,String collectionName) {
 
+
         Criteria criteria = Criteria.where("epoch")
                 .gt(Timestamp.valueOf(fromLocalDateTime))
                 .andOperator(Criteria.where("epoch").lte(Timestamp.valueOf(toLocalDateTime))
