@@ -288,6 +288,8 @@ public class StreamerController {
     @ApiOperation(value = "按照事务id、目标id、时间范围、用户设备类型查看pv uv", notes = "", response = RichPageStatistic.class)
     @PostMapping("/range/rich/pageview")
     public List<RichPageStatistic> rangeRichPageviews(@RequestBody RichForm richForm) {
+        richForm.validate();
+        
         if ("minute".equalsIgnoreCase(richForm.getTimeUnit())) {
             return streamerService.rangeRichPageviewsInMinutes(richForm);
         } else if ("hour".equalsIgnoreCase(richForm.getTimeUnit())) {

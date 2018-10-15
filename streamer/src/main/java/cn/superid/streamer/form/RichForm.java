@@ -43,6 +43,24 @@ public class RichForm {
     @ApiModelProperty(value = "用户设备", example = "Mac、Windows、iPhone、Android、其它")
     private String devType;
 
+    public void validate(){
+        if (!("minute".equalsIgnoreCase(timeUnit)||"hour".equalsIgnoreCase(timeUnit)||"day".equalsIgnoreCase(timeUnit)) ){
+            throw new RuntimeException("不合法的时间单位:"+timeUnit);
+        }
+
+        if(from.after(to)){
+            throw new RuntimeException("开始时间大于结束时间！");
+        }
+
+        if (!("Mac".equals(devType) || "Windows".equals(devType) || "iPhone".equals(devType) || "Android".equals(devType) || "其它".equals(devType))) {
+            throw new RuntimeException("未知设备类型：" + devType);
+        }
+
+        if("其它".equals(this.getDevType())){
+            this.setDevType("Unknown");
+        }
+    }
+
     public long getAffairId() {
         return affairId;
     }
