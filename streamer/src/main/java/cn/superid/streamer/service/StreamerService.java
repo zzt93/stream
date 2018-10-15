@@ -119,15 +119,19 @@ public class StreamerService {
             criteriaList.add(Criteria.where("affairId").is(richForm.getAffairId()));
         }
         if(richForm.getTargetId()>0){
-            Criteria.where("targetId").is(richForm.getTargetId());
+            criteriaList.add(Criteria.where("targetId").is(richForm.getTargetId()));
         }
         if (!StringUtils.isEmpty(richForm.getDevType())) {
-            Criteria.where("deviceType").is(richForm.getDevType());
+            criteriaList.add(Criteria.where("deviceType").is(richForm.getDevType()));
+        }
+
+        Criteria[] criterias = new Criteria[criteriaList.size()];
+        for(int i = 0 ;i < criterias.length;i++){
+            criterias[i] = criteriaList.get(i);
         }
 
         Criteria criteria = Criteria.where("publicIp").is(true)
-                .andOperator((Criteria[]) criteriaList.toArray()
-                );
+                .andOperator(criterias);
 
         Query query = Query.query(criteria).with(Sort.by(Sort.Direction.ASC, "epoch"));
 
