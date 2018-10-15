@@ -133,27 +133,27 @@ public class StreamerService {
 
         LinkedList<RichPageStatistic> pageStatistics = new LinkedList<>(mongo.find(query, RichPageStatistic.class, collectionName));
 
-        ListIterator<RichPageStatistic> it = pageStatistics.listIterator();
-        for (int i = pageStatistics.size() - 1; i >= 0; i--) {
-            LocalDateTime time = null;
-            if("minute".equals(richForm.getTimeUnit())){
-                time = toLocalDateTime.minusMinutes(i);
-            } else if ("hour".equals(richForm.getTimeUnit())) {
-                time = toLocalDateTime.minusHours(i);
-            } else if ("day".equals(richForm.getTimeUnit())) {
-                time = toLocalDateTime.minusDays(i);
-            }
-
-            boolean hasMore = it.hasNext();
-            if (hasMore && time.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli() == it.next().getId()) {
-            } else {
-                if (it.hasPrevious() && hasMore) {
-                    it.previous();
-                }
-                RichPageStatistic pageStatistic = new RichPageStatistic(Timestamp.valueOf(time));
-                it.add(pageStatistic);
-            }
-        }
+//        ListIterator<RichPageStatistic> it = pageStatistics.listIterator();
+//        for (int i = pageStatistics.size() - 1; i >= 0; i--) {
+//            LocalDateTime time = null;
+//            if("minute".equals(richForm.getTimeUnit())){
+//                time = toLocalDateTime.minusMinutes(i);
+//            } else if ("hour".equals(richForm.getTimeUnit())) {
+//                time = toLocalDateTime.minusHours(i);
+//            } else if ("day".equals(richForm.getTimeUnit())) {
+//                time = toLocalDateTime.minusDays(i);
+//            }
+//
+//            boolean hasMore = it.hasNext();
+//            if (hasMore && time.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli() == it.next().getId()) {
+//            } else {
+//                if (it.hasPrevious() && hasMore) {
+//                    it.previous();
+//                }
+//                RichPageStatistic pageStatistic = new RichPageStatistic(Timestamp.valueOf(time));
+//                it.add(pageStatistic);
+//            }
+//        }
 
         return pageStatistics;
     }
