@@ -8,7 +8,7 @@ import cn.superid.collector.entity.view.RichPageStatistic;
 import cn.superid.streamer.compute.MongoConfig;
 import cn.superid.streamer.compute.Unit;
 import cn.superid.streamer.compute.SqlQuery;
-import cn.superid.collector.entity.RichForm;
+import cn.superid.streamer.form.RichForm;
 import cn.superid.streamer.form.TimeRange;
 import cn.superid.streamer.service.StreamerService;
 import com.google.common.base.Preconditions;
@@ -22,6 +22,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * @author zzt
  */
+@Api(value = "用户浏览及操作信息查询展示")
 @RestController
 @RequestMapping("/streamer")
 @CrossOrigin(origins = "*")
@@ -282,6 +285,7 @@ public class StreamerController {
      *
      * @return
      */
+    @ApiOperation(value = "按照事务id、目标id、时间范围、用户设备类型查看pv uv", notes = "", response = RichPageStatistic.class)
     @PostMapping("/range/rich/pageview")
     public List<RichPageStatistic> rangeRichPageviews(@RequestBody RichForm richForm) {
         if ("minute".equalsIgnoreCase(richForm.getTimeUnit())) {

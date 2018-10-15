@@ -1,7 +1,7 @@
 package cn.superid.streamer.service;
 
 import cn.superid.collector.entity.view.RichPageStatistic;
-import cn.superid.collector.entity.RichForm;
+import cn.superid.streamer.form.RichForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
