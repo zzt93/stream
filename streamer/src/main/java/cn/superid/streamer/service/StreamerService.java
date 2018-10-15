@@ -51,6 +51,9 @@ public class StreamerService {
     public List<RichPageStatistic> rangeRichPageviewsInMinutes(@RequestBody RichForm richForm) {
         LocalDateTime fromLocalDateTime = richForm.getFrom().toLocalDateTime().truncatedTo(ChronoUnit.MINUTES);
         LocalDateTime toLocalDateTime = richForm.getTo().toLocalDateTime().truncatedTo(ChronoUnit.MINUTES);
+        if(toLocalDateTime.isAfter(LocalDateTime.now())){
+            toLocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
+        }
 
         if (Duration.between(fromLocalDateTime, toLocalDateTime).toMinutes() > MINUTES_COUNT_LIMIT) {
             throw new RuntimeException("查询时间范围内包含的时间点过多！");
@@ -68,8 +71,11 @@ public class StreamerService {
     public List<RichPageStatistic> rangeRichPageviewsInHours(@RequestBody RichForm richForm) {
         LocalDateTime fromLocalDateTime = richForm.getFrom().toLocalDateTime().truncatedTo(ChronoUnit.HOURS);
         LocalDateTime toLocalDateTime = richForm.getTo().toLocalDateTime().truncatedTo(ChronoUnit.HOURS);
+        if(toLocalDateTime.isAfter(LocalDateTime.now())){
+            toLocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS);
+        }
 
-        if (Duration.between(fromLocalDateTime, toLocalDateTime).toMinutes() > HOURS_COUNT_LIMIT) {
+        if (Duration.between(fromLocalDateTime, toLocalDateTime).toHours() > HOURS_COUNT_LIMIT) {
             throw new RuntimeException("查询时间范围内包含的时间点过多！");
         }
 
@@ -85,8 +91,11 @@ public class StreamerService {
     public List<RichPageStatistic> rangeRichPageviewsInDays(@RequestBody RichForm richForm) {
         LocalDateTime fromLocalDateTime = richForm.getFrom().toLocalDateTime().truncatedTo(ChronoUnit.DAYS);
         LocalDateTime toLocalDateTime = richForm.getTo().toLocalDateTime().truncatedTo(ChronoUnit.DAYS);
+        if(toLocalDateTime.isAfter(LocalDateTime.now())){
+            toLocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
+        }
 
-        if (Duration.between(fromLocalDateTime, toLocalDateTime).toMinutes() > DAYS_COUNT_LIMIT) {
+        if (Duration.between(fromLocalDateTime, toLocalDateTime).toDays() > DAYS_COUNT_LIMIT) {
             throw new RuntimeException("查询时间范围内包含的时间点过多！");
         }
 
