@@ -42,6 +42,13 @@ streamer.kafka.minute.rich: "streamer.minute.rich"
 streamer.hdfs.minute: "hdfs://${HDFS}/streamer/minute"
 #按更多维度计算每分钟的pv uv的检查点路径
 streamer.hdfs.rich.minute: "hdfs://${HDFS}/streamer/rich_minute"
+
+#spark程序资源配置
+spark.driver.cores: ${DRIVER_CORES}
+spark.driver.memory: ${DRIVER_MEMORY}
+spark.executor.cores: ${EXECUTOR_CORES}
+spark.executor.memory: ${EXECUTOR_MEMORY}
+
 ---
 
 spring:
