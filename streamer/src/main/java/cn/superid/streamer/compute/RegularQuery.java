@@ -65,7 +65,7 @@ public class RegularQuery implements Serializable {
     Timestamp now = Timestamp
         .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS));
     repeat(hours, now, Unit.HOUR);
-    logger.info("execute everyHour of : {}",now.toLocalDateTime().truncatedTo(ChronoUnit.HOURS));
+    System.out.println("execute everyHour of : " + now.toLocalDateTime().truncatedTo(ChronoUnit.HOURS));
     repeatRich(hoursRich, now, Unit.HOUR);
   }
 
@@ -76,7 +76,7 @@ public class RegularQuery implements Serializable {
   public void everyDay() {
     Timestamp now = Timestamp
         .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.DAYS));
-    logger.info("execute everyDay of : {}",now.toLocalDateTime().truncatedTo(ChronoUnit.DAYS));
+    System.out.println("execute everyDay of : " + now.toLocalDateTime().truncatedTo(ChronoUnit.DAYS));
     repeat(days, now, Unit.DAY);
     repeatRich(daysRich, now, Unit.DAY);
   }

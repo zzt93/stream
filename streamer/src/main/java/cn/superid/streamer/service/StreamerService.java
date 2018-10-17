@@ -60,7 +60,7 @@ public class StreamerService {
 
         long minutesCount = Duration.between(fromLocalDateTime, toLocalDateTime).toMinutes();
         if ( minutesCount > MINUTES_COUNT_LIMIT) {
-            logger.error("查询时间范围内包含的分钟时间点{}过多！",minutesCount);
+            System.out.println("查询时间范围内包含的分钟时间点过多:"+minutesCount);
             return Collections.emptyList();
         }
 
@@ -83,7 +83,7 @@ public class StreamerService {
 
         long hoursCount = Duration.between(fromLocalDateTime, toLocalDateTime).toHours();
         if (hoursCount > HOURS_COUNT_LIMIT) {
-            logger.error("查询时间范围内包含的小时时间点{}过多！",hoursCount);
+            System.out.println("查询时间范围内包含的小时时间点过多:" + hoursCount);
             return Collections.emptyList();
         }
 
@@ -105,7 +105,7 @@ public class StreamerService {
 
         long daysCount = Duration.between(fromLocalDateTime, toLocalDateTime).toDays();
         if (daysCount > DAYS_COUNT_LIMIT) {
-            logger.error("查询时间范围内包含的天时间点{}过多！",daysCount);
+            System.out.println("查询时间范围内包含的天时间点过多:"+daysCount);
             return Collections.emptyList();
         }
 

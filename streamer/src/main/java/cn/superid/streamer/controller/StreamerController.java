@@ -290,7 +290,7 @@ public class StreamerController {
     @PostMapping("/range/rich/pageview")
     public List<RichPageStatistic> rangeRichPageviews(@RequestBody RichForm richForm) {
         richForm.validate();
-        logger.info("request info : {}",new Gson().toJson(richForm));
+        System.out.println("request info : " + new Gson().toJson(richForm));
         if ("minute".equalsIgnoreCase(richForm.getTimeUnit())) {
             return streamerService.rangeRichPageviewsInMinutes(richForm);
         } else if ("hour".equalsIgnoreCase(richForm.getTimeUnit())) {
