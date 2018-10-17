@@ -58,8 +58,9 @@ public class StreamerService {
             toLocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         }
 
-        if (Duration.between(fromLocalDateTime, toLocalDateTime).toMinutes() > MINUTES_COUNT_LIMIT) {
-            logger.error("查询时间范围内包含的分钟时间点过多！");
+        long minutesCount = Duration.between(fromLocalDateTime, toLocalDateTime).toMinutes();
+        if ( minutesCount > MINUTES_COUNT_LIMIT) {
+            logger.error("查询时间范围内包含的分钟时间点{}过多！",minutesCount);
             return Collections.emptyList();
         }
 
@@ -80,14 +81,14 @@ public class StreamerService {
             toLocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS);
         }
 
-        if (Duration.between(fromLocalDateTime, toLocalDateTime).toHours() > HOURS_COUNT_LIMIT) {
-            logger.error("查询时间范围内包含的小时时间点过多！");
+        long hoursCount = Duration.between(fromLocalDateTime, toLocalDateTime).toHours();
+        if (hoursCount > HOURS_COUNT_LIMIT) {
+            logger.error("查询时间范围内包含的小时时间点{}过多！",hoursCount);
             return Collections.emptyList();
         }
 
         return getRichPageStatistics(fromLocalDateTime, toLocalDateTime, richForm, hourRich);
     }
-
 
     /**
      * 以天为单位获取pv uv信息
@@ -102,8 +103,9 @@ public class StreamerService {
             toLocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
         }
 
-        if (Duration.between(fromLocalDateTime, toLocalDateTime).toDays() > DAYS_COUNT_LIMIT) {
-            logger.error("查询时间范围内包含的天时间点过多！");
+        long daysCount = Duration.between(fromLocalDateTime, toLocalDateTime).toDays();
+        if (daysCount > DAYS_COUNT_LIMIT) {
+            logger.error("查询时间范围内包含的天时间点{}过多！",daysCount);
             return Collections.emptyList();
         }
 

@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
+import com.google.gson.Gson;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -289,7 +290,7 @@ public class StreamerController {
     @PostMapping("/range/rich/pageview")
     public List<RichPageStatistic> rangeRichPageviews(@RequestBody RichForm richForm) {
         richForm.validate();
-        
+        logger.info("request info : {}",new Gson().toJson(richForm));
         if ("minute".equalsIgnoreCase(richForm.getTimeUnit())) {
             return streamerService.rangeRichPageviewsInMinutes(richForm);
         } else if ("hour".equalsIgnoreCase(richForm.getTimeUnit())) {
