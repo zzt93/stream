@@ -57,8 +57,7 @@ public class RegularQuery implements Serializable {
     pageSet = MongoSpark.load(sparkSession, readConfig(sparkSession, pages), PageView.class);
   }
 
-  //TODO 堂哥定时的频率是否少乘以60，还是有某种意图？
-  @Scheduled(fixedRate = 1000 * 60, initialDelay = 1000 * 100)
+  @Scheduled(fixedRate = 1000 * 60 * 60, initialDelay = 1000 * 100)
   public void everyHour() {
     Timestamp now = Timestamp
         .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS));
@@ -66,7 +65,7 @@ public class RegularQuery implements Serializable {
     repeatRich(hoursRich, now, Unit.HOUR);
   }
 
-  @Scheduled(fixedRate = 1000 * 60 * 24, initialDelay = 1000 * 10)
+  @Scheduled(fixedRate = 1000 * 60 * 60 * 24, initialDelay = 1000 * 10)
   public void everyDay() {
     Timestamp now = Timestamp
         .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.DAYS));

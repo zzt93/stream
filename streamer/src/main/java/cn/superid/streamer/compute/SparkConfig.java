@@ -21,6 +21,15 @@ public class SparkConfig {
     private String mongoUri;
     @Value("${collector.mongo.minute}")
     private String minute;
+    @Value("${spark.driver.cores}")
+    private String driverCores;
+    @Value("${spark.driver.memory}")
+    private String driverMems;
+    @Value("${spark.executor.cores}")
+    private String executorCores;
+    @Value("${spark.executor.memory}")
+    private String executorMems;
+
 
     @Bean
     public SparkSession sparkSession(SparkConf conf) {
@@ -38,10 +47,10 @@ public class SparkConfig {
                 .set("spark.mongodb.input.uri", mongoUri)
                 .set("spark.mongodb.output.uri", mongoUri)
                 //当spark用standalone方式部署时，下面的spark配置才会生效
-                .set("spark.driver.cores","4")
-                .set("spark.driver.memory","4g")
-                .set("spark.executor.memory","4g")
-                .set("spark.executor.cores","4")
+                .set("spark.driver.cores",driverCores)
+                .set("spark.driver.memory",driverMems)
+                .set("spark.executor.memory",executorMems)
+                .set("spark.executor.cores",executorCores)
                 .set("spark.debug.maxToStringFields","100")
 //                .set("spark.driver.host","ali-18")
 //                .set("spark.driver.port", "40000")
