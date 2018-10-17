@@ -2,6 +2,8 @@ package cn.superid.streamer.service;
 
 import cn.superid.collector.entity.view.RichPageStatistic;
 import cn.superid.streamer.form.RichForm;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
@@ -17,10 +19,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 /**
  * @author dufeng
@@ -28,6 +27,7 @@ import java.util.ListIterator;
  */
 @Service
 public class StreamerService {
+    private final Logger logger = LoggerFactory.getLogger(StreamerService.class);
     /**
      * 限制前端查询时间范围内的时间点个数
      */
@@ -58,8 +58,10 @@ public class StreamerService {
             toLocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
         }
 
-        if (Duration.between(fromLocalDateTime, toLocalDateTime).toMinutes() > MINUTES_COUNT_LIMIT) {
-            throw new RuntimeException("查询时间范围内包含的时间点过多！");
+        long minutesCount = Duration.between(fromLocalDateTime, toLocalDateTime).toMinutes();
+        if ( minutesCount > MINUTES_COUNT_LIMIT) {
+            System.out.println("查询时间范围内包含的分钟时间点过多:"+minutesCount);
+            return Collections.emptyList();
         }
 
         return getRichPageStatistics(fromLocalDateTime, toLocalDateTime, richForm, minuteRich);
@@ -79,13 +81,14 @@ public class StreamerService {
             toLocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.HOURS);
         }
 
-        if (Duration.between(fromLocalDateTime, toLocalDateTime).toHours() > HOURS_COUNT_LIMIT) {
-            throw new RuntimeException("查询时间范围内包含的时间点过多！");
+        long hoursCount = Duration.between(fromLocalDateTime, toLocalDateTime).toHours();
+        if (hoursCount > HOURS_COUNT_LIMIT) {
+            System.out.println("查询时间范围内包含的小时时间点过多:" + hoursCount);
+            return Collections.emptyList();
         }
 
         return getRichPageStatistics(fromLocalDateTime, toLocalDateTime, richForm, hourRich);
     }
-
 
     /**
      * 以天为单位获取pv uv信息
@@ -100,8 +103,10 @@ public class StreamerService {
             toLocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
         }
 
-        if (Duration.between(fromLocalDateTime, toLocalDateTime).toDays() > DAYS_COUNT_LIMIT) {
-            throw new RuntimeException("查询时间范围内包含的时间点过多！");
+        long daysCount = Duration.between(fromLocalDateTime, toLocalDateTime).toDays();
+        if (daysCount > DAYS_COUNT_LIMIT) {
+            System.out.println("查询时间范围内包含的天时间点过多:"+daysCount);
+            return Collections.emptyList();
         }
 
         return getRichPageStatistics(fromLocalDateTime, toLocalDateTime, richForm, dayRich);

@@ -57,19 +57,26 @@ public class RegularQuery implements Serializable {
     pageSet = MongoSpark.load(sparkSession, readConfig(sparkSession, pages), PageView.class);
   }
 
-  //TODO 堂哥定时的频率是否少乘以60，还是有某种意图？
-  @Scheduled(fixedRate = 1000 * 60, initialDelay = 1000 * 100)
+  /**
+   * 20分钟计算一次，防止因为重新启动的时候错过某些小时的pv uv统计
+   */
+  @Scheduled(fixedRate = 1000 * 60 * 20, initialDelay = 1000 * 100)
   public void everyHour() {
     Timestamp now = Timestamp
         .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS));
     repeat(hours, now, Unit.HOUR);
+    System.out.println("execute everyHour of : " + now.toLocalDateTime().truncatedTo(ChronoUnit.HOURS));
     repeatRich(hoursRich, now, Unit.HOUR);
   }
 
-  @Scheduled(fixedRate = 1000 * 60 * 24, initialDelay = 1000 * 10)
+  /**
+   * 8小时计算一次，防止因为重新启动的时候错过某些天的pv uv统计
+   */
+  @Scheduled(fixedRate = 1000 * 60 * 60 * 8, initialDelay = 1000 * 10)
   public void everyDay() {
     Timestamp now = Timestamp
         .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.DAYS));
+    System.out.println("execute everyDay of : " + now.toLocalDateTime().truncatedTo(ChronoUnit.DAYS));
     repeat(days, now, Unit.DAY);
     repeatRich(daysRich, now, Unit.DAY);
   }
