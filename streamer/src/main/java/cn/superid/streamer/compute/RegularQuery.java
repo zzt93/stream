@@ -164,15 +164,18 @@ public class RegularQuery implements Serializable {
                                     inTimeRange.col("publicIp"))
                             .agg(count("*").as("pv"), countDistinct(col("viewId")).as("uv"),
                                     countDistinct(col("userId")).as("uvSigned"))
-                            .withColumn("epoch", lit(epoch)).withColumn("id", lit(epoch.getTime()))
+                            .withColumn("epoch", lit(epoch))
+//                            .withColumn("id", lit(epoch.getTime())) //同一时间有多个记录，不能用时间做为id，否则插入mongo的时候报错 dup key
                             .as(Encoders.bean(RichPageStatistic.class));
                     //分组计算的结果都保存进去
                     list.addAll(stat.collectAsList());
+                    System.out.println("insert "+list +" into mongo collection : "+collection);
+                    mongo.insert(list, collection);
+                    list.clear();
                 }
 
             }
-            System.out.println("insert "+list +" into mongo collection : "+collection);
-            mongo.insert(list, collection);
+
         } catch (Exception e) {
             logger.error("", e);
         }
