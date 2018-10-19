@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 public class RichPageStatistic implements Serializable {
 
   private static final Gson gson = new Gson();
-  private long id;
+//  private long id;
   private Timestamp epoch;
   private long pv;
   private long uv;
@@ -28,16 +28,16 @@ public class RichPageStatistic implements Serializable {
 
   public RichPageStatistic(Timestamp epoch) {
     this.epoch = epoch;
-    setId(epoch.getTime());
+//    setId(epoch.getTime());
   }
 
-  public long getId() {
-    return id;
-  }
-
-  public void setId(long id) {
-    this.id = id;
-  }
+//  public long getId() {
+//    return id;
+//  }
+//
+//  public void setId(long id) {
+//    this.id = id;
+//  }
 
   public Timestamp getEpoch() {
     return epoch;
