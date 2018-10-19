@@ -225,32 +225,32 @@ public class StreamerController {
      *
      * @return
      */
-    @PostMapping("/last30rich")
-    public List<RichPageStatistic> minutesRichStatistic() {
-        LocalDateTime truncate = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
-        Criteria criteria = Criteria.where("epoch")
-                .gt(Timestamp.valueOf(truncate.minusMinutes(MINUTES_COUNT)))
-                .andOperator(Criteria.where("epoch").lte(Timestamp.valueOf(truncate)));
-        Query query = Query.query(criteria).limit(MINUTES_COUNT).with(Sort.by(Direction.ASC, "epoch"));
-        LinkedList<RichPageStatistic> pageStatistics = new LinkedList<>(mongo.find(query, RichPageStatistic.class, minuteRich));
-        if (pageStatistics.size() != MINUTES_COUNT) {
-            ListIterator<RichPageStatistic> it = pageStatistics.listIterator();
-            for (int i = MINUTES_COUNT - 1; i >= 0; i--) {
-                LocalDateTime time = truncate.minusMinutes(i);
-                boolean hasMore = it.hasNext();
-                if (hasMore && time.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli() == it.next().getId()) {
-                } else {
-                    if (it.hasPrevious() && hasMore) {
-                        it.previous();
-                    }
-                    RichPageStatistic pageStatistic = new RichPageStatistic(Timestamp.valueOf(time));
-                    it.add(pageStatistic);
-                }
-            }
-        }
-        Preconditions.checkState(pageStatistics.size() == MINUTES_COUNT, "Wrong logic");
-        return pageStatistics;
-    }
+//    @PostMapping("/last30rich")
+//    public List<RichPageStatistic> minutesRichStatistic() {
+//        LocalDateTime truncate = LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES);
+//        Criteria criteria = Criteria.where("epoch")
+//                .gt(Timestamp.valueOf(truncate.minusMinutes(MINUTES_COUNT)))
+//                .andOperator(Criteria.where("epoch").lte(Timestamp.valueOf(truncate)));
+//        Query query = Query.query(criteria).limit(MINUTES_COUNT).with(Sort.by(Direction.ASC, "epoch"));
+//        LinkedList<RichPageStatistic> pageStatistics = new LinkedList<>(mongo.find(query, RichPageStatistic.class, minuteRich));
+//        if (pageStatistics.size() != MINUTES_COUNT) {
+//            ListIterator<RichPageStatistic> it = pageStatistics.listIterator();
+//            for (int i = MINUTES_COUNT - 1; i >= 0; i--) {
+//                LocalDateTime time = truncate.minusMinutes(i);
+//                boolean hasMore = it.hasNext();
+//                if (hasMore && time.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli() == it.next().getId()) {
+//                } else {
+//                    if (it.hasPrevious() && hasMore) {
+//                        it.previous();
+//                    }
+//                    RichPageStatistic pageStatistic = new RichPageStatistic(Timestamp.valueOf(time));
+//                    it.add(pageStatistic);
+//                }
+//            }
+//        }
+//        Preconditions.checkState(pageStatistics.size() == MINUTES_COUNT, "Wrong logic");
+//        return pageStatistics;
+//    }
 
     /**
      * 前端页面每一分钟调用一次接口，获取最新的一分钟的页面浏览统计信息
