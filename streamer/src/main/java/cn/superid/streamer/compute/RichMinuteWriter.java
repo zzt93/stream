@@ -35,7 +35,7 @@ public class RichMinuteWriter {
   public void listen(String message) {
     logger.info("Received message in group: " + message);
     RichPageStatistic pageStatistic = gson.fromJson(message, RichPageStatistic.class);
-    pageStatistic.setId(pageStatistic.getEpoch().getTime());
+//    pageStatistic.setId(pageStatistic.getEpoch().getTime());
     mongo.save(pageStatistic, minute);
   }
 }
