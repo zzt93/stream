@@ -134,7 +134,7 @@ public class StreamerService {
         for(int i = 0 ;i < criterias.length;i++){
             criterias[i] = criteriaList.get(i);
         }
-
+        //查询好像不可以有多个andOperator，所以把多个Criteria放进一个数组中传给一个andOperator
         Criteria criteria = Criteria.where("publicIp").is(true)
                 .andOperator(criterias);
 
