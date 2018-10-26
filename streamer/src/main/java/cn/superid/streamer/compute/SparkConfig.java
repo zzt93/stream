@@ -52,8 +52,8 @@ public class SparkConfig {
                 .set("spark.executor.memory",executorMems)
                 .set("spark.executor.cores",executorCores)
                 .set("spark.debug.maxToStringFields","100")
-                .set("spark.driver.host","ali-18")
-                .set("spark.driver.port", "40000")
+//                .set("spark.driver.host","ali-18")
+//                .set("spark.driver.port", "40000")
                 .setJars(new String[]{"/app.jar"})
 //        .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
                 ;
