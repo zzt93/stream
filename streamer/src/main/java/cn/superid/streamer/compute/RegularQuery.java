@@ -115,6 +115,8 @@ public class RegularQuery implements Serializable {
                         .withColumn("epoch", lit(epoch)).withColumn("id", lit(epoch.getTime()))
                         .as(Encoders.bean(PageStatistic.class));
                 list.add(stat.first());
+                System.out.println("offset:"+offset);
+                System.out.println("repeat last:"+last);
             }
             mongo.insert(list, collection);
         } catch (Exception e) {
@@ -177,6 +179,8 @@ public class RegularQuery implements Serializable {
                     System.out.println("insert "+list +" into mongo collection : "+collection);
                     mongo.insert(list, collection);
                     list.clear();
+                    System.out.println("offset:"+offset);
+                    System.out.println("repeatRich last:"+last);
                 }
 
             }
