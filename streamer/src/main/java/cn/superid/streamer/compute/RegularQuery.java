@@ -91,6 +91,7 @@ public class RegularQuery implements Serializable {
                     .first();
             Timestamp last =
                     lastDoc == null ? null : Timestamp.from(lastDoc.get("epoch", Date.class).toInstant());
+            System.out.println("repeat last:"+last);
             ArrayList<PageStatistic> list = new ArrayList<>();
             int size;
             if (last == null) {
@@ -102,6 +103,7 @@ public class RegularQuery implements Serializable {
                     size += unit.range;
                 }
             }
+            System.out.println("repeat last:"+last);
             System.out.println("repeat size:" + size);
             for (int offset = 0; offset < size; offset++) {
                 Dataset<PageView> inTimeRange = getInTimeRange(pageDataSet, last, unit, offset);
@@ -136,6 +138,7 @@ public class RegularQuery implements Serializable {
             //获取最后一条文档的时间
             Timestamp last =
                     lastDoc == null ? null : Timestamp.from(lastDoc.get("epoch", Date.class).toInstant());
+            System.out.println("repeatRich last:"+last);
             ArrayList<RichPageStatistic> list = new ArrayList<>();
             int size;
             if (last == null) {
@@ -148,6 +151,7 @@ public class RegularQuery implements Serializable {
                     size += unit.range;
                 }
             }
+            System.out.println("repeatRich last:"+last);
             System.out.println("repeatRich size:" + size);
             for (int offset = 0; offset < size; offset++) {
                 //从mongodb中获取last到offset+1这段时间内的数据，作为spark的dataset
