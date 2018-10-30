@@ -67,9 +67,9 @@ public class RegularQuery implements Serializable {
     public void everyHour() {
         Timestamp now = Timestamp
                 .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS));
-        repeat(hours, now, Unit.HOUR);
         System.out.println("execute everyHour of : " + now.toLocalDateTime().truncatedTo(ChronoUnit.HOURS));
         repeatRich(hoursRich, now, Unit.HOUR);
+        repeat(hours, now, Unit.HOUR);
     }
 
     /**
@@ -108,9 +108,7 @@ public class RegularQuery implements Serializable {
             System.out.println("repeat size:" + size);
             for (int offset = 0; offset < size; offset++) {
                 Dataset<PageView> inTimeRange = getInTimeRange(pageDataSet, last, unit, offset);
-                Timestamp epoch = Timestamp.valueOf(unit.update(last,  1));
-                //上一步并没有达到更新last的目的，将last更新为offset+1的时间点
-                last = epoch;
+                Timestamp epoch = Timestamp.valueOf(unit.update(last,  offset+1));
                 Dataset<PageStatistic> stat = inTimeRange
                         .agg(count("*").as("pv"), countDistinct(col("viewId")).as("uv"),
                                 countDistinct(col("userId")).as("uvSigned"))
@@ -119,8 +117,9 @@ public class RegularQuery implements Serializable {
                 list.add(stat.first());
                 System.out.println("offset:"+offset);
                 System.out.println("repeat last:"+last);
+                mongo.insert(list, collection);
+                list.clear();
             }
-            mongo.insert(list, collection);
         } catch (Exception e) {
             logger.error("", e);
         }
@@ -161,9 +160,7 @@ public class RegularQuery implements Serializable {
             for (int offset = 0; offset < size; offset++) {
                 //从mongodb中获取last到offset+1这段时间内的数据，作为spark的dataset
                 Dataset<PageView> inTimeRange = getInTimeRange(pageDataSet, last, unit, offset);
-                Timestamp epoch = Timestamp.valueOf(unit.update(last, 1));
-                //上一步并没有达到更新last的目的，将last更新为offset+1的时间点
-                last = epoch;
+                Timestamp epoch = Timestamp.valueOf(unit.update(last,  offset+1));
                 //不加Object[]强制转换，jenkins编译会报错
                 if (((Object[]) inTimeRange.collect()).length > 0) {
                     Dataset<RichPageStatistic> stat = inTimeRange
@@ -185,7 +182,6 @@ public class RegularQuery implements Serializable {
                     System.out.println("offset:"+offset);
                     System.out.println("repeatRich last:"+last);
                 }
-
             }
 
         } catch (Exception e) {
