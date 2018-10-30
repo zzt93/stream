@@ -13,6 +13,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.spark.MongoSpark;
 
 import java.io.Serializable;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -98,7 +99,7 @@ public class RegularQuery implements Serializable {
                 last = Timestamp.valueOf(unit.update(now, -unit.range));
                 size = unit.range;
             } else {
-                size = unit.getUnit(now) - unit.getUnit(last);
+                size = unit.getDifferenceUnit(now, last);
                 if (size < 0) {
                     size += unit.range;
                 }
@@ -146,7 +147,7 @@ public class RegularQuery implements Serializable {
                 size = unit.range;
             } else {
                 //获取当前时间和最后一条mongo数据库中的时间之间的时间点个数
-                size = unit.getUnit(now) - unit.getUnit(last);
+                size = unit.getDifferenceUnit(now, last);
                 if (size < 0) {
                     size += unit.range;
                 }
@@ -194,4 +195,11 @@ public class RegularQuery implements Serializable {
         return pages.where(col("epoch").between(low, up));
     }
 
+    public static void main(String[] args) {
+        Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
+        int hour = timestamp.toLocalDateTime().getHour();
+        int day = timestamp.toLocalDateTime().getDayOfMonth();
+        System.out.println("hour:"+hour);
+        System.out.println("day:"+day);
+    }
 }

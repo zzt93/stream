@@ -1,6 +1,7 @@
 package cn.superid.streamer.compute;
 
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 /**
@@ -24,6 +25,10 @@ public enum Unit {
     public int getUnit(Timestamp timestamp) {
       return timestamp.toLocalDateTime().getDayOfMonth();
     }
+    @Override
+    public int getDifferenceUnit(Timestamp before, Timestamp after) {
+      return (int)Duration.between(after.toLocalDateTime(),before.toLocalDateTime()).toDays();
+    }
   }, HOUR(24) {
     @Override
     public LocalDateTime update(Timestamp dateTime, int offset) {
@@ -34,6 +39,10 @@ public enum Unit {
     public int getUnit(Timestamp timestamp) {
       return timestamp.toLocalDateTime().getHour();
     }
+    @Override
+    public int getDifferenceUnit(Timestamp before, Timestamp after) {
+      return (int)Duration.between(after.toLocalDateTime(),before.toLocalDateTime()).toHours();
+    }
   }, Minute(30) {
     @Override
     public LocalDateTime update(Timestamp dateTime, int offset) {
@@ -43,6 +52,11 @@ public enum Unit {
     @Override
     public int getUnit(Timestamp timestamp) {
       return timestamp.toLocalDateTime().getMinute();
+    }
+
+    @Override
+    public int getDifferenceUnit(Timestamp before, Timestamp after) {
+      return (int)Duration.between(after.toLocalDateTime(),before.toLocalDateTime()).toMinutes();
     }
   };
 
@@ -59,4 +73,12 @@ public enum Unit {
   public abstract LocalDateTime update(Timestamp dateTime, int offset);
 
   public abstract int getUnit(Timestamp timestamp);
+
+  /**
+   * 获取两个Timestamp之间的差值
+   * @param before
+   * @param after
+   * @return
+   */
+  public abstract int getDifferenceUnit(Timestamp before,Timestamp after);
 }
