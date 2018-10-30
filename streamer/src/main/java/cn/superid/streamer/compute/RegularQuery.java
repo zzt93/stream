@@ -63,7 +63,7 @@ public class RegularQuery implements Serializable {
     /**
      * 每个小时计算一次小时的pv uv统计
      */
-    @Scheduled(fixedRate = 1000 * 60 * 60, initialDelay = 1000 * 300)
+    @Scheduled(fixedRate = 1000 * 60 * 60, initialDelay = 1000 * 30)
     public void everyHour() {
         Timestamp now = Timestamp
                 .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS));
@@ -75,7 +75,7 @@ public class RegularQuery implements Serializable {
     /**
      * 每天计算一次天的pv uv统计
      */
-    @Scheduled(fixedRate = 1000 * 60 * 60 * 24, initialDelay = 1000 * 5)
+    @Scheduled(fixedRate = 1000 * 60 * 60 * 24, initialDelay = 1000 * 300)
     public void everyDay() {
         Timestamp now = Timestamp
                 .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.DAYS));
