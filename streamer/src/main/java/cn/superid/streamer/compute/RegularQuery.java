@@ -108,7 +108,7 @@ public class RegularQuery implements Serializable {
             System.out.println("repeat size:" + size);
             for (int offset = 0; offset < size; offset++) {
                 Dataset<PageView> inTimeRange = getInTimeRange(pageDataSet, last, unit, offset);
-                Timestamp epoch = Timestamp.valueOf(unit.update(last, offset + 1));
+                Timestamp epoch = Timestamp.valueOf(unit.update(last,  1));
                 //上一步并没有达到更新last的目的，将last更新为offset+1的时间点
                 last = epoch;
                 Dataset<PageStatistic> stat = inTimeRange
@@ -161,7 +161,7 @@ public class RegularQuery implements Serializable {
             for (int offset = 0; offset < size; offset++) {
                 //从mongodb中获取last到offset+1这段时间内的数据，作为spark的dataset
                 Dataset<PageView> inTimeRange = getInTimeRange(pageDataSet, last, unit, offset);
-                Timestamp epoch = Timestamp.valueOf(unit.update(last, offset + 1));
+                Timestamp epoch = Timestamp.valueOf(unit.update(last, 1));
                 //上一步并没有达到更新last的目的，将last更新为offset+1的时间点
                 last = epoch;
                 //不加Object[]强制转换，jenkins编译会报错
