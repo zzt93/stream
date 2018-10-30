@@ -63,7 +63,7 @@ public class RegularQuery implements Serializable {
     /**
      * 每个小时计算一次小时的pv uv统计
      */
-    @Scheduled(fixedRate = 1000 * 60 * 60, initialDelay = 1000 * 100)
+    @Scheduled(fixedRate = 1000 * 60 * 60, initialDelay = 1000 * 300)
     public void everyHour() {
         Timestamp now = Timestamp
                 .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS));
@@ -75,7 +75,7 @@ public class RegularQuery implements Serializable {
     /**
      * 每天计算一次天的pv uv统计
      */
-    @Scheduled(fixedRate = 1000 * 60 * 60 * 24, initialDelay = 1000 * 10)
+    @Scheduled(fixedRate = 1000 * 60 * 60 * 24, initialDelay = 1000 * 5)
     public void everyDay() {
         Timestamp now = Timestamp
                 .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.DAYS));
@@ -109,6 +109,8 @@ public class RegularQuery implements Serializable {
             for (int offset = 0; offset < size; offset++) {
                 Dataset<PageView> inTimeRange = getInTimeRange(pageDataSet, last, unit, offset);
                 Timestamp epoch = Timestamp.valueOf(unit.update(last, offset + 1));
+                //上一步并没有达到更新last的目的，将last更新为offset+1的时间点
+                last = epoch;
                 Dataset<PageStatistic> stat = inTimeRange
                         .agg(count("*").as("pv"), countDistinct(col("viewId")).as("uv"),
                                 countDistinct(col("userId")).as("uvSigned"))
@@ -159,8 +161,9 @@ public class RegularQuery implements Serializable {
             for (int offset = 0; offset < size; offset++) {
                 //从mongodb中获取last到offset+1这段时间内的数据，作为spark的dataset
                 Dataset<PageView> inTimeRange = getInTimeRange(pageDataSet, last, unit, offset);
-                //将last更新为offset+1的时间点
                 Timestamp epoch = Timestamp.valueOf(unit.update(last, offset + 1));
+                //上一步并没有达到更新last的目的，将last更新为offset+1的时间点
+                last = epoch;
                 //不加Object[]强制转换，jenkins编译会报错
                 if (((Object[]) inTimeRange.collect()).length > 0) {
                     Dataset<RichPageStatistic> stat = inTimeRange
