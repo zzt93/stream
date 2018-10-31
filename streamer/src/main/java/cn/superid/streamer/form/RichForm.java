@@ -52,7 +52,10 @@ public class RichForm {
             throw new RuntimeException("开始时间大于结束时间！");
         }
 
-        if (!("Mac".equals(devType) || "Windows".equals(devType) || "iPhone".equals(devType) || "Android".equals(devType) || "其它".equals(devType))) {
+        if (devType == null || "全部".equals(devType)){
+            this.setDevType("");
+        }
+        if (!("Mac".equals(devType) || "Windows".equals(devType) || "iPhone".equals(devType) || "Android".equals(devType) || "其它".equals(devType) || "".equals(devType))) {
             throw new RuntimeException("未知设备类型：" + devType);
         }
 
