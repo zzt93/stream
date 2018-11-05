@@ -61,7 +61,7 @@ public class MongoConfig {
     return new MongoCustomConversions(list);
   }
 
-  static ReadConfig readConfig(SparkSession sparkSession, String collection) {
+  public static ReadConfig readConfig(SparkSession sparkSession, String collection) {
     Map<String, String> overrides = new HashMap<>();
     overrides.put("spark.mongodb.input.collection", collection);
     return ReadConfig.create(sparkSession).withOptions(overrides);

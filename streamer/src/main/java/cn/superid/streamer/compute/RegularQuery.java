@@ -46,10 +46,6 @@ public class RegularQuery implements Serializable {
     private String hours;
     @Value("${collector.mongo.day}")
     private String days;
-    @Value("${collector.mongo.hour.rich}")
-    private String hoursRich;
-    @Value("${collector.mongo.day.rich}")
-    private String daysRich;
     private Dataset<PageView> pageDataSet;
 
 
@@ -67,8 +63,7 @@ public class RegularQuery implements Serializable {
     public void everyHour() {
         Timestamp now = Timestamp
                 .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS));
-        System.out.println("execute everyHour of : " + now.toLocalDateTime().truncatedTo(ChronoUnit.HOURS));
-        repeatRich(hoursRich, now, Unit.HOUR);
+        logger.info("execute everyHour of : " + now.toLocalDateTime().truncatedTo(ChronoUnit.HOURS));
         repeat(hours, now, Unit.HOUR);
     }
 
@@ -79,9 +74,8 @@ public class RegularQuery implements Serializable {
     public void everyDay() {
         Timestamp now = Timestamp
                 .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.DAYS));
-        System.out.println("execute everyDay of : " + now.toLocalDateTime().truncatedTo(ChronoUnit.DAYS));
+        logger.info("execute everyDay of : " + now.toLocalDateTime().truncatedTo(ChronoUnit.DAYS));
         repeat(days, now, Unit.DAY);
-        repeatRich(daysRich, now, Unit.DAY);
     }
 
     private void repeat(String collection, Timestamp now, Unit unit) {
@@ -92,7 +86,7 @@ public class RegularQuery implements Serializable {
                     .first();
             Timestamp last =
                     lastDoc == null ? null : Timestamp.from(lastDoc.get("epoch", Date.class).toInstant());
-            System.out.println("repeat last:"+last);
+            logger.info("repeat last:"+last);
             ArrayList<PageStatistic> list = new ArrayList<>();
             int size;
             if (last == null) {
@@ -104,8 +98,8 @@ public class RegularQuery implements Serializable {
                     size += unit.range;
                 }
             }
-            System.out.println("repeat last:"+last);
-            System.out.println("repeat size:" + size);
+            logger.info("repeat last:"+last);
+            logger.info("repeat size:" + size);
             for (int offset = 0; offset < size; offset++) {
                 Dataset<PageView> inTimeRange = getInTimeRange(pageDataSet, last, unit, offset);
                 Timestamp epoch = Timestamp.valueOf(unit.update(last,  offset+1));
@@ -115,8 +109,8 @@ public class RegularQuery implements Serializable {
                         .withColumn("epoch", lit(epoch)).withColumn("id", lit(epoch.getTime()))
                         .as(Encoders.bean(PageStatistic.class));
                 list.add(stat.first());
-                System.out.println("offset:"+offset);
-                System.out.println("repeat last:"+last);
+                logger.info("offset:"+offset);
+                logger.info("repeat last:"+last);
                 mongo.insert(list, collection);
                 list.clear();
             }
@@ -142,7 +136,7 @@ public class RegularQuery implements Serializable {
             //获取最后一条文档的时间
             Timestamp last =
                     lastDoc == null ? null : Timestamp.from(lastDoc.get("epoch", Date.class).toInstant());
-            System.out.println("repeatRich last:"+last);
+            logger.info("repeatRich last:"+last);
             ArrayList<RichPageStatistic> list = new ArrayList<>();
             int size;
             if (last == null) {
@@ -155,8 +149,8 @@ public class RegularQuery implements Serializable {
                     size += unit.range;
                 }
             }
-            System.out.println("repeatRich last:"+last);
-            System.out.println("repeatRich size:" + size);
+            logger.info("repeatRich last:"+last);
+            logger.info("repeatRich size:" + size);
             for (int offset = 0; offset < size; offset++) {
                 //从mongodb中获取last到offset+1这段时间内的数据，作为spark的dataset
                 Dataset<PageView> inTimeRange = getInTimeRange(pageDataSet, last, unit, offset);
@@ -176,11 +170,11 @@ public class RegularQuery implements Serializable {
                             .as(Encoders.bean(RichPageStatistic.class));
                     //分组计算的结果都保存进去
                     list.addAll(stat.collectAsList());
-                    System.out.println("insert "+list +" into mongo collection : "+collection);
+                    logger.info("insert "+list +" into mongo collection : "+collection);
                     mongo.insert(list, collection);
                     list.clear();
-                    System.out.println("offset:"+offset);
-                    System.out.println("repeatRich last:"+last);
+                    logger.info("offset:"+offset);
+                    logger.info("repeatRich last:"+last);
                 }
             }
 
@@ -202,7 +196,7 @@ public class RegularQuery implements Serializable {
         Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
         int hour = timestamp.toLocalDateTime().getHour();
         int day = timestamp.toLocalDateTime().getDayOfMonth();
-        System.out.println("hour:"+hour);
-        System.out.println("day:"+day);
+        logger.info("hour:"+hour);
+        logger.info("day:"+day);
     }
 }
