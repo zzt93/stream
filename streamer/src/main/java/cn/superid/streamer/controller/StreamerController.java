@@ -6,25 +6,21 @@ import cn.superid.collector.entity.view.PageStatistic;
 import cn.superid.collector.entity.view.PageView;
 import cn.superid.collector.entity.view.RichPageStatistic;
 import cn.superid.streamer.compute.MongoConfig;
-import cn.superid.streamer.compute.Unit;
 import cn.superid.streamer.compute.SqlQuery;
+import cn.superid.streamer.compute.Unit;
 import cn.superid.streamer.form.RichForm;
 import cn.superid.streamer.form.TimeRange;
 import cn.superid.streamer.service.StreamerService;
 import com.google.common.base.Preconditions;
-
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-
-import com.google.gson.Gson;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,9 +52,6 @@ public class StreamerController {
     private final String day;
     private final String hour;
     private final String minute;
-    private final String dayRich;
-    private final String hourRich;
-    private final String minuteRich;
     private final String page;
     @Autowired
     private StreamerService streamerService;
@@ -68,21 +61,15 @@ public class StreamerController {
                               @Value("${collector.mongo.page}") String page,
                               @Value("${collector.mongo.minute}") String minute,
                               @Value("${collector.mongo.hour}") String hour,
-                              @Value("${collector.mongo.day}") String day,
-                              @Value("${collector.mongo.minute.rich}") String minuteRich,
-                              @Value("${collector.mongo.hour.rich}") String hourRich,
-                              @Value("${collector.mongo.day.rich}") String dayRich
+                              @Value("${collector.mongo.day}") String day
     ) {
         this.sqlQuery = sqlQuery;
         this.mongo = mongo;
         this.minute = minute;
         this.hour = hour;
         this.day = day;
-        this.minuteRich = minuteRich;
-        this.hourRich = hourRich;
-        this.dayRich = dayRich;
         this.page = page;
-        MongoConfig.createIfNotExist(mongo, this.minute, Unit.Minute.getRange() * 50);
+        MongoConfig.createIfNotExist(mongo, this.minute, Unit.MINUTE.getRange() * 50);
     }
 
     @PostMapping("/query")
@@ -101,16 +88,10 @@ public class StreamerController {
         return queryMongo(range, day, ChronoUnit.DAYS, PageStatistic.class);
     }
 
-    /**
-     * 按天查询统计信息
-     *
-     * @param range
-     * @return
-     */
-    @PostMapping("/day_rich")
-    public List<RichPageStatistic> dayRichStatistics(@RequestBody TimeRange range) {
-        return queryMongo(range, dayRich, ChronoUnit.DAYS, RichPageStatistic.class);
-    }
+//    @PostMapping("/day_rich")
+//    public List<RichPageStatistic> dayRichStatistics(@RequestBody TimeRange range) {
+//        return queryMongo(range, dayRich, ChronoUnit.DAYS, RichPageStatistic.class);
+//    }
 
     /**
      * 按天查询详情
@@ -135,16 +116,11 @@ public class StreamerController {
         return queryMongo(range, hour, ChronoUnit.HOURS, PageStatistic.class);
     }
 
-    /**
-     * 按小时查询统计信息
-     *
-     * @param range
-     * @return
-     */
-    @PostMapping("/hour_rich")
-    public List<RichPageStatistic> hourRichStatistics(@RequestBody TimeRange range) {
-        return queryMongo(range, hourRich, ChronoUnit.HOURS, RichPageStatistic.class);
-    }
+
+//    @PostMapping("/hour_rich")
+//    public List<RichPageStatistic> hourRichStatistics(@RequestBody TimeRange range) {
+//        return queryMongo(range, hourRich, ChronoUnit.HOURS, RichPageStatistic.class);
+//    }
 
     /**
      * 按小时查询详情
@@ -266,40 +242,26 @@ public class StreamerController {
         return one == null ? new PageStatistic(now) : one;
     }
 
-    /**
-     * 前端页面每一分钟调用一次接口，获取最新的一分钟的页面浏览统计信息
-     *
-     * @return
-     */
-    @PostMapping("/last1rich")
-    public RichPageStatistic minuteRich() {
-        Timestamp now = Timestamp.valueOf(LocalDateTime.now());
-        Criteria criteria = Criteria.where("epoch").is(truncate(now, ChronoUnit.MINUTES));
-        Query query = Query.query(criteria);
-        RichPageStatistic one = mongo.findOne(query, RichPageStatistic.class, minuteRich);
-        return one == null ? new RichPageStatistic(now) : one;
-    }
+//    @PostMapping("/last1rich")
+//    public RichPageStatistic minuteRich() {
+//        Timestamp now = Timestamp.valueOf(LocalDateTime.now());
+//        Criteria criteria = Criteria.where("epoch").is(truncate(now, ChronoUnit.MINUTES));
+//        Query query = Query.query(criteria);
+//        RichPageStatistic one = mongo.findOne(query, RichPageStatistic.class, minuteRich);
+//        return one == null ? new RichPageStatistic(now) : one;
+//    }
+
 
 
     /**
      * 指定范围内的更多维度的pv uv 信息
-     *
-     * @return
      */
     @ApiOperation(value = "按照事务id、目标id、时间范围、用户设备类型查看pv uv", notes = "", response = RichPageStatistic.class)
     @PostMapping("/range/rich/pageview")
     public List<RichPageStatistic> rangeRichPageviews(@RequestBody RichForm richForm) {
-        richForm.validate();
-        System.out.println("request info : " + new Gson().toJson(richForm));
-        if ("minute".equalsIgnoreCase(richForm.getTimeUnit())) {
-            return streamerService.rangeRichPageviewsInMinutes(richForm);
-        } else if ("hour".equalsIgnoreCase(richForm.getTimeUnit())) {
-            return streamerService.rangeRichPageviewsInHours(richForm);
-        } else if ("day".equalsIgnoreCase(richForm.getTimeUnit())) {
-            return streamerService.rangeRichPageviewsInDays(richForm);
-        } else {
-            logger.error("未识别的时间单位{}", richForm.getTimeUnit());
-            return Collections.emptyList();
-        }
+      richForm.validate();
+      logger.info("request info : {}", richForm);
+      return streamerService.rangeRichPageviewsInUnit(richForm,
+          Unit.valueOf(richForm.getTimeUnit().toUpperCase()));
     }
 }

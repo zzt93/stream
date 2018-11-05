@@ -2,6 +2,8 @@ package cn.superid.streamer.compute;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.streaming.StreamingQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.apache.spark.sql.streaming.Trigger.ProcessingTime;
 
@@ -10,6 +12,8 @@ import static org.apache.spark.sql.streaming.Trigger.ProcessingTime;
  * @create: 2018-10-10 16:24
  */
 public class StructuredStreamQueryRunner implements Runnable {
+    private static final Logger logger = LoggerFactory.getLogger(RegularQuery.class);
+
     private String kafkaBootstrapServers;
     /**
      * kafka topic
@@ -33,7 +37,7 @@ public class StructuredStreamQueryRunner implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("output kafka topic :" + kafkaTopic);
+        logger.info("output kafka topic :" + kafkaTopic);
 
             dataset.writeStream()
                     .outputMode("update")
