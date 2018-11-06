@@ -54,7 +54,7 @@ public class StreamerService {
       Unit unit) {
     LocalDateTime from = unit.truncate(richForm.getFrom().toLocalDateTime());
 
-    long timeDiff = unit.getDifferenceUnit(richForm.getFrom(), richForm.getTo());
+    long timeDiff = unit.getDifferenceUnit(richForm.getTo(), richForm.getFrom());
     if (timeDiff > COUNT_LIMIT) {
       logger.info("查询时间范围内包含的{}过多:{}", unit, timeDiff);
       return Collections.emptyList();
