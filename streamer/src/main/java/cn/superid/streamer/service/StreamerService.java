@@ -68,7 +68,7 @@ public class StreamerService {
       Unit unit, RichForm query) {
 
     List<Column> group = new ArrayList<>();
-    pageView.where(col("publicIp").equalTo(true));
+    pageView.select(col("*")).where(col("publicIp").equalTo(true));
 
     if (query.getAffairId() != null) {
       pageView.where(col("affairId").equalTo(query.getAffairId()));
@@ -82,15 +82,13 @@ public class StreamerService {
       pageView.where(col("deviceType").equalTo(query.getDevType()));
       group.add(col("deviceType"));
     }
-    Dataset<PageView> temp = pageView.select(col("*"))
-        .as(Encoders.bean(PageView.class));
 
     Timestamp low = Timestamp.valueOf(from);
     for (int offset = 0; offset < timeDiff; offset++) {
       Timestamp upper = Timestamp.valueOf(unit.update(low, offset + 1));
-      temp.where(col("epoch").between(low, upper));
+      pageView.where(col("epoch").between(low, upper));
 
-      Dataset<RichPageStatistic> stat = temp
+      Dataset<RichPageStatistic> stat = pageView
           .groupBy(group.toArray(new Column[0]))
           .agg(count("*").as("pv"), countDistinct(col("viewId")).as("uv"),
               countDistinct(col("userId")).as("uvSigned"))
