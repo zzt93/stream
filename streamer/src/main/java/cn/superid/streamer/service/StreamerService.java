@@ -82,19 +82,21 @@ public class StreamerService {
       pageView.where(col("deviceType").equalTo(query.getDevType()));
       group.add(col("deviceType"));
     }
+    Dataset<PageView> temp = pageView.select(col("*"))
+        .as(Encoders.bean(PageView.class));
 
     Timestamp low = Timestamp.valueOf(from);
     for (int offset = 0; offset < timeDiff; offset++) {
       Timestamp upper = Timestamp.valueOf(unit.update(low, offset + 1));
-      pageView.where(col("epoch").between(low, upper));
+      temp.where(col("epoch").between(low, upper));
 
-      Dataset<RichPageStatistic> stat = pageView
+      Dataset<RichPageStatistic> stat = temp
           .groupBy(group.toArray(new Column[0]))
           .agg(count("*").as("pv"), countDistinct(col("viewId")).as("uv"),
               countDistinct(col("userId")).as("uvSigned"))
           .withColumn("epoch", lit(upper))
           .as(Encoders.bean(RichPageStatistic.class));
-      Object take = stat.take(0);
+      RichPageStatistic take = stat.first();
       logger.info("{}", take);
     }
 

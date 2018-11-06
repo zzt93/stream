@@ -86,7 +86,6 @@ public class StructuredStreamQuery implements Serializable {
                 }, Encoders.bean(PageView.class));
 
         minutePvAndUv(views);
-        richMinutePvAndUv(views);
 
     }
 
