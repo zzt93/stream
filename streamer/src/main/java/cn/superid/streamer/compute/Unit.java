@@ -26,8 +26,8 @@ public enum Unit {
       return timestamp.toLocalDateTime().getDayOfMonth();
     }
     @Override
-    public int getDifferenceUnit(Timestamp first, Timestamp second) {
-      return (int)Duration.between(first.toLocalDateTime(), second.toLocalDateTime()).toDays();
+    public int diff(Timestamp start, Timestamp end) {
+      return (int)Duration.between(start.toLocalDateTime(), end.toLocalDateTime()).toDays();
     }
   }, HOUR(24, ChronoUnit.HOURS) {
     @Override
@@ -40,8 +40,8 @@ public enum Unit {
       return timestamp.toLocalDateTime().getHour();
     }
     @Override
-    public int getDifferenceUnit(Timestamp first, Timestamp second) {
-      return (int)Duration.between(first.toLocalDateTime(), second.toLocalDateTime()).toHours();
+    public int diff(Timestamp start, Timestamp end) {
+      return (int)Duration.between(start.toLocalDateTime(), end.toLocalDateTime()).toHours();
     }
   }, MINUTE(30, ChronoUnit.MINUTES) {
     @Override
@@ -55,8 +55,8 @@ public enum Unit {
     }
 
     @Override
-    public int getDifferenceUnit(Timestamp first, Timestamp second) {
-      return (int)Duration.between(first.toLocalDateTime(), second.toLocalDateTime()).toMinutes();
+    public int diff(Timestamp start, Timestamp end) {
+      return (int)Duration.between(start.toLocalDateTime(), end.toLocalDateTime()).toMinutes();
     }
   };
 
@@ -79,7 +79,7 @@ public enum Unit {
   /**
    * 获取两个Timestamp之间的差值
    */
-  public abstract int getDifferenceUnit(Timestamp first,Timestamp second);
+  public abstract int diff(Timestamp start,Timestamp end);
 
   public LocalDateTime truncate(LocalDateTime dateTime) {
     return dateTime.truncatedTo(unit);
