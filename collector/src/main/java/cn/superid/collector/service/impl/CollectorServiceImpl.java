@@ -20,6 +20,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicLong;
+import org.springframework.util.StringUtils;
 
 /**
  * @author dufeng
@@ -65,7 +66,7 @@ public class CollectorServiceImpl implements CollectorService {
     @Async
     @Override
     public void save(PageView pageView) {
-        System.out.println("save pageView to mongo : \n"+pageView);
+        LOGGER.info("save pageView to mongo : \n"+pageView);
         try {
             mongo.insert(pageView, pageCollection);
         } catch (Exception e) {
@@ -82,7 +83,7 @@ public class CollectorServiceImpl implements CollectorService {
     @Async
     @Override
     public void save(Option option) {
-        System.out.println("save option to mongo : \n"+option);
+        LOGGER.info("save option to mongo : \n"+option);
         try {
             mongo.insert(option, optionCollection);
         } catch (Exception e) {
@@ -151,9 +152,9 @@ public class CollectorServiceImpl implements CollectorService {
     }
 
     @Override
-    public List<PageView> extractPageView(MobilePageView mobilePageView) {
+    public List<PageView> extractPageView(MobilePageView mobilePageView, String ip) {
         List<PageView> views = new ArrayList<>();
-        for (MobilePageView.ViewEntry innerEntry : mobilePageView.getInnerEntries()) {
+        for (MobilePageView.ViewEntry view : mobilePageView.getInnerEntries()) {
             views.add(new PageView.PageBuilder().setId(mobilePageView.getViewId())
                     .setUserId(mobilePageView.getUserId())
                     .setDevType(mobilePageView.getDevType())
@@ -164,17 +165,17 @@ public class CollectorServiceImpl implements CollectorService {
                     .setServerIp(mobilePageView.getServerIp())
                     .setUploadTime(mobilePageView.getUploadTime())
                     .setUserAgent(mobilePageView.getUserAgent())
-                    .setBusinessLine(innerEntry.getBusinessLine())
-                    .setPageUri(innerEntry.getPageUri())
-                    .setReferer(innerEntry.getReferer())
-                    .setCollectTime(innerEntry.getCollectTime())
-                    .setClientIp(innerEntry.getClientIp())
-                    .setResources(innerEntry.getResources())
+                    .setBusinessLine(view.getBusinessLine())
+                    .setPageUri(view.getPageUri())
+                    .setReferer(view.getReferer())
+                    .setCollectTime(view.getCollectTime())
+                    .setClientIp(StringUtils.isEmpty(view.getClientIp()) ? ip : view.getClientIp())
+                    .setResources(view.getResources())
                     .build());
         }
 
         if(CollectionUtils.isEmpty(views)){
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
 
         return views;
@@ -205,7 +206,7 @@ public class CollectorServiceImpl implements CollectorService {
     public void sendMessage(String topicName, Object msg) {
         HashMap<String, Object> map = new HashMap<>();
         map.put(KafkaHeaders.TOPIC, topicName);
-        System.out.println("send message to kafka : \n"+ msg.toString());
+        LOGGER.info("send message to kafka : \n"+ msg.toString());
         kafkaTemplate.send(new GenericMessage<>(msg.toString(), map));
     }
 }

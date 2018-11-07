@@ -34,7 +34,6 @@ public class PageViewSender implements MessageSender {
         HashMap<String, Object> map = new HashMap<>();
         map.put(KafkaHeaders.TOPIC, topic);
 //        LOGGER.info("send msg: " + msg.toString());
-//        System.out.println("send message:"+ msg.toString());
 //        kafkaTemplate.send(new GenericMessage<>(msg.toString(), map));
     }
 }

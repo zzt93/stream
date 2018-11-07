@@ -28,7 +28,7 @@ public interface CollectorService {
 
     List<Option> extractOption(MobileOption mobileOption);
 
-    List<PageView> extractPageView(MobilePageView mobilePageView);
+    List<PageView> extractPageView(MobilePageView mobilePageView, String ip);
 
     String peekPage();
 

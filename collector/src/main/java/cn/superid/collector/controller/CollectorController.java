@@ -65,7 +65,6 @@ public class CollectorController {
   @PostMapping("/page")
   @RequestBodyNeedDecrypt
   public SimpleResponse queryFile(@RequestBody PageView pageView, HttpServletRequest request) {
-//    System.out.println("**Controller pageView="+pageView);
     LocalDateTime now = LocalDateTime.now();
     pageView.setEpoch(Timestamp.valueOf(now));
     pageView.setUploadTime(TimeUtil.getDateTimeStr(now));
@@ -103,7 +102,6 @@ public class CollectorController {
   @PostMapping("/mobile_page")
   @RequestBodyNeedDecrypt
   public SimpleResponse uploadMobilePageView(@RequestBody MobilePageView view, HttpServletRequest request) {
-//    System.out.println("**Controller mobilePageView="+view);
     LocalDateTime now = LocalDateTime.now();
     view.setEpoch(Timestamp.valueOf(now));
     view.setUploadTime(TimeUtil.getDateTimeStr(now));
@@ -118,7 +116,7 @@ public class CollectorController {
 
     view.setDomain(request.getHeader("x-original"));
 
-    List<PageView> views = collectorService.extractPageView(view);
+    List<PageView> views = collectorService.extractPageView(view, getIp(request));
 
     for(PageView v: views){
       v.postProcess();
@@ -134,18 +132,21 @@ public class CollectorController {
   @PostMapping("/option")
   @RequestBodyNeedDecrypt
   public SimpleResponse uploadOption(@RequestBody Option option, HttpServletRequest request) {
-//    System.out.println("Controller option="+option);
     LocalDateTime now = LocalDateTime.now();
     option.setEpoch(Timestamp.valueOf(now));
     option.setUploadTime(TimeUtil.getDateTimeStr(now));
 
-    if(StringUtils.isEmpty(option.getClientIp())){
-      option.setClientIp(request.getRemoteAddr());
+    if (StringUtils.isEmpty(option.getClientIp())){
+      option.setClientIp(getIp(request));
     }
 
     collectorService.save(option);
     collectorService.sendMessage(optionTopic, option);
     return new SimpleResponse(0);
+  }
+
+  private String getIp(HttpServletRequest request) {
+    return request.getRemoteAddr();
   }
 
   /**
@@ -159,7 +160,6 @@ public class CollectorController {
   @PostMapping("/mobile_option")
   @RequestBodyNeedDecrypt
   public SimpleResponse uploadMobileOption(@RequestBody MobileOption option, HttpServletRequest request) {
-//    System.out.println("Controller mobileOption="+option);
     LocalDateTime now = LocalDateTime.now();
     option.setEpoch(Timestamp.valueOf(now));
     option.setUploadTime(TimeUtil.getDateTimeStr(now));
