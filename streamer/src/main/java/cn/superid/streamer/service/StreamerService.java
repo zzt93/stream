@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Service
 public class StreamerService {
 
+  public static final String EPOCH = "EPOCH";
   /**
    * 限制前端查询时间范围内的时间点个数
    */
@@ -66,7 +67,10 @@ public class StreamerService {
   private List<RichPageStatistic> getRichPageStatistics(LocalDateTime dateTime, int timeDiff,
       Unit unit, RichForm query) {
 
-    StringBuilder sql = new StringBuilder(" from pages where publicIp = true");
+    StringBuilder sql = new StringBuilder(
+        "select count(*) as pv, count(distinct viewId) as uv, count(distinct userId) as uvSigned, "
+            + EPOCH
+            + ", from pages where publicIp = true");
     if (query.getAffairId() != null) {
       sql.append(" and affairId = ").append(query.getAffairId());
     }
@@ -83,9 +87,6 @@ public class StreamerService {
       Timestamp upper = Timestamp.valueOf(unit.update(from, offset + 1));
       futures.add(service.submit(() -> {
             sql.append(" and epoch > ").append(low).append(" and epoch < ").append(upper);
-            sql.insert(0,
-                " select count(*) as pv count( distinct viewId) as uv, count(distinct userId) as uvSigned, "
-                    + low);
             if (query.getAffairId() != null) {
               sql.append(", ").append(query.getAffairId());
             }
@@ -95,7 +96,8 @@ public class StreamerService {
             if (!StringUtils.isEmpty(query.getDevType())) {
               sql.append(", ").append(query.getDevType());
             }
-            return pageView.sqlContext().sql(sql.toString()).first();
+            String replace = sql.toString().replace(EPOCH, upper.toString());
+            return pageView.sqlContext().sql(replace).first();
           }
       ));
     }
