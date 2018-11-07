@@ -50,4 +50,6 @@ spark.executor.memory: ${EXECUTOR_MEMORY}
 spring:
   profiles:
     active: ${ACTIVE_PROFILE:dev}
+  jackson:
+    default-property-inclusion: non_null
 
