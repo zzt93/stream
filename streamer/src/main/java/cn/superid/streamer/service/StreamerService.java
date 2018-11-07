@@ -39,6 +39,8 @@ public class StreamerService {
    */
   private static final int COUNT_LIMIT = 100;
   private static final ExecutorService service = Executors.newCachedThreadPool();
+  public static final String LOW = "LOW";
+  public static final String UPPER = "UPPER";
   private final Logger logger = LoggerFactory.getLogger(StreamerService.class);
   private final Dataset<PageView> pageView;
 
@@ -67,17 +69,21 @@ public class StreamerService {
   private List<RichPageStatistic> getRichPageStatistics(LocalDateTime dateTime, int timeDiff,
       Unit unit, RichForm query) {
 
-    StringBuilder fromClause = new StringBuilder(", from pages where publicIp = true");
+    StringBuilder fromClause = new StringBuilder(", from pages where publicIp = true and epoch > '"
+        + LOW + "' and epoch < '" + UPPER + "'");
     StringBuilder select = new StringBuilder(
         "select count(*) as pv, count(distinct viewId) as uv, count(distinct userId) as uvSigned, "
             + EPOCH);
     if (query.getAffairId() != null) {
+      select.append(", ").append(query.getAffairId());
       fromClause.append(" and affairId = ").append(query.getAffairId());
     }
     if (query.getTargetId() != null) {
+      select.append(", ").append(query.getTargetId());
       fromClause.append(" and targetId = ").append(query.getTargetId());
     }
     if (!StringUtils.isEmpty(query.getDevType())) {
+      select.append(", '").append(query.getDevType()).append("'");
       fromClause.append(" and deviceType = '").append(query.getDevType()).append("'");
     }
     Timestamp from = Timestamp.valueOf(dateTime);
@@ -86,18 +92,10 @@ public class StreamerService {
       Timestamp low = Timestamp.valueOf(unit.update(from, offset));
       Timestamp upper = Timestamp.valueOf(unit.update(from, offset + 1));
       futures.add(service.submit(() -> {
-            select.append(" and epoch > '").append(low).append("' and epoch < '").append(upper).append("'");
-            if (query.getAffairId() != null) {
-              select.append(", ").append(query.getAffairId());
-            }
-            if (query.getTargetId() != null) {
-              select.append(", ").append(query.getTargetId());
-            }
-            if (!StringUtils.isEmpty(query.getDevType())) {
-              select.append(", '").append(query.getDevType()).append("'");
-            }
-            String replace = select.toString().replace(EPOCH, upper.toString());
-            return pageView.sqlContext().sql(replace + fromClause.toString()).first();
+        String fromStr = fromClause.toString().replace(LOW, low.toString())
+            .replace(UPPER, upper.toString());
+        String selectStr = select.toString().replace(EPOCH, upper.toString());
+            return pageView.sqlContext().sql(selectStr + fromStr).first();
           }
       ));
     }
