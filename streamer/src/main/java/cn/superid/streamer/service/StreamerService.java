@@ -68,7 +68,7 @@ public class StreamerService {
   private List<RichPageStatistic> getRichPageStatistics(LocalDateTime from, int timeDiff,
       Unit unit, RichForm query) {
 
-    pageView.select(col("*")).where(col("publicIp").equalTo(true));
+    pageView.where(col("publicIp").equalTo(true));
 
     if (query.getAffairId() != null) {
       pageView.where(col("affairId").equalTo(query.getAffairId()));
@@ -87,13 +87,13 @@ public class StreamerService {
     for (int offset = 0; offset < timeDiff; offset++) {
       Timestamp upper = Timestamp.valueOf(unit.update(low, offset + 1));
       pageView.where(col("epoch").between(low, upper));
-      Dataset<Row> stat = pageView
+      Row stat = pageView
           .agg(count("*").as("pv"), countDistinct(col("viewId")).as("uv"),
               countDistinct(col("userId")).as("uvSigned"))
           .withColumn("epoch", lit(upper))
+          .first()
           ;
-      Row take = stat.first();
-      logger.info("{}", take);
+      logger.info("{}", stat);
     }
 
     return null;
