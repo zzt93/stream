@@ -69,7 +69,7 @@ public class StreamerService {
   private List<RichPageStatistic> getRichPageStatistics(LocalDateTime dateTime, int timeDiff,
       Unit unit, RichForm query) {
 
-    StringBuilder fromClause = new StringBuilder(", from pages where publicIp = true and epoch > '"
+    StringBuilder fromClause = new StringBuilder(" from pages where publicIp = true and epoch > '"
         + LOW + "' and epoch < '" + UPPER + "'");
     StringBuilder select = new StringBuilder(
         "select count(*) as pv, count(distinct viewId) as uv, count(distinct userId) as uvSigned, '"
