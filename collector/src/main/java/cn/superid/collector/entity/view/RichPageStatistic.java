@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 public class RichPageStatistic implements Serializable {
 
   private static final Gson gson = new Gson();
-  private Timestamp epoch;
+  private String epoch;
   private long pv;
   private long uv;
   private long uvSigned;
@@ -24,11 +24,18 @@ public class RichPageStatistic implements Serializable {
   public RichPageStatistic() {
   }
 
-  public Timestamp getEpoch() {
+  public RichPageStatistic(String epoch, long pv, long uv, long uvSigned) {
+    this.epoch = epoch;
+    this.pv = pv;
+    this.uv = uv;
+    this.uvSigned = uvSigned;
+  }
+
+  public String getEpoch() {
     return epoch;
   }
 
-  public void setEpoch(Timestamp epoch) {
+  public void setEpoch(String epoch) {
     this.epoch = epoch;
   }
 
@@ -60,32 +67,36 @@ public class RichPageStatistic implements Serializable {
     return affairId;
   }
 
-  public void setAffairId(Long affairId) {
+  public RichPageStatistic setAffairId(Long affairId) {
     this.affairId = affairId;
+    return this;
   }
 
   public Long getAllianceId() {
     return allianceId;
   }
 
-  public void setAllianceId(Long allianceId) {
+  public RichPageStatistic setAllianceId(Long allianceId) {
     this.allianceId = allianceId;
+    return this;
   }
 
   public Long getTargetId() {
     return targetId;
   }
 
-  public void setTargetId(Long targetId) {
+  public RichPageStatistic setTargetId(Long targetId) {
     this.targetId = targetId;
+    return this;
   }
 
   public String getDeviceType() {
     return deviceType;
   }
 
-  public void setDeviceType(String deviceType) {
+  public RichPageStatistic setDeviceType(String deviceType) {
     this.deviceType = deviceType;
+    return this;
   }
 
   @Override

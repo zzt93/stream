@@ -104,6 +104,9 @@ public class StreamerService {
       try {
         Row row = future.get();
         logger.info("{}", row);
+        RichPageStatistic stat = new RichPageStatistic(row.getString(3), row.getLong(0),
+            row.getLong(1), row.getLong(2));
+        res.add(stat);
       } catch (InterruptedException | ExecutionException e) {
         logger.error("", e);
       }
