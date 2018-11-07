@@ -72,8 +72,8 @@ public class StreamerService {
     StringBuilder fromClause = new StringBuilder(", from pages where publicIp = true and epoch > '"
         + LOW + "' and epoch < '" + UPPER + "'");
     StringBuilder select = new StringBuilder(
-        "select count(*) as pv, count(distinct viewId) as uv, count(distinct userId) as uvSigned, "
-            + EPOCH);
+        "select count(*) as pv, count(distinct viewId) as uv, count(distinct userId) as uvSigned, '"
+            + EPOCH + "'");
     if (query.getAffairId() != null) {
       select.append(", ").append(query.getAffairId());
       fromClause.append(" and affairId = ").append(query.getAffairId());
