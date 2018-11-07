@@ -1,10 +1,5 @@
 package cn.superid.streamer.service;
 
-import static org.apache.spark.sql.functions.col;
-import static org.apache.spark.sql.functions.count;
-import static org.apache.spark.sql.functions.countDistinct;
-import static org.apache.spark.sql.functions.lit;
-
 import cn.superid.collector.entity.view.PageView;
 import cn.superid.collector.entity.view.RichPageStatistic;
 import cn.superid.streamer.compute.MongoConfig;
@@ -71,15 +66,15 @@ public class StreamerService {
   private List<RichPageStatistic> getRichPageStatistics(LocalDateTime dateTime, int timeDiff,
       Unit unit, RichForm query) {
 
-    pageView.where(col("publicIp").equalTo(true));
+    StringBuilder sql = new StringBuilder(" from pages where publicIp = true");
     if (query.getAffairId() != null) {
-      pageView.where(col("affairId").equalTo(query.getAffairId()));
+      sql.append(" and affairId = ").append(query.getAffairId());
     }
     if (query.getTargetId() != null) {
-      pageView.where(col("targetId").equalTo(query.getTargetId()));
+      sql.append(" and targetId = ").append(query.getTargetId());
     }
     if (!StringUtils.isEmpty(query.getDevType())) {
-      pageView.where(col("deviceType").equalTo(query.getDevType()));
+      sql.append(" and deviceType = ").append(query.getDevType());
     }
     Timestamp from = Timestamp.valueOf(dateTime);
     List<Future<Row>> futures = new ArrayList<>(timeDiff);
@@ -87,22 +82,20 @@ public class StreamerService {
       Timestamp low = Timestamp.valueOf(unit.update(from, offset));
       Timestamp upper = Timestamp.valueOf(unit.update(from, offset + 1));
       futures.add(service.submit(() -> {
-        pageView.where(col("epoch").between(low, upper));
-        Dataset<Row> agg = pageView
-                .agg(count("*").as("pv"), countDistinct(col("viewId")).as("uv"),
-                    countDistinct(col("userId")).as("uvSigned"));
+            sql.append(" and epoch > ").append(low).append(" and epoch < ").append(upper);
+            sql.insert(0,
+                " select count(*) as pv count( distinct viewId) as uv, count(distinct userId) as uvSigned, "
+                    + low);
             if (query.getAffairId() != null) {
-              agg.withColumn("affairId", lit(query.getAffairId()));
+              sql.append(", ").append(query.getAffairId());
             }
             if (query.getTargetId() != null) {
-              agg.withColumn("targetId", lit(query.getTargetId()));
+              sql.append(", ").append(query.getTargetId());
             }
             if (!StringUtils.isEmpty(query.getDevType())) {
-              agg.withColumn("deviceType", lit(query.getDevType()));
+              sql.append(", ").append(query.getDevType());
             }
-            return agg
-                .withColumn("epoch", lit(upper))
-                .first();
+            return pageView.sqlContext().sql(sql.toString()).first();
           }
       ));
     }
