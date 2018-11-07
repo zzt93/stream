@@ -67,18 +67,18 @@ public class StreamerService {
   private List<RichPageStatistic> getRichPageStatistics(LocalDateTime dateTime, int timeDiff,
       Unit unit, RichForm query) {
 
-    StringBuilder sql = new StringBuilder(
+    StringBuilder fromClause = new StringBuilder(", from pages where publicIp = true");
+    StringBuilder select = new StringBuilder(
         "select count(*) as pv, count(distinct viewId) as uv, count(distinct userId) as uvSigned, "
-            + EPOCH
-            + ", from pages where publicIp = true");
+            + EPOCH);
     if (query.getAffairId() != null) {
-      sql.append(" and affairId = ").append(query.getAffairId());
+      fromClause.append(" and affairId = ").append(query.getAffairId());
     }
     if (query.getTargetId() != null) {
-      sql.append(" and targetId = ").append(query.getTargetId());
+      fromClause.append(" and targetId = ").append(query.getTargetId());
     }
     if (!StringUtils.isEmpty(query.getDevType())) {
-      sql.append(" and deviceType = ").append(query.getDevType());
+      fromClause.append(" and deviceType = '").append(query.getDevType()).append("'");
     }
     Timestamp from = Timestamp.valueOf(dateTime);
     List<Future<Row>> futures = new ArrayList<>(timeDiff);
@@ -86,18 +86,18 @@ public class StreamerService {
       Timestamp low = Timestamp.valueOf(unit.update(from, offset));
       Timestamp upper = Timestamp.valueOf(unit.update(from, offset + 1));
       futures.add(service.submit(() -> {
-            sql.append(" and epoch > ").append(low).append(" and epoch < ").append(upper);
+            select.append(" and epoch > '").append(low).append("' and epoch < '").append(upper).append("'");
             if (query.getAffairId() != null) {
-              sql.append(", ").append(query.getAffairId());
+              select.append(", ").append(query.getAffairId());
             }
             if (query.getTargetId() != null) {
-              sql.append(", ").append(query.getTargetId());
+              select.append(", ").append(query.getTargetId());
             }
             if (!StringUtils.isEmpty(query.getDevType())) {
-              sql.append(", ").append(query.getDevType());
+              select.append(", '").append(query.getDevType()).append("'");
             }
-            String replace = sql.toString().replace(EPOCH, upper.toString());
-            return pageView.sqlContext().sql(replace).first();
+            String replace = select.toString().replace(EPOCH, upper.toString());
+            return pageView.sqlContext().sql(replace + fromClause.toString()).first();
           }
       ));
     }
