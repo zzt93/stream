@@ -12,32 +12,17 @@ import java.sql.Timestamp;
 public class RichPageStatistic implements Serializable {
 
   private static final Gson gson = new Gson();
-//  private long id;
   private Timestamp epoch;
   private long pv;
   private long uv;
   private long uvSigned;
-  private long affairId;
-  private long allianceId;
-  private long targetId;
-  private boolean publicIp;
+  private Long affairId;
+  private Long allianceId;
+  private Long targetId;
   private String deviceType;
 
   public RichPageStatistic() {
   }
-
-  public RichPageStatistic(Timestamp epoch) {
-    this.epoch = epoch;
-//    setId(epoch.getTime());
-  }
-
-//  public long getId() {
-//    return id;
-//  }
-//
-//  public void setId(long id) {
-//    this.id = id;
-//  }
 
   public Timestamp getEpoch() {
     return epoch;
@@ -71,36 +56,28 @@ public class RichPageStatistic implements Serializable {
     this.pv = pv;
   }
 
-  public long getAffairId() {
+  public Long getAffairId() {
     return affairId;
   }
 
-  public void setAffairId(long affairId) {
+  public void setAffairId(Long affairId) {
     this.affairId = affairId;
   }
 
-  public long getAllianceId() {
+  public Long getAllianceId() {
     return allianceId;
   }
 
-  public void setAllianceId(long allianceId) {
+  public void setAllianceId(Long allianceId) {
     this.allianceId = allianceId;
   }
 
-  public long getTargetId() {
+  public Long getTargetId() {
     return targetId;
   }
 
-  public void setTargetId(long targetId) {
+  public void setTargetId(Long targetId) {
     this.targetId = targetId;
-  }
-
-  public boolean isPublicIp() {
-    return publicIp;
-  }
-
-  public void setPublicIp(boolean publicIp) {
-    this.publicIp = publicIp;
   }
 
   public String getDeviceType() {

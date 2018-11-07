@@ -19,6 +19,7 @@ import java.util.List;
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoders;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,34 +68,31 @@ public class StreamerService {
   private List<RichPageStatistic> getRichPageStatistics(LocalDateTime from, int timeDiff,
       Unit unit, RichForm query) {
 
-    List<Column> group = new ArrayList<>();
     pageView.select(col("*")).where(col("publicIp").equalTo(true));
 
     if (query.getAffairId() != null) {
       pageView.where(col("affairId").equalTo(query.getAffairId()));
-      group.add(col("affairId"));
+      pageView.withColumn("affairId", lit(query.getAffairId()));
     }
     if (query.getTargetId() != null) {
       pageView.where(col("targetId").equalTo(query.getTargetId()));
-      group.add(col("targetId"));
+      pageView.withColumn("targetId", lit(query.getTargetId()));
     }
     if (!StringUtils.isEmpty(query.getDevType())) {
       pageView.where(col("deviceType").equalTo(query.getDevType()));
-      group.add(col("deviceType"));
+      pageView.withColumn("deviceType", lit(query.getDevType()));
     }
 
     Timestamp low = Timestamp.valueOf(from);
     for (int offset = 0; offset < timeDiff; offset++) {
       Timestamp upper = Timestamp.valueOf(unit.update(low, offset + 1));
       pageView.where(col("epoch").between(low, upper));
-
-      Dataset<RichPageStatistic> stat = pageView
-          .groupBy(group.toArray(new Column[0]))
+      Dataset<Row> stat = pageView
           .agg(count("*").as("pv"), countDistinct(col("viewId")).as("uv"),
               countDistinct(col("userId")).as("uvSigned"))
           .withColumn("epoch", lit(upper))
-          .as(Encoders.bean(RichPageStatistic.class));
-      RichPageStatistic take = stat.first();
+          ;
+      Row take = stat.first();
       logger.info("{}", take);
     }
 
