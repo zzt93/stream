@@ -68,35 +68,36 @@ public class StreamerService {
   }
 
 
-  private List<RichPageStatistic> getRichPageStatistics(LocalDateTime from, int timeDiff,
+  private List<RichPageStatistic> getRichPageStatistics(LocalDateTime dateTime, int timeDiff,
       Unit unit, RichForm query) {
 
     pageView.where(col("publicIp").equalTo(true));
 
-    if (query.getAffairId() != null) {
-      pageView.where(col("affairId").equalTo(query.getAffairId()));
-      pageView.withColumn("affairId", lit(query.getAffairId()));
-    }
-    if (query.getTargetId() != null) {
-      pageView.where(col("targetId").equalTo(query.getTargetId()));
-      pageView.withColumn("targetId", lit(query.getTargetId()));
-    }
-    if (!StringUtils.isEmpty(query.getDevType())) {
-      pageView.where(col("deviceType").equalTo(query.getDevType()));
-      pageView.withColumn("deviceType", lit(query.getDevType()));
-    }
-
-    Timestamp low = Timestamp.valueOf(from);
+    Timestamp from = Timestamp.valueOf(dateTime);
     List<Future<Row>> futures = new ArrayList<>(timeDiff);
     for (int offset = 0; offset < timeDiff; offset++) {
-      Timestamp upper = Timestamp.valueOf(unit.update(low, offset + 1));
+      Timestamp low = Timestamp.valueOf(unit.update(from, offset));
+      Timestamp upper = Timestamp.valueOf(unit.update(from, offset + 1));
       futures.add(service.submit(() -> {
-            pageView.where(col("epoch").between(low, upper));
-        return pageView
-            .agg(count("*").as("pv"), countDistinct(col("viewId")).as("uv"),
-                countDistinct(col("userId")).as("uvSigned"))
-            .withColumn("epoch", lit(upper))
-            .first();
+            Dataset<Row> agg = pageView
+                .agg(count("*").as("pv"), countDistinct(col("viewId")).as("uv"),
+                    countDistinct(col("userId")).as("uvSigned"));
+            agg.where(col("epoch").between(low, upper));
+            if (query.getAffairId() != null) {
+              agg.where(col("affairId").equalTo(query.getAffairId()));
+              agg.withColumn("affairId", lit(query.getAffairId()));
+            }
+            if (query.getTargetId() != null) {
+              agg.where(col("targetId").equalTo(query.getTargetId()));
+              agg.withColumn("targetId", lit(query.getTargetId()));
+            }
+            if (!StringUtils.isEmpty(query.getDevType())) {
+              agg.where(col("deviceType").equalTo(query.getDevType()));
+              agg.withColumn("deviceType", lit(query.getDevType()));
+            }
+            return agg
+                .withColumn("epoch", lit(upper))
+                .first();
           }
       ));
     }
