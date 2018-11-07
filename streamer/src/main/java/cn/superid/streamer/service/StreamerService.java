@@ -16,9 +16,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.spark.sql.Column;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.slf4j.Logger;
@@ -40,6 +42,7 @@ public class StreamerService {
    * 限制前端查询时间范围内的时间点个数
    */
   private static final int COUNT_LIMIT = 100;
+  private static final ExecutorService service = Executors.newCachedThreadPool();
   private final Logger logger = LoggerFactory.getLogger(StreamerService.class);
   private final Dataset<PageView> pageView;
 
@@ -84,18 +87,28 @@ public class StreamerService {
     }
 
     Timestamp low = Timestamp.valueOf(from);
+    List<Future<Row>> futures = new ArrayList<>(timeDiff);
     for (int offset = 0; offset < timeDiff; offset++) {
       Timestamp upper = Timestamp.valueOf(unit.update(low, offset + 1));
-      pageView.where(col("epoch").between(low, upper));
-      Row stat = pageView
-          .agg(count("*").as("pv"), countDistinct(col("viewId")).as("uv"),
-              countDistinct(col("userId")).as("uvSigned"))
-          .withColumn("epoch", lit(upper))
-          .first()
-          ;
-      logger.info("{}", stat);
+      futures.add(service.submit(() -> {
+            pageView.where(col("epoch").between(low, upper));
+        return pageView
+            .agg(count("*").as("pv"), countDistinct(col("viewId")).as("uv"),
+                countDistinct(col("userId")).as("uvSigned"))
+            .withColumn("epoch", lit(upper))
+            .first();
+          }
+      ));
     }
-
-    return null;
+    List<RichPageStatistic> res = new ArrayList<>(timeDiff);
+    for (Future<Row> future : futures) {
+      try {
+        Row row = future.get();
+        logger.info("{}", row);
+      } catch (InterruptedException | ExecutionException e) {
+        logger.error("", e);
+      }
+    }
+    return res;
   }
 }
