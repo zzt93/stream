@@ -72,27 +72,32 @@ public class StreamerService {
       Unit unit, RichForm query) {
 
     pageView.where(col("publicIp").equalTo(true));
-
+    if (query.getAffairId() != null) {
+      pageView.where(col("affairId").equalTo(query.getAffairId()));
+    }
+    if (query.getTargetId() != null) {
+      pageView.where(col("targetId").equalTo(query.getTargetId()));
+    }
+    if (!StringUtils.isEmpty(query.getDevType())) {
+      pageView.where(col("deviceType").equalTo(query.getDevType()));
+    }
     Timestamp from = Timestamp.valueOf(dateTime);
     List<Future<Row>> futures = new ArrayList<>(timeDiff);
     for (int offset = 0; offset < timeDiff; offset++) {
       Timestamp low = Timestamp.valueOf(unit.update(from, offset));
       Timestamp upper = Timestamp.valueOf(unit.update(from, offset + 1));
       futures.add(service.submit(() -> {
-            Dataset<Row> agg = pageView
+        pageView.where(col("epoch").between(low, upper));
+        Dataset<Row> agg = pageView
                 .agg(count("*").as("pv"), countDistinct(col("viewId")).as("uv"),
                     countDistinct(col("userId")).as("uvSigned"));
-            agg.where(col("epoch").between(low, upper));
             if (query.getAffairId() != null) {
-              agg.where(col("affairId").equalTo(query.getAffairId()));
               agg.withColumn("affairId", lit(query.getAffairId()));
             }
             if (query.getTargetId() != null) {
-              agg.where(col("targetId").equalTo(query.getTargetId()));
               agg.withColumn("targetId", lit(query.getTargetId()));
             }
             if (!StringUtils.isEmpty(query.getDevType())) {
-              agg.where(col("deviceType").equalTo(query.getDevType()));
               agg.withColumn("deviceType", lit(query.getDevType()));
             }
             return agg
