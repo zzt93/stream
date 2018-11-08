@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
  * @create: 2018-10-09 16:25
  */
 public class DevUtil {
+
     /**
      * windows设备
      */
@@ -29,6 +30,7 @@ public class DevUtil {
      * IOS设备（iPad？）
      */
     private static final Pattern IOS = Pattern.compile("IOS", Pattern.CASE_INSENSITIVE);
+    public static final String UNKNOWN = "Unknown";
 
 
     public static String getDeviceType(String userAgent) {
@@ -43,7 +45,7 @@ public class DevUtil {
         } else if (IOS.matcher(userAgent).find()) {
             return "IOS";
         } else {
-            return "Unknown";
+            return UNKNOWN;
         }
 
     }

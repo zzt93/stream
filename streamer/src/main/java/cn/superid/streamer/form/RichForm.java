@@ -1,125 +1,121 @@
 package cn.superid.streamer.form;
 
+import cn.superid.collector.util.DevUtil;
 import cn.superid.streamer.compute.Unit;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.sql.Timestamp;
 
 /**
  * 按照更多维度查询pv uv
+ *
  * @author dufeng
  * @create: 2018-10-15 10:48
  */
 @ApiModel()
 public class RichForm {
-    /**
-     * 事务id
-     */
-    @ApiModelProperty(notes = "事务id", example = "12345")
-    private Long affairId;
-    /**
-     * 目标id
-     */
-    @ApiModelProperty(notes = "目标id", example = "12345")
-    private Long targetId;
-    /**
-     * 时间范围起始点
-     */
-    @ApiModelProperty(notes = "查询时间范围开始点", example = "2018-10-15T02:41:00.000Z")
-    private Timestamp from;
-    /**
-     * 时间范围结束点
-     */
-    @ApiModelProperty(notes = "查询时间范围结束点", example = "2018-10-25T02:41:00.000Z")
-    private Timestamp to;
-    /**
-     * 时间单位：minute/hour/day
-     */
-    @ApiModelProperty(notes = "查询的单位", example = "minute/hour/day")
-    private String timeUnit;
-    /**
-     * 设备类型：Mac/Windows/iPhone/Android/其它
-     */
-    @ApiModelProperty(notes = "用户设备", example = "Mac/Windows/iPhone/Android/其它")
-    private String devType;
 
-    public void validate(){
-        Unit.valueOf(timeUnit.toUpperCase());
+  /**
+   * 事务id
+   */
+  @ApiModelProperty(notes = "事务id", example = "12345")
+  private Long affairId;
+  /**
+   * 目标id
+   */
+  @ApiModelProperty(notes = "目标id", example = "12345")
+  private Long targetId;
+  /**
+   * 时间范围起始点
+   */
+  @ApiModelProperty(notes = "查询时间范围开始点", example = "2018-10-15T02:41:00.000Z")
+  private Timestamp from;
+  /**
+   * 时间范围结束点
+   */
+  @ApiModelProperty(notes = "查询时间范围结束点", example = "2018-10-25T02:41:00.000Z")
+  private Timestamp to;
+  /**
+   * 时间单位：minute/hour/day
+   */
+  @ApiModelProperty(notes = "查询的单位", example = "minute/hour/day")
+  private String timeUnit;
+  /**
+   * 设备类型：Mac/Windows/iPhone/Android/
+   */
+  @ApiModelProperty(notes = "用户设备", example = "Mac/Windows/iPhone/Android/" + DevUtil.UNKNOWN)
+  private String devType;
 
-        if(from.after(to)){
-            throw new RuntimeException("开始时间大于结束时间！");
-        }
+  public void validate() {
+    Unit.valueOf(timeUnit.toUpperCase());
 
-        if (devType == null || "全部".equals(devType)){
-            this.setDevType(null);
-        }
-        if (!("Mac".equals(devType) || "Windows".equals(devType) || "iPhone".equals(devType) || "Android".equals(devType) || "其它".equals(devType) || "".equals(devType))) {
-            throw new RuntimeException("未知设备类型：" + devType);
-        }
-
-        if("其它".equals(this.getDevType())){
-            this.setDevType("Unknown");
-        }
+    if (from.after(to)) {
+      throw new RuntimeException("开始时间大于结束时间！");
     }
 
-    public Long getAffairId() {
-        return affairId;
+    if (devType != null && !("Mac".equals(devType) || "Windows".equals(devType) || "iPhone".equals(devType)
+        || "Android".equals(devType) || DevUtil.UNKNOWN.equals(devType))) {
+      throw new RuntimeException("未知设备类型：" + devType);
     }
+  }
 
-    public void setAffairId(Long affairId) {
-        this.affairId = affairId;
-    }
+  public Long getAffairId() {
+    return affairId;
+  }
 
-    public Long getTargetId() {
-        return targetId;
-    }
+  public void setAffairId(Long affairId) {
+    this.affairId = affairId;
+  }
 
-    public void setTargetId(Long targetId) {
-        this.targetId = targetId;
-    }
+  public Long getTargetId() {
+    return targetId;
+  }
 
-    public Timestamp getFrom() {
-        return from;
-    }
+  public void setTargetId(Long targetId) {
+    this.targetId = targetId;
+  }
 
-    public void setFrom(Timestamp from) {
-        this.from = from;
-    }
+  public Timestamp getFrom() {
+    return from;
+  }
 
-    public Timestamp getTo() {
-        return to;
-    }
+  public void setFrom(Timestamp from) {
+    this.from = from;
+  }
 
-    public void setTo(Timestamp to) {
-        this.to = to;
-    }
+  public Timestamp getTo() {
+    return to;
+  }
 
-    public String getTimeUnit() {
-        return timeUnit;
-    }
+  public void setTo(Timestamp to) {
+    this.to = to;
+  }
 
-    public void setTimeUnit(String timeUnit) {
-        this.timeUnit = timeUnit;
-    }
+  public String getTimeUnit() {
+    return timeUnit;
+  }
 
-    public String getDevType() {
-        return devType;
-    }
+  public void setTimeUnit(String timeUnit) {
+    this.timeUnit = timeUnit;
+  }
 
-    public void setDevType(String devType) {
-        this.devType = devType;
-    }
+  public String getDevType() {
+    return devType;
+  }
 
-    @Override
-    public String toString() {
-        return "RichForm{" +
-            "affairId=" + affairId +
-            ", targetId=" + targetId +
-            ", from=" + from +
-            ", to=" + to +
-            ", timeUnit='" + timeUnit + '\'' +
-            ", devType='" + devType + '\'' +
-            '}';
-    }
+  public void setDevType(String devType) {
+    this.devType = devType;
+  }
+
+  @Override
+  public String toString() {
+    return "RichForm{" +
+        "affairId=" + affairId +
+        ", targetId=" + targetId +
+        ", from=" + from +
+        ", to=" + to +
+        ", timeUnit='" + timeUnit + '\'' +
+        ", devType='" + devType + '\'' +
+        '}';
+  }
 }
