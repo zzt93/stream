@@ -128,7 +128,9 @@ public class PageView implements Serializable {
      * 前端传过来之后，处理一下字段信息，根据前端传递的信息，来填补publicIp、deviceType字段
      */
     public void postProcess() {
-        publicIp = !INNER_IP.matcher(clientIp).find();
+        if (clientIp != null) {
+            publicIp = !INNER_IP.matcher(clientIp).find();
+        }
 
         deviceType = DevUtil.getDeviceType(this.userAgent);
 

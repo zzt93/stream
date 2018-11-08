@@ -70,9 +70,7 @@ public class CollectorController {
     pageView.setUploadTime(TimeUtil.getDateTimeStr(now));
 
     if(StringUtils.isEmpty(pageView.getClientIp())){
-      //nginx做了代理，要从请求头中才能拿到ip地址
-      String ip = request.getHeader("X-Forwarded-For");
-      pageView.setClientIp(IpUtil.getIpFrom(ip));
+      pageView.setClientIp(getIp(request));
     }
     if(StringUtils.isEmpty(pageView.getUserAgent())){
       pageView.setUserAgent(request.getHeader("User-Agent"));
@@ -89,6 +87,15 @@ public class CollectorController {
     collectorService.save(pageView);
     collectorService.sendMessage(pageTopic, pageView);
     return new SimpleResponse(0);
+  }
+
+  private String getIp(HttpServletRequest request) {
+    //nginx做了代理，要从请求头中才能拿到ip地址
+    String ip = request.getHeader("X-Forwarded-For");
+    if (StringUtils.isEmpty(ip)) {
+      ip = request.getRemoteAddr();
+    }
+    return ip;
   }
 
   /**
@@ -145,9 +152,6 @@ public class CollectorController {
     return new SimpleResponse(0);
   }
 
-  private String getIp(HttpServletRequest request) {
-    return request.getRemoteAddr();
-  }
 
   /**
    * 移动端上报的操作记录接口
