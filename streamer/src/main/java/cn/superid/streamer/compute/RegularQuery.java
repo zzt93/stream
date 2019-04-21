@@ -62,7 +62,7 @@ public class RegularQuery implements Serializable {
     public void everyHour() {
         Timestamp now = Timestamp
                 .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS));
-        logger.info("execute everyHour of : " + now.toLocalDateTime().truncatedTo(ChronoUnit.HOURS));
+        logger.debug("execute everyHour of :  {}", now.toLocalDateTime().truncatedTo(ChronoUnit.HOURS));
         repeat(hours, now, Unit.HOUR);
     }
 
@@ -73,7 +73,7 @@ public class RegularQuery implements Serializable {
     public void everyDay() {
         Timestamp now = Timestamp
                 .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.DAYS));
-        logger.info("execute everyDay of : " + now.toLocalDateTime().truncatedTo(ChronoUnit.DAYS));
+        logger.debug("execute everyDay of :  {}", now.toLocalDateTime().truncatedTo(ChronoUnit.DAYS));
         repeat(days, now, Unit.DAY);
     }
 
@@ -85,7 +85,7 @@ public class RegularQuery implements Serializable {
                     .first();
             Timestamp last =
                     lastDoc == null ? null : Timestamp.from(lastDoc.get("epoch", Date.class).toInstant());
-            logger.info("repeat last:"+last);
+            logger.debug("repeat last: {}", last);
             ArrayList<PageStatistic> list = new ArrayList<>();
             int size;
             if (last == null) {
@@ -98,8 +98,8 @@ public class RegularQuery implements Serializable {
                     size += unit.range;
                 }
             }
-            logger.info("repeat last:"+last);
-            logger.info("repeat size:" + size);
+            logger.debug("repeat last: {}", last);
+            logger.debug("repeat size: {}", size);
             for (int offset = 0; offset < size; offset++) {
                 Dataset<PageView> inTimeRange = getInTimeRange(pageDataSet, last, unit, offset);
                 Timestamp epoch = Timestamp.valueOf(unit.update(last,  offset+1));
@@ -109,8 +109,8 @@ public class RegularQuery implements Serializable {
                         .withColumn("epoch", lit(epoch)).withColumn("id", lit(epoch.getTime()))
                         .as(Encoders.bean(PageStatistic.class));
                 list.add(stat.first());
-                logger.info("offset:"+offset);
-                logger.info("repeat last:"+last);
+                logger.debug("offset: {}", offset);
+                logger.debug("repeat last: {}", last);
                 mongo.insert(list, collection);
                 list.clear();
             }
@@ -136,7 +136,7 @@ public class RegularQuery implements Serializable {
             //获取最后一条文档的时间
             Timestamp last =
                     lastDoc == null ? null : Timestamp.from(lastDoc.get("epoch", Date.class).toInstant());
-            logger.info("repeatRich last:"+last);
+            logger.debug("repeatRich last: {}", last);
             ArrayList<RichPageStatistic> list = new ArrayList<>();
             int size;
             if (last == null) {
@@ -149,8 +149,8 @@ public class RegularQuery implements Serializable {
                     size += unit.range;
                 }
             }
-            logger.info("repeatRich last:"+last);
-            logger.info("repeatRich size:" + size);
+            logger.debug("repeatRich last: {}", last);
+            logger.debug("repeatRich size: {}", size);
             for (int offset = 0; offset < size; offset++) {
                 //从mongodb中获取last到offset+1这段时间内的数据，作为spark的dataset
                 Dataset<PageView> inTimeRange = getInTimeRange(pageDataSet, last, unit, offset);
@@ -170,11 +170,11 @@ public class RegularQuery implements Serializable {
                             .as(Encoders.bean(RichPageStatistic.class));
                     //分组计算的结果都保存进去
                     list.addAll(stat.collectAsList());
-                    logger.info("insert "+list +" into mongo collection : "+collection);
+                    logger.debug("insert {} into mongo collection: {}", list, collection);
                     mongo.insert(list, collection);
                     list.clear();
-                    logger.info("offset:"+offset);
-                    logger.info("repeatRich last:"+last);
+                    logger.debug("offset: {}", offset);
+                    logger.debug("repeatRich last: {}", last);
                 }
             }
 
@@ -192,11 +192,4 @@ public class RegularQuery implements Serializable {
         return pages.where(col("epoch").between(low, up));
     }
 
-    public static void main(String[] args) {
-        Timestamp timestamp = Timestamp.valueOf(LocalDateTime.now());
-        int hour = timestamp.toLocalDateTime().getHour();
-        int day = timestamp.toLocalDateTime().getDayOfMonth();
-        logger.info("hour:"+hour);
-        logger.info("day:"+day);
-    }
 }

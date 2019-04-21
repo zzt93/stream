@@ -100,9 +100,6 @@ public class CollectorController {
 
   /**
    * 移动端上报的用户浏览记录接口
-   * @param view
-   * @param request
-   * @return
    */
   @ApiOperation(value = "移动端上报用户浏览记录接口（要对请求body做base64加密）", notes = "", response = SimpleResponse.class)
   @CrossOrigin(origins = "*")
@@ -155,9 +152,6 @@ public class CollectorController {
 
   /**
    * 移动端上报的操作记录接口
-   * @param option
-   * @param request
-   * @return
    */
   @ApiOperation(value = "移动端上报用户操作记录接口（要对请求body做base64加密）", notes = "", response = SimpleResponse.class)
   @CrossOrigin(origins = "*")

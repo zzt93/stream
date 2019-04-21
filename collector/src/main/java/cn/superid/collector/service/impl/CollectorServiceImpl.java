@@ -66,65 +66,30 @@ public class CollectorServiceImpl implements CollectorService {
     @Async
     @Override
     public void save(PageView pageView) {
-        LOGGER.info("save pageView to mongo: {}", pageView);
-        try {
-            mongo.insert(pageView, pageCollection);
-        } catch (Exception e) {
-            LOGGER.error("", e);
-        }
-
-        pageQueue.addLast(pageView);
-        if (pageQueue.size() == TWENTY) {
-            pageQueue.removeFirst();
-        }
-        pageEstimatedSize.incrementAndGet();
+        LOGGER.debug("save pageView to mongo: {}", pageView);
+        saveMongoAndMemory(pageView, pageQueue, pageEstimatedSize);
     }
 
     @Async
     @Override
     public void save(Option option) {
-        LOGGER.info("save option to mongo : {}", option);
+        LOGGER.debug("save option to mongo : {}", option);
+        saveMongoAndMemory(option, optionQueue, optionEstimatedSize);
+    }
+
+    private <T> void saveMongoAndMemory(T option, ConcurrentLinkedDeque<T> queue, AtomicLong c) {
         try {
             mongo.insert(option, optionCollection);
         } catch (Exception e) {
             LOGGER.error("", e);
         }
 
-        optionQueue.addLast(option);
-        if (optionQueue.size() == TWENTY) {
-            optionQueue.removeFirst();
+        queue.addLast(option);
+        if (queue.size() == TWENTY) {
+            queue.removeFirst();
         }
-        optionEstimatedSize.incrementAndGet();
+        c.incrementAndGet();
     }
-//
-//    @Async
-//    @Override
-//    public void save(MobileOption option) {
-//        List<Option> options = new ArrayList<>();
-//        for (MobileOption.ViewEntry innerEntry : option.getInnerEntries()) {
-//            options.add(new Option.Builder().viewId(option.getViewId())
-//                        .userId(option.getUserId())
-//                        .clientIp(option.getClientIp())
-//                        .devType(option.getDevType())
-//                        .appVer(option.getAppVer())
-//                        .uploadTime(option.getUploadTime())
-//                        .businessLine(innerEntry.getBusinessLine())
-//                        .pageUri(innerEntry.getPageUri())
-//                        .eleId(innerEntry.getEleId())
-//                        .attrs(innerEntry.getAttrs())
-//                        .opTime(innerEntry.getOpTime())
-//                        .build());
-//        }
-//
-//        if(CollectionUtils.isEmpty(options)){
-//            return;
-//        }
-//
-//        for(Option op:options){
-//            System.out.println("op="+op);
-////            save(op);
-//        }
-//    }
 
     @Override
     public List<Option> extractOption(MobileOption mobileOption) {
@@ -195,7 +160,7 @@ public class CollectorServiceImpl implements CollectorService {
     private String peek(AtomicLong estimatedSize, ConcurrentLinkedDeque queue){
         StringBuilder sb = new StringBuilder(2000);
         sb.append("[").append(estimatedSize.get()).append("]");
-        Iterator<PageView> it = queue.iterator();
+        Iterator it = queue.iterator();
         for (int i = 0; i < Math.min(TWENTY, estimatedSize.get()) && it.hasNext(); i++) {
             sb.append(it.next());
         }
@@ -206,7 +171,7 @@ public class CollectorServiceImpl implements CollectorService {
     public void sendMessage(String topicName, Object msg) {
         HashMap<String, Object> map = new HashMap<>();
         map.put(KafkaHeaders.TOPIC, topicName);
-        LOGGER.info("send message to kafka : {}", msg.toString());
+        LOGGER.debug("send message to kafka : {}", msg.toString());
         kafkaTemplate.send(new GenericMessage<>(msg.toString(), map));
     }
 }

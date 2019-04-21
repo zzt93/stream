@@ -37,7 +37,7 @@ public class StructuredStreamQueryRunner implements Runnable {
 
     @Override
     public void run() {
-        logger.info("output kafka topic :" + kafkaTopic);
+        logger.debug("output kafka topic : {}", kafkaTopic);
 
             dataset.writeStream()
                     .outputMode("update")

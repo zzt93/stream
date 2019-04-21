@@ -58,7 +58,7 @@ public class StreamerService {
 
     long timeDiff = unit.diff(richForm.getFrom(), richForm.getTo());
     if (timeDiff > COUNT_LIMIT) {
-      logger.info("查询时间范围内包含的{}过多:{}", unit, timeDiff);
+      logger.error("查询时间范围内包含的{}过多:{}", unit, timeDiff);
       return Collections.emptyList();
     }
 
@@ -103,7 +103,7 @@ public class StreamerService {
     for (Future<Row> future : futures) {
       try {
         Row row = future.get();
-        logger.info("{}", row);
+        logger.debug("{}", row);
         RichPageStatistic stat = new RichPageStatistic(row.getString(3), row.getLong(0),
             row.getLong(1), row.getLong(2));
         res.add(stat);

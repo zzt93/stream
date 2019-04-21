@@ -105,46 +105,4 @@ public class MyRequestBodyAdvice implements RequestBodyAdvice {
     }
 
 
-    public static class InputStreamByteArray {
-        private byte[] holder;
-
-        public InputStreamByteArray(InputStream source) throws IOException {
-            int length = source.available();
-            holder = new byte[length];
-
-            source.read(holder, 0, length);
-        }
-
-    }
-
-    /**
-     * 缓存InputStream的容器，可以把输入流拿出来重复使用
-     */
-    public class InputStreamHolder {
-
-        private ByteArrayOutputStream byteArrayOutputStream = null;
-
-        public InputStreamHolder(InputStream source) throws IOException {
-
-            byteArrayOutputStream = new ByteArrayOutputStream();
-            //输入流中的字节数组长度
-            int length = source.available();
-            byte[] holder = new byte[length];
-            //把输入流中的字节数组读取到holder中，读取完，输入流source也就不能再用了
-            source.read(holder, 0, length);
-
-            //把holder中的字节写到byteArrayOutputStream中
-            byteArrayOutputStream.write(holder, 0, length);
-            byteArrayOutputStream.flush();
-
-        }
-
-        /**
-         * 获取输入流，可以重复使用的方法
-         * @return
-         */
-        public InputStream getInputStream() {
-            return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-        }
-    }
 }

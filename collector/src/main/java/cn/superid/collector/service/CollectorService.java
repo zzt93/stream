@@ -14,13 +14,11 @@ import java.util.List;
 public interface CollectorService {
     /**
      * 保存页面浏览信息到mongodb
-     * @param pageView
      */
     void save(PageView pageView);
 
     /**
      * 保存用户操作信息到mongodb
-     * @param option
      */
     void save(Option option);
 
@@ -36,8 +34,6 @@ public interface CollectorService {
 
     /**
      * 发送消息到Kafka
-     * @param topicName
-     * @param msg
      */
     void sendMessage(String topicName, Object msg);
 }
