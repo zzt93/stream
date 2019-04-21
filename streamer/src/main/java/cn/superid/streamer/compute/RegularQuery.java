@@ -103,17 +103,15 @@ public class RegularQuery implements Serializable {
             for (int offset = 0; offset < size; offset++) {
                 Dataset<PageView> inTimeRange = getInTimeRange(pageDataSet, last, unit, offset);
                 Timestamp epoch = Timestamp.valueOf(unit.update(last,  offset+1));
+                logger.debug("{}", epoch);
                 Dataset<PageStatistic> stat = inTimeRange
                         .agg(count("*").as("pv"), countDistinct(col("viewId")).as("uv"),
                                 countDistinct(col("userId")).as("uvSigned"))
                         .withColumn("epoch", lit(epoch)).withColumn("id", lit(epoch.getTime()))
                         .as(Encoders.bean(PageStatistic.class));
                 list.add(stat.first());
-                logger.debug("offset: {}", offset);
-                logger.debug("repeat last: {}", last);
-                mongo.insert(list, collection);
-                list.clear();
             }
+            mongo.insert(list, collection);
         } catch (Exception e) {
             logger.error("", e);
         }
