@@ -67,25 +67,25 @@ public class CollectorServiceImpl implements CollectorService {
     @Override
     public void save(PageView pageView) {
         LOGGER.debug("save pageView to mongo: {}", pageView);
-        saveMongoAndMemory(pageView, pageQueue, pageEstimatedSize);
+        saveMongoAndMemory(pageView, pageQueue, pageEstimatedSize, pageCollection);
     }
 
     @Async
     @Override
     public void save(Option option) {
         LOGGER.debug("save option to mongo : {}", option);
-        saveMongoAndMemory(option, optionQueue, optionEstimatedSize);
+        saveMongoAndMemory(option, optionQueue, optionEstimatedSize, optionCollection);
     }
 
-    private <T> void saveMongoAndMemory(T option, ConcurrentLinkedDeque<T> queue, AtomicLong c) {
+    private <T> void saveMongoAndMemory(T option, ConcurrentLinkedDeque<T> queue, AtomicLong c, String collection) {
         try {
-            mongo.insert(option, optionCollection);
+            mongo.insert(option, collection);
         } catch (Exception e) {
             LOGGER.error("", e);
         }
 
         queue.addLast(option);
-        if (queue.size() == TWENTY) {
+        if (queue.size() >= TWENTY) {
             queue.removeFirst();
         }
         c.incrementAndGet();
