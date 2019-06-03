@@ -18,6 +18,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -261,7 +262,6 @@ public class StreamerController {
     public List<RichPageStatistic> rangeRichPageviews(@RequestBody RichForm richForm) {
       richForm.validate();
       logger.info("request info : {}", richForm);
-      return streamerService.rangeRichPageviewsInUnit(richForm,
-          Unit.valueOf(richForm.getTimeUnit().toUpperCase()));
+      return Collections.emptyList();
     }
 }
