@@ -189,6 +189,14 @@ public class StreamerController {
         return mongo.find(query, tClass, collection);
     }
 
+    private <T> List<T> queryMongo(TimeRange range, String collection, Class<T> tClass) {
+        Preconditions.checkArgument(range.getFrom() != null && range.getTo() != null, "No time range");
+        Criteria criteria = Criteria.where("epoch").gte(range.getFrom())
+                .andOperator(Criteria.where("epoch").lt(range.getTo()));
+        Query query = Query.query(criteria).with(range.pageRequest());
+        return mongo.find(query, tClass, collection);
+    }
+
     /**
      * 查询最近30分钟的浏览统计信息（刷新页面或者刚打开页面的时候，一次性加载30分钟的数据，后续只增量更新一分钟的数据）
      *
@@ -260,11 +268,24 @@ public class StreamerController {
     public List<PageStatistic> getStatistics(@RequestBody TimeRange timeRange){
         int precision = timeRange.getPrecision();
         if (precision == 1) { //月
-            return queryMongo(timeRange, month, ChronoUnit.MONTHS, PageStatistic.class);
+            return queryMongo(timeRange, month, PageStatistic.class);
         } else if (precision == 3) { // 小时
             return queryMongo(timeRange, hour, ChronoUnit.HOURS, PageStatistic.class);
         } else { // 默认为天
             return queryMongo(timeRange, day, ChronoUnit.DAYS, PageStatistic.class);
+        }
+    }
+
+    @PostMapping("/statistics_detail")
+    public List<PageView> statisticsDetail(@RequestBody TimeRange timeRange) {
+        Preconditions.checkNotNull(timeRange.pageRequest(), "No pagination info or too deep pagination");
+        int precision = timeRange.getPrecision();
+        if (precision == 1) { // 月
+            return queryMongo(timeRange, page, PageView.class);
+        } else if (precision == 3) { // 小时
+            return queryMongo(timeRange, page, ChronoUnit.HOURS, PageView.class);
+        } else { // 默认为天
+            return queryMongo(timeRange, page, ChronoUnit.DAYS, PageView.class);
         }
     }
 
@@ -273,7 +294,7 @@ public class StreamerController {
     public List<PlatformStatistic> getPlatformStatistic(@RequestBody TimeRange timeRange){
         int precision = timeRange.getPrecision();
         if (precision == 1) { // 月
-            return queryMongo(timeRange, platformMonths, ChronoUnit.MONTHS, PlatformStatistic.class);
+            return queryMongo(timeRange, platformMonths, PlatformStatistic.class);
         } else if (precision == 3) { // 小时
             return queryMongo(timeRange, platformHours, ChronoUnit.HOURS, PlatformStatistic.class);
         } else { // 默认为天
