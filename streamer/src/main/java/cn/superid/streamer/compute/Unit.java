@@ -58,6 +58,21 @@ public enum Unit {
     public int diff(Timestamp start, Timestamp end) {
       return (int)Duration.between(start.toLocalDateTime(), end.toLocalDateTime()).toMinutes();
     }
+  }, MONTH(12, ChronoUnit.MONTHS) {
+    @Override
+    public LocalDateTime update(Timestamp dateTime, int offset) {
+      return dateTime.toLocalDateTime().plusMonths(offset);
+    }
+
+    @Override
+    public int getUnit(Timestamp timestamp) {
+      return timestamp.toLocalDateTime().getMonthValue();
+    }
+
+    @Override
+    public int diff(Timestamp start, Timestamp end) {
+      return (int) Duration.between(start.toLocalDateTime(), end.toLocalDateTime()).toDays() / 30;
+    }
   };
 
   public final int range;

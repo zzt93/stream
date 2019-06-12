@@ -28,6 +28,22 @@ collector.mongo.minute: minutes
 collector.mongo.hour: hours
 #mongodb collection名字，用于保存按时间维度计算出的每天的pv uv结果
 collector.mongo.day: days
+#mongodb collection名字，用于保存按时间维度计算出的每月的pv uv结果
+collector.mongo.month: months
+
+#mongodb collection名字，用于保存按时间维度计算出的每小时的平台访客结果
+collector.mongo.platform.hour: platform_hours
+#mongodb collection名字，用于保存按时间维度计算出的每天的平台访客结果
+collector.mongo.platform.day: platform_days
+#mongodb collection名字，用于保存按时间维度计算出的每月的平台访客结果
+collector.mongo.platform.month: platform_months
+
+#mongodb collection名字，用于保存按时间维度计算出的每小时的认证结果
+collector.mongo.auth.hour: auth_hours
+#mongodb collection名字，用于保存按时间维度计算出的每天的认证结果
+collector.mongo.auth.day: auth_days
+#mongodb collection名字，用于保存按时间维度计算出的每月的认证结果
+collector.mongo.auth.month: auth_months
 
 
 #按时间维度计算每分钟的pv uv结果保存的kafka topic
