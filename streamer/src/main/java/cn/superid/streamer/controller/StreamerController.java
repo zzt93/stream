@@ -267,11 +267,11 @@ public class StreamerController {
     @PostMapping("/get_statistics")
     public List<PageStatistic> getStatistics(@RequestBody TimeRange timeRange){
         int precision = timeRange.getPrecision();
-        if (precision == 1) { //月
+        if (precision == TimePrecision.MONTH) {
             return queryMongo(timeRange, month, ChronoUnit.DAYS, PageStatistic.class);
-        } else if (precision == 3) { // 小时
+        } else if (precision == TimePrecision.HOUR) {
             return queryMongo(timeRange, hour, ChronoUnit.HOURS, PageStatistic.class);
-        } else { // 默认为天
+        } else {
             return queryMongo(timeRange, day, ChronoUnit.DAYS, PageStatistic.class);
         }
     }
@@ -281,11 +281,11 @@ public class StreamerController {
         Preconditions.checkNotNull(timeRange.pageRequest(), "No pagination info or too deep pagination");
         List<PageView> pageViews = new ArrayList<>();
         int precision = timeRange.getPrecision();
-        if (precision == TimePrecision.MONTH) { // 月
+        if (precision == TimePrecision.MONTH) {
             pageViews = queryMongo(timeRange, page, ChronoUnit.DAYS, PageView.class);
-        } else if (precision == TimePrecision.HOUR) { // 小时
+        } else if (precision == TimePrecision.HOUR) {
             pageViews = queryMongo(timeRange, page, ChronoUnit.HOURS, PageView.class);
-        } else { // 默认为天
+        } else {
             pageViews = queryMongo(timeRange, page, ChronoUnit.DAYS, PageView.class);
         }
 
@@ -298,33 +298,14 @@ public class StreamerController {
     @ApiOperation(value = "根据精度获取不同平台访客数据", notes = "", response = PlatformStatistic.class)
     @PostMapping("/get_platform_statistics")
     public List<PlatformStatistic> getPlatformStatistic(@RequestBody TimeRange timeRange){
-        List<PlatformStatistic> platformStatistics = new ArrayList<>();
         int precision = timeRange.getPrecision();
-        if (precision == TimePrecision.MONTH) { // 月
-            platformStatistics =  queryMongo(timeRange, platformMonths, ChronoUnit.DAYS, PlatformStatistic.class);
-        } else if (precision == TimePrecision.HOUR) { // 小时
-            platformStatistics = queryMongo(timeRange, platformHours, ChronoUnit.HOURS, PlatformStatistic.class);
-        } else { // 默认为天
-            platformStatistics = queryMongo(timeRange, platformDays, ChronoUnit.DAYS, PlatformStatistic.class);
+        if (precision == TimePrecision.MONTH) {
+            return queryMongo(timeRange, platformMonths, ChronoUnit.DAYS, PlatformStatistic.class);
+        } else if (precision == TimePrecision.HOUR) {
+            return queryMongo(timeRange, platformHours, ChronoUnit.HOURS, PlatformStatistic.class);
+        } else {
+            return queryMongo(timeRange, platformDays, ChronoUnit.DAYS, PlatformStatistic.class);
         }
-
-        if (platformStatistics.size() > 0) {
-            logger.info("get_platform_statistics succ, res={}", platformStatistics);
-            return platformStatistics;
-        }
-
-        List<PlatformStatistic> temp = new ArrayList<>();
-        PlatformStatistic p1 = new PlatformStatistic(new Timestamp(new Date().getTime()-1000*60*60*24), 10, 20, 30, 40);
-        PlatformStatistic p2 = new PlatformStatistic(new Timestamp(new Date().getTime()-1000*60*60*24), 40, 30, 20, 10);
-        PlatformStatistic p3 = new PlatformStatistic(new Timestamp(new Date().getTime()-1000*60*60*24), 12, 22, 43, 36);
-        PlatformStatistic p4 = new PlatformStatistic(new Timestamp(new Date().getTime()-1000*60*60*24), 15, 25, 35, 45);
-        PlatformStatistic p5 = new PlatformStatistic(new Timestamp(new Date().getTime()-1000*60*60*24), 19, 23, 46, 26);
-        temp.add(p1);
-        temp.add(p2);
-        temp.add(p3);
-        temp.add(p4);
-        temp.add(p5);
-        return temp;
     }
 
     @ApiOperation(value = "根据精度获取不同认证状态用户数据", notes = "", response = AuthStatistic.class)
