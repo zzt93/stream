@@ -15,6 +15,11 @@ public class TimeRange {
   private int page;
   private int size;
 
+  /**
+   * 精度，1月|2天|3小时
+   */
+  private int precision;
+
   public Timestamp getFrom() {
     return from;
   }
@@ -45,6 +50,14 @@ public class TimeRange {
 
   public void setSize(int size) {
     this.size = size;
+  }
+
+  public int getPrecision() {
+    return precision;
+  }
+
+  public void setPrecision(int precision) {
+    this.precision = precision;
   }
 
   public Pageable pageRequest() {

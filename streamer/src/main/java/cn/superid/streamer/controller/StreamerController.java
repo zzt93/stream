@@ -2,15 +2,14 @@ package cn.superid.streamer.controller;
 
 import static cn.superid.streamer.util.TimestampUtils.truncate;
 
-import cn.superid.collector.entity.view.PageStatistic;
-import cn.superid.collector.entity.view.PageView;
-import cn.superid.collector.entity.view.RichPageStatistic;
+import cn.superid.collector.entity.view.*;
 import cn.superid.streamer.compute.MongoConfig;
 import cn.superid.streamer.compute.SqlQuery;
 import cn.superid.streamer.compute.Unit;
 import cn.superid.streamer.form.RichForm;
 import cn.superid.streamer.form.TimeRange;
 import cn.superid.streamer.service.StreamerService;
+import cn.superid.streamer.vo.CurrentInfoVO;
 import com.google.common.base.Preconditions;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -50,10 +49,20 @@ public class StreamerController {
     private static final Logger logger = LoggerFactory.getLogger(StreamerController.class);
     private final SqlQuery sqlQuery;
     private final MongoTemplate mongo;
+    private final String month;
     private final String day;
     private final String hour;
     private final String minute;
     private final String page;
+
+    private final String platformHours;
+    private final String platformDays;
+    private final String platformMonths;
+
+    private final String authHours;
+    private final String authDays;
+    private final String authMonths;
+
     @Autowired
     private StreamerService streamerService;
 
@@ -62,14 +71,31 @@ public class StreamerController {
                               @Value("${collector.mongo.page}") String page,
                               @Value("${collector.mongo.minute}") String minute,
                               @Value("${collector.mongo.hour}") String hour,
-                              @Value("${collector.mongo.day}") String day
+                              @Value("${collector.mongo.day}") String day,
+                              @Value("${collector.mongo.month}") String month,
+                              @Value("{collector.mongo.platform.hour}") String platformHours,
+                              @Value("{collector.mongo.platform.day}") String platformDays,
+                              @Value("{collector.mongo.platform.month}") String platformMonths,
+                              @Value("{collector.mongo.auth.hour}") String authHours,
+                              @Value("{collector.mongo.auth.day}") String authDays,
+                              @Value("{collector.mongo.auth.month}") String authMonths
     ) {
         this.sqlQuery = sqlQuery;
         this.mongo = mongo;
         this.minute = minute;
         this.hour = hour;
         this.day = day;
+        this.month = month;
         this.page = page;
+
+        this.platformHours = platformHours;
+        this.platformDays = platformDays;
+        this.platformMonths = platformMonths;
+
+        this.authHours = authHours;
+        this.authDays = authDays;
+        this.authMonths = authMonths;
+
         MongoConfig.createIfNotExist(mongo, this.minute, Unit.MINUTE.getRange() * 50);
     }
 
@@ -263,5 +289,51 @@ public class StreamerController {
       richForm.validate();
       logger.info("request info : {}", richForm);
       return Collections.emptyList();
+    }
+
+    @ApiOperation(value = "获取当前信息", notes = "", response = CurrentInfoVO.class)
+    @PostMapping("/current_info")
+    public CurrentInfoVO getCurrentInfo(){
+        CurrentInfoVO currentInfoVO = new CurrentInfoVO(0, 0, 0, 100);
+        return currentInfoVO;
+    }
+
+    @ApiOperation(value = "根据精度获取PVUV统计信息", notes = "", response = PageStatistic.class)
+    @PostMapping("/get_statistics")
+    public List<PageStatistic> getStatistics(TimeRange timeRange){
+        int precision = timeRange.getPrecision();
+        if (precision == 1) { //月
+            return queryMongo(timeRange, month, ChronoUnit.MONTHS, PageStatistic.class);
+        } else if (precision == 3) { // 小时
+            return queryMongo(timeRange, hour, ChronoUnit.HOURS, PageStatistic.class);
+        } else { // 默认为天
+            return queryMongo(timeRange, day, ChronoUnit.DAYS, PageStatistic.class);
+        }
+    }
+
+    @ApiOperation(value = "根据精度获取不同平台访客数据", notes = "", response = PlatformStatistic.class)
+    @PostMapping("/get_platform_statistics")
+    public List<PlatformStatistic> getPlatformStatistic(TimeRange timeRange){
+        int precision = timeRange.getPrecision();
+        if (precision == 1) { // 月
+            return queryMongo(timeRange, platformMonths, ChronoUnit.MONTHS, PlatformStatistic.class);
+        } else if (precision == 3) { // 小时
+            return queryMongo(timeRange, platformHours, ChronoUnit.HOURS, PlatformStatistic.class);
+        } else { // 默认为天
+            return queryMongo(timeRange, platformDays, ChronoUnit.DAYS, PlatformStatistic.class);
+        }
+    }
+
+    @ApiOperation(value = "根据精度获取不同认证状态用户数据", notes = "", response = AuthStatistic.class)
+    @PostMapping("/get_auth_statistic")
+    public List<AuthStatistic> getAuthStatistic(TimeRange timeRange){
+        int precision = timeRange.getPrecision();
+        if (precision == 1) { // 月
+            return queryMongo(timeRange, authMonths, ChronoUnit.MONTHS, AuthStatistic.class);
+        } else if (precision == 3) { // 小时
+            return queryMongo(timeRange, authHours, ChronoUnit.HOURS, AuthStatistic.class);
+        } else { // 默认为天
+            return queryMongo(timeRange, authDays, ChronoUnit.DAYS, AuthStatistic.class);
+        }
     }
 }
