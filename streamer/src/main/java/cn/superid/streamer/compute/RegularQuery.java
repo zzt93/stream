@@ -135,53 +135,6 @@ public class RegularQuery implements Serializable {
         }
     }
 
-    /**
-     * 计算每小时、每天的pv uv 放到mongodb中，如果mongodb中缺少了部分数据（程序挂了），会补全最后一条数据到当前时间之间的数据
-     *
-     * @param collection
-     * @param now
-     * @param unit
-     */
-    private void repeatRich(String collection, Timestamp now, Unit unit) {
-        try {
-            MongoConfig.createIfNotExist(mongo, collection, unit.range * 10);
-            LastAndSize lastAndSize = getLastAndSize(collection, now, unit, "repeatRich");
-            Timestamp last = lastAndSize.getLast();
-            int size = lastAndSize.getSize();
-
-            ArrayList<RichPageStatistic> list = new ArrayList<>();
-            for (int offset = 0; offset < size; offset++) {
-                //从mongodb中获取last到offset+1这段时间内的数据，作为spark的dataset
-                Dataset<PageView> inTimeRange = getInTimeRange(pageDataSet, last, unit, offset);
-                //不加Object[]强制转换，jenkins编译会报错
-                if (((Object[]) inTimeRange.collect()).length <= 0) {
-                    continue;
-                }
-                Timestamp epoch = Timestamp.valueOf(unit.update(last,  offset+1));
-                Dataset<RichPageStatistic> stat = inTimeRange
-                        .groupBy(inTimeRange.col("deviceType"),
-                                inTimeRange.col("allianceId"),
-                                inTimeRange.col("affairId"),
-                                inTimeRange.col("targetId"),
-                                inTimeRange.col("publicIp"))
-                        .agg(count("*").as("pv"), countDistinct(col("viewId")).as("uv"),
-                                countDistinct(col("userId")).as("uvSigned"))
-                        .withColumn("epoch", lit(epoch))
-//                            .withColumn("id", lit(epoch.getTime())) //同一时间有多个记录，不能用时间做为id，否则插入mongo的时候报错 dup key
-                        .as(Encoders.bean(RichPageStatistic.class));
-                //分组计算的结果都保存进去
-                list.addAll(stat.collectAsList());
-                logger.debug("insert {} into mongo collection: {}", list, collection);
-                mongo.insert(list, collection);
-                list.clear();
-                logger.debug("offset: {}", offset);
-                logger.debug("repeatRich last: {}", last);
-            }
-
-        } catch (Exception e) {
-            logger.error("", e);
-        }
-    }
 
     @Scheduled(fixedRate = 1000 * 60 * 60, initialDelay = 1000 * 60)
     public void platformEveryHour(){
