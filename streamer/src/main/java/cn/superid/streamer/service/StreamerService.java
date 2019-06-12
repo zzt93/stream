@@ -1,7 +1,7 @@
 package cn.superid.streamer.service;
 
 import cn.superid.collector.entity.view.PageView;
-import cn.superid.collector.entity.view.RichPageStatistic;
+import cn.superid.streamer.entity.RichPageStatistic;
 import cn.superid.streamer.compute.MongoConfig;
 import cn.superid.streamer.compute.Unit;
 import cn.superid.streamer.form.RichForm;
