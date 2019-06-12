@@ -257,7 +257,7 @@ public class StreamerController {
 
     @ApiOperation(value = "根据精度获取PVUV统计信息", notes = "", response = PageStatistic.class)
     @PostMapping("/get_statistics")
-    public List<PageStatistic> getStatistics(TimeRange timeRange){
+    public List<PageStatistic> getStatistics(@RequestBody TimeRange timeRange){
         int precision = timeRange.getPrecision();
         if (precision == 1) { //月
             return queryMongo(timeRange, month, ChronoUnit.MONTHS, PageStatistic.class);
@@ -270,7 +270,7 @@ public class StreamerController {
 
     @ApiOperation(value = "根据精度获取不同平台访客数据", notes = "", response = PlatformStatistic.class)
     @PostMapping("/get_platform_statistics")
-    public List<PlatformStatistic> getPlatformStatistic(TimeRange timeRange){
+    public List<PlatformStatistic> getPlatformStatistic(@RequestBody TimeRange timeRange){
         int precision = timeRange.getPrecision();
         if (precision == 1) { // 月
             return queryMongo(timeRange, platformMonths, ChronoUnit.MONTHS, PlatformStatistic.class);
@@ -283,7 +283,7 @@ public class StreamerController {
 
     @ApiOperation(value = "根据精度获取不同认证状态用户数据", notes = "", response = AuthStatistic.class)
     @PostMapping("/get_auth_statistic")
-    public List<AuthStatistic> getAuthStatistic(TimeRange timeRange){
+    public List<AuthStatistic> getAuthStatistic(@RequestBody TimeRange timeRange){
         List<AuthStatistic> authStatistics= queryMongo(timeRange, authHours, ChronoUnit.HOURS, AuthStatistic.class);
 //        int precision = timeRange.getPrecision();
 //        if (precision == 1) { // 月
