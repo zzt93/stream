@@ -6,6 +6,10 @@ import cn.superid.collector.entity.view.*;
 import cn.superid.streamer.compute.MongoConfig;
 import cn.superid.streamer.compute.SqlQuery;
 import cn.superid.streamer.compute.Unit;
+import cn.superid.streamer.entity.AuthStatistic;
+import cn.superid.streamer.entity.PageStatistic;
+import cn.superid.streamer.entity.PlatformStatistic;
+import cn.superid.streamer.entity.RichPageStatistic;
 import cn.superid.streamer.form.RichForm;
 import cn.superid.streamer.form.TimeRange;
 import cn.superid.streamer.service.StreamerService;
@@ -60,8 +64,6 @@ public class StreamerController {
     private final String platformMonths;
 
     private final String authHours;
-    private final String authDays;
-    private final String authMonths;
 
     @Autowired
     private StreamerService streamerService;
@@ -76,9 +78,7 @@ public class StreamerController {
                               @Value("{collector.mongo.platform.hour}") String platformHours,
                               @Value("{collector.mongo.platform.day}") String platformDays,
                               @Value("{collector.mongo.platform.month}") String platformMonths,
-                              @Value("{collector.mongo.auth.hour}") String authHours,
-                              @Value("{collector.mongo.auth.day}") String authDays,
-                              @Value("{collector.mongo.auth.month}") String authMonths
+                              @Value("{collector.mongo.auth.hour}") String authHours
     ) {
         this.sqlQuery = sqlQuery;
         this.mongo = mongo;
@@ -93,8 +93,6 @@ public class StreamerController {
         this.platformMonths = platformMonths;
 
         this.authHours = authHours;
-        this.authDays = authDays;
-        this.authMonths = authMonths;
 
         MongoConfig.createIfNotExist(mongo, this.minute, Unit.MINUTE.getRange() * 50);
     }
@@ -286,13 +284,15 @@ public class StreamerController {
     @ApiOperation(value = "根据精度获取不同认证状态用户数据", notes = "", response = AuthStatistic.class)
     @PostMapping("/get_auth_statistic")
     public List<AuthStatistic> getAuthStatistic(TimeRange timeRange){
-        int precision = timeRange.getPrecision();
-        if (precision == 1) { // 月
-            return queryMongo(timeRange, authMonths, ChronoUnit.MONTHS, AuthStatistic.class);
-        } else if (precision == 3) { // 小时
-            return queryMongo(timeRange, authHours, ChronoUnit.HOURS, AuthStatistic.class);
-        } else { // 默认为天
-            return queryMongo(timeRange, authDays, ChronoUnit.DAYS, AuthStatistic.class);
-        }
+        List<AuthStatistic> authStatistics= queryMongo(timeRange, authHours, ChronoUnit.HOURS, AuthStatistic.class);
+//        int precision = timeRange.getPrecision();
+//        if (precision == 1) { // 月
+//
+//        } else if (precision == 3) { // 小时
+//
+//        } else { // 默认为天
+//
+//        }
+        return authStatistics;
     }
 }

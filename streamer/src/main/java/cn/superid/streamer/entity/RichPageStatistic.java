@@ -1,9 +1,8 @@
-package cn.superid.collector.entity.view;
+package cn.superid.streamer.entity;
 
 import com.google.gson.Gson;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 
 /**
  * 更详尽的页面浏览的统计信息

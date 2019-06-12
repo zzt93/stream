@@ -6,10 +6,10 @@ import static org.apache.spark.sql.functions.count;
 import static org.apache.spark.sql.functions.countDistinct;
 import static org.apache.spark.sql.functions.lit;
 
-import cn.superid.collector.entity.view.PageStatistic;
+import cn.superid.streamer.entity.PageStatistic;
 import cn.superid.collector.entity.view.PageView;
-import cn.superid.collector.entity.view.PlatformStatistic;
-import cn.superid.collector.entity.view.RichPageStatistic;
+import cn.superid.streamer.entity.PlatformStatistic;
+import cn.superid.streamer.entity.RichPageStatistic;
 import cn.superid.streamer.vo.LastAndSize;
 import cn.superid.streamer.vo.PlatformTemp;
 import com.mongodb.BasicDBObject;
@@ -62,10 +62,6 @@ public class RegularQuery implements Serializable {
 
     @Value("{collector.mongo.auth.hour}")
     private String authHours;
-    @Value("{collector.mongo.auth.day}")
-    private String authDays;
-    @Value("{collector.mongo.auth.month}")
-    private String authMonths;
 
     private Dataset<PageView> pageDataSet;
 
