@@ -174,6 +174,7 @@ public class RegularQuery implements Serializable {
                         .groupBy(inTimeRange.col("devType"))
                         .agg(countDistinct("viewId").as("uv"))
                         .withColumn("epoch", lit(epoch))
+                        .withColumn("id", lit(epoch.getTime()))
                         .as(Encoders.bean(PlatformTemp.class));
                 List<PlatformTemp> platformTempList = stats.collectAsList();
                 if (platformTempList.size() <= 0) {
