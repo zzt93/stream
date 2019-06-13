@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -259,8 +260,7 @@ public class StreamerController {
     @ApiOperation(value = "获取当前信息", notes = "", response = CurrentInfoVO.class)
     @PostMapping("/current_info")
     public CurrentInfoVO getCurrentInfo(){
-        CurrentInfoVO currentInfoVO = new CurrentInfoVO(0, 0, 0, 100);
-        return currentInfoVO;
+        return streamerService.getCurrentInfo();
     }
 
     @ApiOperation(value = "根据精度获取PVUV统计信息", notes = "", response = PageStatistic.class)
@@ -312,40 +312,41 @@ public class StreamerController {
     @PostMapping("/get_auth_statistic")
     public List<AuthStatistic> getAuthStatistic(@RequestBody TimeRange timeRange){
         List<AuthStatistic> authStatistics = queryMongo(timeRange, authHours, ChronoUnit.HOURS, AuthStatistic.class);
-        List<AuthStatistic> temp = new ArrayList<>();
-        AuthStatistic a1 = new AuthStatistic(new Timestamp(new Date().getTime()-1000*60*60*24));
-        a1.setIdAuth(10);
-        a1.setNotAuth(5);
-        a1.setPassportAuth(0);
+        return filterAuthStatistic(authStatistics, timeRange.getPrecision());
+    }
 
-        AuthStatistic a2 = new AuthStatistic(new Timestamp(new Date().getTime()-1000*60*60*20));
-        a2.setIdAuth(20);
-        a2.setNotAuth(15);
-        a2.setPassportAuth(10);
+    private List<AuthStatistic> filterAuthStatistic(List<AuthStatistic> authStatistics, int precision) {
+        if (precision == TimePrecision.HOUR) {
+            return authStatistics;
+        }
 
-        AuthStatistic a3 = new AuthStatistic(new Timestamp(new Date().getTime()-1000*60*60*16));
-        a3.setIdAuth(30);
-        a3.setNotAuth(25);
-        a3.setPassportAuth(24);
+        Map<Timestamp, AuthStatistic> map = new HashMap<>();
+        authStatistics.stream().forEach(a -> map.put(a.getEpoch(), a));
 
-        AuthStatistic a4 = new AuthStatistic(new Timestamp(new Date().getTime()-1000*60*60*12));
-        a4.setIdAuth(50);
-        a4.setNotAuth(35);
-        a4.setPassportAuth(39);
+        Map<Long, Timestamp> timeGroup = new HashMap<>();
+        if (precision == TimePrecision.MONTH) {
+            map.keySet().stream().forEach(k -> {
+                long curKey = (long)(k.getYear() * 12 + k.getMonth());
+                if (!timeGroup.containsKey(curKey) || timeGroup.get(curKey).before(k)) {
+                    timeGroup.put(curKey, k);
+                }
+            });
+        } else { // 天
+            map.keySet().stream().forEach(k -> {
+                long curKey = k.getTime()/1000/60/60/24;
+                if (!timeGroup.containsKey(curKey) || timeGroup.get(curKey).before(k)) {
+                    timeGroup.put(curKey, k);
+                }
+            });
+        }
 
-        temp.add(a1);
-        temp.add(a2);
-        temp.add(a3);
-        temp.add(a4);
-        return temp;
-//        int precision = timeRange.getPrecision();
-//        if (precision == 1) { // 月
-//
-//        } else if (precision == 3) { // 小时
-//
-//        } else { // 默认为天
-//
-//        }
-//        return authStatistics;
+        List<Timestamp> timeRes = new ArrayList<>(timeGroup.values());
+        Collections.sort(timeRes);
+
+        ArrayList<AuthStatistic> res = new ArrayList<>();
+        for (Timestamp t : timeRes) {
+            res.add(map.get(t));
+        }
+        return res;
     }
 }
