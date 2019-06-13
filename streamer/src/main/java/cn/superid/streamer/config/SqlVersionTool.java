@@ -1,4 +1,4 @@
-package cn.superid.collector.config;
+package cn.superid.streamer.config;
 
 import cn.superid.common.utils.lock.RedisLock;
 import com.esotericsoftware.yamlbeans.YamlException;
@@ -20,10 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -103,7 +100,7 @@ public class SqlVersionTool implements CommandLineRunner {
                         }
                         return Integer.parseInt(entry.getKey()) > version;
                     })
-                    .sorted((e1,e2)->  Integer.parseInt(e1.getKey())-Integer.parseInt(e2.getKey()))
+                    .sorted(Comparator.comparingInt(e -> Integer.parseInt(e.getKey())))
                     .collect(Collectors.toList());
             return res;
         } catch (YamlException e) {
