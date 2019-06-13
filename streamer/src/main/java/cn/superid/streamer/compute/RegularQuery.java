@@ -6,6 +6,10 @@ import static org.apache.spark.sql.functions.count;
 import static org.apache.spark.sql.functions.countDistinct;
 import static org.apache.spark.sql.functions.lit;
 
+import cn.superid.streamer.constant.AuthType;
+import cn.superid.streamer.dao.UserActiveLogDao;
+import cn.superid.streamer.dao.UserInfoLogDao;
+import cn.superid.streamer.entity.AuthStatistic;
 import cn.superid.streamer.entity.PageStatistic;
 import cn.superid.collector.entity.view.PageView;
 import cn.superid.streamer.entity.PlatformStatistic;
@@ -64,6 +68,9 @@ public class RegularQuery implements Serializable {
     private String authHours;
 
     private Dataset<PageView> pageDataSet;
+
+    @Autowired
+    private UserInfoLogDao userInfoLogDao;
 
 
     @Autowired
@@ -201,14 +208,31 @@ public class RegularQuery implements Serializable {
         }
     }
 
+    @Scheduled(fixedRate = 1000 * 60 * 60, initialDelay = 1000 * 90)
+    public void authEveryHour(){
+        Timestamp now = Timestamp
+                .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS));
+        logger.debug("execute authEveryHour of :  {}", now.toLocalDateTime().truncatedTo(ChronoUnit.HOURS));
+        repeatAuth(authHours, now, Unit.HOUR);
+    }
+
     private void repeatAuth(String collection, Timestamp now, Unit unit){
         try {
             MongoConfig.createIfNotExist(mongo, collection, unit.range * 10);
-            LastAndSize lastAndSize = getLastAndSize(collection, now, unit, "repeatAuth");
-            Timestamp last = lastAndSize.getLast();
-            int size = lastAndSize.getSize();
 
-            ArrayList<PageStatistic> list = new ArrayList<>();
+            long notAuth = userInfoLogDao.countByAuthType(AuthType.NOT_AUTH);
+            long idAuth = userInfoLogDao.countByAuthType(AuthType.ID_AUTH);
+            long passportAuth = userInfoLogDao.countByAuthType(AuthType.PASSPORT_AUTH);
+
+            AuthStatistic authStatistic = new AuthStatistic();
+            authStatistic.setNotAuth(notAuth);
+            authStatistic.setIdAuth(idAuth);
+            authStatistic.setPassportAuth(passportAuth);
+
+            ArrayList<AuthStatistic> list = new ArrayList<>();
+            list.add(authStatistic);
+
+            mongo.insert(list, collection);
         } catch (Exception e) {
             logger.error("", e);
         }

@@ -1,13 +1,18 @@
 package cn.superid.streamer.service;
 
 import cn.superid.collector.entity.view.PageView;
+import cn.superid.streamer.constant.ActiveStatus;
+import cn.superid.streamer.dao.UserActiveLogDao;
+import cn.superid.streamer.dao.UserInfoLogDao;
 import cn.superid.streamer.entity.RichPageStatistic;
 import cn.superid.streamer.compute.MongoConfig;
 import cn.superid.streamer.compute.Unit;
 import cn.superid.streamer.form.RichForm;
+import cn.superid.streamer.vo.CurrentInfoVO;
 import com.mongodb.spark.MongoSpark;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,6 +48,12 @@ public class StreamerService {
   public static final String UPPER = "UPPER";
   private final Logger logger = LoggerFactory.getLogger(StreamerService.class);
   private final Dataset<PageView> pageView;
+
+  @Autowired
+  private UserInfoLogDao userInfoLogDao;
+
+  @Autowired
+  private UserActiveLogDao userActiveLogDao;
 
   @Autowired
   public StreamerService(SparkSession spark, @Value("${collector.mongo.page}") String pages) {
@@ -112,5 +123,16 @@ public class StreamerService {
       }
     }
     return res;
+  }
+
+  public CurrentInfoVO getCurrentInfo(){
+    long onlineUser = userActiveLogDao.countOnlineUser();
+    Timestamp from = Timestamp
+            .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.DAYS));
+    long newUser = userInfoLogDao.countByCreateTimeAfter(from);
+    long activeUser = userActiveLogDao.countActiveUser(from, Timestamp.valueOf(LocalDateTime.now()));
+    long totalUser = userInfoLogDao.count();
+
+    return new CurrentInfoVO(onlineUser, newUser, activeUser, totalUser);
   }
 }
