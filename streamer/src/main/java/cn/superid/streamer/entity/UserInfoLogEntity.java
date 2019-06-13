@@ -13,20 +13,16 @@ public class UserInfoLogEntity {
     private long userId;
     private int authType;
     private Timestamp authTime;
-    private int onlineStatus;
-    private int activeStatus;
     private Timestamp createTime;
 
     public UserInfoLogEntity() {
     }
 
-    public UserInfoLogEntity(long id, long userId, int authType, Timestamp authTime, int onlineStatus, int activeStatus, Timestamp createTime) {
+    public UserInfoLogEntity(long id, long userId, int authType, Timestamp authTime, Timestamp createTime) {
         this.id = id;
         this.userId = userId;
         this.authType = authType;
         this.authTime = authTime;
-        this.onlineStatus = onlineStatus;
-        this.activeStatus = activeStatus;
         this.createTime = createTime;
     }
 
@@ -60,22 +56,6 @@ public class UserInfoLogEntity {
 
     public void setAuthTime(Timestamp authTime) {
         this.authTime = authTime;
-    }
-
-    public int getOnlineStatus() {
-        return onlineStatus;
-    }
-
-    public void setOnlineStatus(int onlineStatus) {
-        this.onlineStatus = onlineStatus;
-    }
-
-    public int getActiveStatus() {
-        return activeStatus;
-    }
-
-    public void setActiveStatus(int activeStatus) {
-        this.activeStatus = activeStatus;
     }
 
     public Timestamp getCreateTime() {

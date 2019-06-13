@@ -26,4 +26,6 @@ public interface UserActiveLogDao extends JpaRepository<UserActiveLogEntity, Lon
             "(login_time not null and login_time <= current_time)" +
             "and (logout_time is null or logout_time < login_time)", nativeQuery = true)
     long countOnlineUser();
+
+    UserActiveLogEntity findByUserIdAndDeviceId(long userId, String deviceId);
 }

@@ -2,11 +2,14 @@ package cn.superid.streamer.service;
 
 import cn.superid.collector.entity.view.PageView;
 import cn.superid.streamer.constant.ActiveStatus;
+import cn.superid.streamer.constant.OperationType;
 import cn.superid.streamer.dao.UserActiveLogDao;
 import cn.superid.streamer.dao.UserInfoLogDao;
+import cn.superid.streamer.dto.KafkaDeviceDTO;
 import cn.superid.streamer.entity.RichPageStatistic;
 import cn.superid.streamer.compute.MongoConfig;
 import cn.superid.streamer.compute.Unit;
+import cn.superid.streamer.entity.UserActiveLogEntity;
 import cn.superid.streamer.form.RichForm;
 import cn.superid.streamer.vo.CurrentInfoVO;
 import com.mongodb.spark.MongoSpark;
@@ -15,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -135,4 +139,21 @@ public class StreamerService {
 
     return new CurrentInfoVO(onlineUser, newUser, activeUser, totalUser);
   }
+
+  public void userOperation(KafkaDeviceDTO deviceDTO, int operateType) {
+    UserActiveLogEntity userActiveLogEntity = userActiveLogDao.findByUserIdAndDeviceId(deviceDTO.getUserId(), deviceDTO.getDeviceId());
+    if (userActiveLogEntity == null) {
+      userActiveLogEntity = new UserActiveLogEntity();
+      userActiveLogEntity.setUserId(deviceDTO.getUserId());
+      userActiveLogEntity.setDeviceId(deviceDTO.getDeviceId());
+    }
+    if (operateType == OperationType.online) {
+      userActiveLogEntity.setLoginTime(new Timestamp(new Date().getTime()));
+    } else {
+      userActiveLogEntity.setLogoutTime(new Timestamp(new Date().getTime()));
+    }
+
+    userActiveLogDao.save(userActiveLogEntity);
+  }
+
 }

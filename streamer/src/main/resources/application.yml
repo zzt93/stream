@@ -64,4 +64,3 @@ spring:
     active: ${ACTIVE_PROFILE:dev}
   jackson:
     default-property-inclusion: non_null
-

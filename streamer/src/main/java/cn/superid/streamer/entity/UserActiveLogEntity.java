@@ -5,7 +5,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import java.sql.Timestamp;
 
-@Table(name = "user_info_log")
+@Table(name = "user_active_log")
 @Entity
 public class UserActiveLogEntity {
     @Id
