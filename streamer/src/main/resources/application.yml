@@ -65,10 +65,10 @@ spring:
   jackson:
     default-property-inclusion: non_null
   datasource:
-    url: "jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/simu_streamer_${ACTIVE_PROFILE}?rewriteBatchedStatements=true&autoReconnect=true&useUnicode=true&characterEncoding=utf-8&useSSL=false"
-    driver-class-name: "com.mysql.jdbc.Driver"
-    username: "${MYSQL_USERNAME}"
-    password: "${MYSQL_PSW}"
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/simu_streamer_${ACTIVE_PROFILE}?rewriteBatchedStatements=true&autoReconnect=true&useUnicode=true&characterEncoding=utf-8&useSSL=false
+    driver-class-name: com.mysql.jdbc.Driver
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PSW}
     hikari:
       maximum-pool-size: 20
       minimum-idle: 5
