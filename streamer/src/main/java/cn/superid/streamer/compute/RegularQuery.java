@@ -224,7 +224,7 @@ public class RegularQuery implements Serializable {
             long idAuth = userInfoLogDao.countByAuthType(AuthType.ID_AUTH);
             long passportAuth = userInfoLogDao.countByAuthType(AuthType.PASSPORT_AUTH);
 
-            AuthStatistic authStatistic = new AuthStatistic();
+            AuthStatistic authStatistic = new AuthStatistic(new Timestamp(new Date().getTime()));
             authStatistic.setNotAuth(notAuth);
             authStatistic.setIdAuth(idAuth);
             authStatistic.setPassportAuth(passportAuth);
