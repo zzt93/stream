@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS `user_info_log` (
 CREATE TABLE IF NOT EXISTS `user_active_log` (
     `id` bigint unsigned NOT NULL AUTO_INCREMENT,
     `user_id` bigint NOT NULL,
-    `device_id` varchar NOT NULL,
+    `device_id` varchar(64) NOT NULL,
     `login_time` timestamp NULL,
     `logout_time` timestamp NULL,
     PRIMARY KEY (`id`)
