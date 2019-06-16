@@ -157,6 +157,13 @@
 			<version>1.2.58</version>
 		</dependency>
 
+		<!--kafka模块-->
+		<dependency>
+			<groupId>cn.superid</groupId>
+			<artifactId>cloud-common-kafka</artifactId>
+			<version>${common.version}</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
