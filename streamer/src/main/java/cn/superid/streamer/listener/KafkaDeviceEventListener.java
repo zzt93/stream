@@ -50,7 +50,7 @@ public class KafkaDeviceEventListener {
         return factory;
     }
 
-    @KafkaListener(id = "streamer", topics = "${spring.kafka.topic-prefix}" + TOPIC_OFFLINE,
+    @KafkaListener(id = "streamer", topics = "release_" + TOPIC_OFFLINE,
             containerFactory = "ackContainerFactory")
     public void deviceOfflineListener(ConsumerRecord<Long, String> record,
                                       Acknowledgment ack) throws Exception {
@@ -62,7 +62,7 @@ public class KafkaDeviceEventListener {
         ack.acknowledge();
     }
 
-    @KafkaListener(id = "streamer", topics = "${spring.kafka.topic-prefix}" + TOPIC_ONLINE,
+    @KafkaListener(id = "streamer", topics = "release_" + TOPIC_ONLINE,
             containerFactory = "ackContainerFactory")
     public void deviceOnlineListener(ConsumerRecord<Long, String> record,
                                      Acknowledgment ack) throws Exception {
