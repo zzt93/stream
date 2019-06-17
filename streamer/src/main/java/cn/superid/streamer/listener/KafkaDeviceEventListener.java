@@ -11,11 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-/**
- * @author yinywf
- * @version $Id: KafkaDeviceEventListener.java, v 0.1 2019年04月12日
- */
-
 @Component
 public class KafkaDeviceEventListener {
     private static final Logger logger = LoggerFactory.getLogger(KafkaDeviceEventListener.class);
@@ -26,7 +21,7 @@ public class KafkaDeviceEventListener {
     @Autowired
     private StreamerService streamerService;
 
-    @KafkaListener(topics = "release_" + TOPIC_OFFLINE)
+    @KafkaListener(topics = "${spring.kafka.topic-prefix}" + TOPIC_OFFLINE)
     public void DeviceOfflineListener(ConsumerRecord<Long, String> record) {
         logger.info("deviceOfflineListener, record={}", record.toString());
         KafkaDeviceDTO deviceDTO = JSON.parseObject(record.value(), KafkaDeviceDTO.class);
@@ -35,7 +30,7 @@ public class KafkaDeviceEventListener {
         }
     }
 
-    @KafkaListener(topics = "release_" + TOPIC_ONLINE)
+    @KafkaListener(topics = "${spring.kafka.topic-prefix}" + TOPIC_ONLINE)
     public void DeviceOnlineListener(ConsumerRecord<Long, String> record) {
         logger.info("deviceOnlineListener, record={}", record.toString());
         KafkaDeviceDTO deviceDTO = JSON.parseObject(record.value(), KafkaDeviceDTO.class);
