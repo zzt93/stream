@@ -25,8 +25,7 @@ public class KafkaDeviceEventListener {
     @Autowired
     private StreamerService streamerService;
 
-    @KafkaListener(topics = "${spring.kafka.topic-prefix}" + TOPIC_OFFLINE,
-            containerFactory = "longKeyFactory")
+    @KafkaListener(topics = "${spring.kafka.topic-prefix}" + TOPIC_OFFLINE)
     public void deviceOfflineListener(ConsumerRecord<Long, String> record,
                                       Acknowledgment ack) throws Exception {
         KafkaDeviceDTO deviceDTO = JSON.parseObject(record.value(), KafkaDeviceDTO.class);
@@ -36,8 +35,7 @@ public class KafkaDeviceEventListener {
         ack.acknowledge();
     }
 
-    @KafkaListener(topics = "${spring.kafka.topic-prefix}" + TOPIC_ONLINE,
-            containerFactory = "longKeyFactory")
+    @KafkaListener(topics = "${spring.kafka.topic-prefix}" + TOPIC_ONLINE)
     public void deviceOnlineListener(ConsumerRecord<Long, String> record,
                                      Acknowledgment ack) throws Exception {
         KafkaDeviceDTO deviceDTO = JSON.parseObject(record.value(), KafkaDeviceDTO.class);
