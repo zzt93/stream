@@ -42,37 +42,31 @@ public class KafkaDeviceEventListener {
         return props;
     }
 
-    @Bean("ackContainerFactory")
-    public ConcurrentKafkaListenerContainerFactory ackContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory factory = new ConcurrentKafkaListenerContainerFactory();
-        factory.setConsumerFactory(new DefaultKafkaConsumerFactory(consumerProps()));
-        factory.getContainerProperties().setAckMode(AbstractMessageListenerContainer.AckMode.MANUAL_IMMEDIATE);
-        return factory;
-    }
+//    @Bean("ackContainerFactory")
+//    public ConcurrentKafkaListenerContainerFactory ackContainerFactory() {
+//        ConcurrentKafkaListenerContainerFactory factory = new ConcurrentKafkaListenerContainerFactory();
+//        factory.setConsumerFactory(new DefaultKafkaConsumerFactory(consumerProps()));
+//        factory.getContainerProperties().setAckMode(AbstractMessageListenerContainer.AckMode.MANUAL_IMMEDIATE);
+//        return factory;
+//    }
 
-    @KafkaListener(id = "streamer", topics = "release_" + TOPIC_OFFLINE,
-            containerFactory = "ackContainerFactory")
-    public void deviceOfflineListener(ConsumerRecord<Long, String> record,
-                                      Acknowledgment ack) throws Exception {
+    @KafkaListener(topics = "release_" + TOPIC_OFFLINE)
+    public void deviceOfflineListener(ConsumerRecord<Long, String> record) throws Exception {
         logger.info("deviceOfflineListener, record={}", record.toString());
         KafkaDeviceDTO deviceDTO = JSON.parseObject(record.value(), KafkaDeviceDTO.class);
         if (deviceDTO != null) {
             streamerService.userOperation(deviceDTO, OperationType.offline);
         }
-        ack.acknowledge();
     }
 
-    @KafkaListener(id = "streamer", topics = "release_" + TOPIC_ONLINE,
-            containerFactory = "ackContainerFactory")
-    public void deviceOnlineListener(ConsumerRecord<Long, String> record,
-                                     Acknowledgment ack) throws Exception {
+    @KafkaListener(topics = "release_" + TOPIC_ONLINE)
+    public void deviceOnlineListener(ConsumerRecord<Long, String> record) throws Exception {
         logger.info("deviceOnlineListener, record={}", record.toString());
         KafkaDeviceDTO deviceDTO = JSON.parseObject(record.value(), KafkaDeviceDTO.class);
 
         if (deviceDTO != null) {
             streamerService.userOperation(deviceDTO, OperationType.online);
         }
-        ack.acknowledge();
     }
 
 }
