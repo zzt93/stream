@@ -9,8 +9,7 @@ import java.sql.Timestamp;
 @Entity
 public class UserInfoLogEntity {
     @Id
-    private long id;
-    private long userId;
+    private long id; // 用户id
     private int authType;
     private Timestamp authTime;
     private Timestamp createTime;
@@ -18,9 +17,8 @@ public class UserInfoLogEntity {
     public UserInfoLogEntity() {
     }
 
-    public UserInfoLogEntity(long id, long userId, int authType, Timestamp authTime, Timestamp createTime) {
+    public UserInfoLogEntity(long id, int authType, Timestamp authTime, Timestamp createTime) {
         this.id = id;
-        this.userId = userId;
         this.authType = authType;
         this.authTime = authTime;
         this.createTime = createTime;
@@ -32,14 +30,6 @@ public class UserInfoLogEntity {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(long userId) {
-        this.userId = userId;
     }
 
     public int getAuthType() {
