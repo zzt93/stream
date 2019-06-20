@@ -345,7 +345,11 @@ public class StreamerController {
 
         ArrayList<AuthStatistic> res = new ArrayList<>();
         for (Timestamp t : timeRes) {
-            res.add(map.get(t));
+            AuthStatistic a = map.get(t);
+            if (a.getNotAuth() == 0) {
+                continue;
+            }
+            res.add(a);
         }
         return res;
     }
