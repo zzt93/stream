@@ -64,7 +64,7 @@ public class StreamerController {
     private final String platformDays;
     private final String platformMonths;
 
-    private final String authHours;
+    private final String authDays;
 
     @Autowired
     private StreamerService streamerService;
@@ -79,7 +79,7 @@ public class StreamerController {
                               @Value("{collector.mongo.platform.hour}") String platformHours,
                               @Value("{collector.mongo.platform.day}") String platformDays,
                               @Value("{collector.mongo.platform.month}") String platformMonths,
-                              @Value("{collector.mongo.auth.hour}") String authHours
+                              @Value("{collector.mongo.auth.day}") String authDays
     ) {
         this.sqlQuery = sqlQuery;
         this.mongo = mongo;
@@ -93,7 +93,7 @@ public class StreamerController {
         this.platformDays = platformDays;
         this.platformMonths = platformMonths;
 
-        this.authHours = authHours;
+        this.authDays = authDays;
 
         MongoConfig.createIfNotExist(mongo, this.minute, Unit.MINUTE.getRange() * 50);
     }
@@ -311,7 +311,7 @@ public class StreamerController {
     @ApiOperation(value = "根据精度获取不同认证状态用户数据", notes = "", response = AuthStatistic.class)
     @PostMapping("/get_auth_statistic")
     public List<AuthStatistic> getAuthStatistic(@RequestBody TimeRange timeRange){
-        List<AuthStatistic> authStatistics = queryMongo(timeRange, authHours, ChronoUnit.HOURS, AuthStatistic.class);
+        List<AuthStatistic> authStatistics = queryMongo(timeRange, authDays, ChronoUnit.DAYS, AuthStatistic.class);
         return filterAuthStatistic(authStatistics, timeRange.getPrecision());
     }
 

@@ -150,9 +150,7 @@ public class StreamerService {
     }
     if (operateType == OperationType.online) {
       userActiveLogEntity.setLoginTime(new Timestamp(timestamp));
-      userActiveLogEntity.setLogoutTime(null);
     } else {
-      userActiveLogEntity.setLoginTime(null);
       userActiveLogEntity.setLogoutTime(new Timestamp(timestamp));
     }
 

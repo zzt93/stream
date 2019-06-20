@@ -8,7 +8,7 @@ import java.sql.Timestamp;
 
 @Repository
 public interface UserInfoLogDao extends JpaRepository<UserInfoLogEntity, Long> {
-    long countByAuthType(int authType);
+    long countByAuthTypeAndCreateTimeBefore(int authType, Timestamp timestamp);
 
     long countByCreateTimeAfter(Timestamp timestamp);
 }
