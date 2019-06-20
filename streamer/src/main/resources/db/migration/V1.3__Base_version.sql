@@ -1,0 +1,1 @@
+alter table user_active_log add column agent VARCHAR(255) DEFAULT '' NULL;

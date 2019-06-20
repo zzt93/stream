@@ -140,7 +140,7 @@ public class StreamerService {
     return new CurrentInfoVO(onlineUser, newUser, activeUser, totalUser);
   }
 
-  public void userOperation(KafkaDeviceDTO deviceDTO, int operateType) {
+  public void userOperation(KafkaDeviceDTO deviceDTO, int operateType, long timestamp) {
     UserActiveLogEntity userActiveLogEntity = userActiveLogDao.findByUserIdAndDeviceId(deviceDTO.getUserId(), deviceDTO.getDeviceId());
     if (userActiveLogEntity == null) {
       userActiveLogEntity = new UserActiveLogEntity();

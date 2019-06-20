@@ -26,7 +26,7 @@ public class KafkaDeviceEventListener {
         logger.info("deviceOfflineListener, record={}", record.toString());
         KafkaDeviceDTO deviceDTO = JSON.parseObject(record.value(), KafkaDeviceDTO.class);
         if (deviceDTO != null) {
-            streamerService.userOperation(deviceDTO, OperationType.offline);
+            streamerService.userOperation(deviceDTO, OperationType.offline, record.timestamp());
         }
     }
 
@@ -36,7 +36,7 @@ public class KafkaDeviceEventListener {
         KafkaDeviceDTO deviceDTO = JSON.parseObject(record.value(), KafkaDeviceDTO.class);
 
         if (deviceDTO != null) {
-            streamerService.userOperation(deviceDTO, OperationType.online);
+            streamerService.userOperation(deviceDTO, OperationType.online, record.timestamp());
         }
     }
 
