@@ -2,10 +2,12 @@ package cn.superid.streamer.vo;
 
 import cn.superid.collector.entity.view.PageView;
 
+import java.sql.Timestamp;
+
 public class StatsDetailVO {
     private String clientIp;
     private String device;//浏览器
-    private String uploadTime;//访问时间
+    private Timestamp epoch;
     private String pageUri;//访问页面
 
     public StatsDetailVO() {
@@ -21,14 +23,14 @@ public class StatsDetailVO {
             this.device = pageView.getDevice();
         }
 
-        this.uploadTime = pageView.getUploadTime();
+        this.epoch = pageView.getEpoch();
         this.pageUri = pageView.getPageUri();
     }
 
-    public StatsDetailVO(String clientIp, String device, String uploadTime, String pageUri) {
+    public StatsDetailVO(String clientIp, String device, Timestamp epoch, String pageUri) {
         this.clientIp = clientIp;
         this.device = device;
-        this.uploadTime = uploadTime;
+        this.epoch = epoch;
         this.pageUri = pageUri;
     }
 
@@ -48,12 +50,12 @@ public class StatsDetailVO {
         this.device = device;
     }
 
-    public String getUploadTime() {
-        return uploadTime;
+    public Timestamp getEpoch() {
+        return epoch;
     }
 
-    public void setUploadTime(String uploadTime) {
-        this.uploadTime = uploadTime;
+    public void setEpoch(Timestamp epoch) {
+        this.epoch = epoch;
     }
 
     public String getPageUri() {
