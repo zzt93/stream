@@ -14,16 +14,18 @@ public class UserActiveLogEntity {
     private String deviceId;
     private Timestamp loginTime;
     private Timestamp logoutTime;
+    private String agent;
 
     public UserActiveLogEntity() {
     }
 
-    public UserActiveLogEntity(long id, long userId, String deviceId, Timestamp loginTime, Timestamp logoutTime) {
+    public UserActiveLogEntity(long id, long userId, String deviceId, Timestamp loginTime, Timestamp logoutTime, String agent) {
         this.id = id;
         this.userId = userId;
         this.deviceId = deviceId;
         this.loginTime = loginTime;
         this.logoutTime = logoutTime;
+        this.agent = agent;
     }
 
     public long getId() {
@@ -64,5 +66,13 @@ public class UserActiveLogEntity {
 
     public void setLogoutTime(Timestamp logoutTime) {
         this.logoutTime = logoutTime;
+    }
+
+    public String getAgent() {
+        return agent;
+    }
+
+    public void setAgent(String agent) {
+        this.agent = agent;
     }
 }
