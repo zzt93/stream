@@ -16,8 +16,6 @@ import com.mongodb.spark.MongoSpark;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -54,14 +52,14 @@ public class RegularQuery implements Serializable {
     @Value("${collector.mongo.month}")
     private String months;
 
-    @Value("{collector.mongo.platform.hour}")
+    @Value("${collector.mongo.platform.hour}")
     private String platformHours;
-    @Value("{collector.mongo.platform.day}")
+    @Value("${collector.mongo.platform.day}")
     private String platformDays;
-    @Value("{collector.mongo.platform.month}")
+    @Value("${collector.mongo.platform.month}")
     private String platformMonths;
 
-    @Value("{collector.mongo.auth.day}")
+    @Value("${collector.mongo.auth.day}")
     private String authDays;
 
     private Dataset<PageView> pageDataSet;
@@ -211,25 +209,6 @@ public class RegularQuery implements Serializable {
                 .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.DAYS));
         logger.debug("execute authEveryDay of :  {}", now.toLocalDateTime());
         repeatAuth(authDays, now, Unit.DAY);
-    }
-
-    @Scheduled(fixedRate = 1000 * 60 * 60 * 24, initialDelay = 1000 * 1200)
-    public void initAuthUser() {
-        //最早注册的用户在2018-01-08
-        Date date = null;
-        try {
-            date = new SimpleDateFormat("yyyy-MM-dd").parse("2018-01-09");
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return;
-        }
-        Timestamp from = new Timestamp(date.getTime());
-        Timestamp end = new Timestamp(new Date().getTime());
-
-        for (Timestamp t = from; t.before(end); t = Timestamp.valueOf(t.toLocalDateTime().plusDays(1))) {
-            repeatAuth(authDays, t, Unit.DAY);
-        }
-
     }
 
     private void repeatAuth(String collection, Timestamp now, Unit unit){
