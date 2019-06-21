@@ -76,10 +76,10 @@ public class StreamerController {
                               @Value("${collector.mongo.hour}") String hour,
                               @Value("${collector.mongo.day}") String day,
                               @Value("${collector.mongo.month}") String month,
-                              @Value("{collector.mongo.platform.hour}") String platformHours,
-                              @Value("{collector.mongo.platform.day}") String platformDays,
-                              @Value("{collector.mongo.platform.month}") String platformMonths,
-                              @Value("{collector.mongo.auth.day}") String authDays
+                              @Value("${collector.mongo.platform.hour}") String platformHours,
+                              @Value("${collector.mongo.platform.day}") String platformDays,
+                              @Value("${collector.mongo.platform.month}") String platformMonths,
+                              @Value("${collector.mongo.auth.day}") String authDays
     ) {
         this.sqlQuery = sqlQuery;
         this.mongo = mongo;
