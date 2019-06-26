@@ -15,7 +15,8 @@ public interface UserActiveLogDao extends JpaRepository<UserActiveLogEntity, Lon
      */
     @Query(value = "select count(distinct user_id) from user_active_log where " +
             "(login_time is not null and login_time between ?1 and ?2)" +
-            "or (logout_time is not null and logout_time between ?1 and ?2)", nativeQuery = true)
+            "or (logout_time is not null and logout_time between ?1 and ?2)" +
+            "or (login_time is not null and login_time < ?1 and (logout_time is null or logout_time < login_time))", nativeQuery = true)
     long countActiveUser(Timestamp from, Timestamp to);
 
     /**

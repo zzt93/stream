@@ -7,13 +7,11 @@ import static org.apache.spark.sql.functions.countDistinct;
 import static org.apache.spark.sql.functions.lit;
 
 import cn.superid.streamer.constant.AuthType;
-import cn.superid.streamer.dao.UserActiveLogDao;
 import cn.superid.streamer.dao.UserInfoLogDao;
 import cn.superid.streamer.entity.AuthStatistic;
 import cn.superid.streamer.entity.PageStatistic;
 import cn.superid.collector.entity.view.PageView;
 import cn.superid.streamer.entity.PlatformStatistic;
-import cn.superid.streamer.entity.RichPageStatistic;
 import cn.superid.streamer.vo.LastAndSize;
 import cn.superid.streamer.vo.PlatformTemp;
 import com.mongodb.BasicDBObject;
@@ -87,7 +85,7 @@ public class RegularQuery implements Serializable {
     public void everyHour() {
         Timestamp now = Timestamp
                 .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS));
-        logger.debug("execute everyHour of :  {}", now.toLocalDateTime().truncatedTo(ChronoUnit.HOURS));
+        logger.debug("execute everyHour of :  {}", now.toLocalDateTime());
         repeat(hours, now, Unit.HOUR);
     }
 
@@ -98,15 +96,15 @@ public class RegularQuery implements Serializable {
     public void everyDay() {
         Timestamp now = Timestamp
                 .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.DAYS));
-        logger.debug("execute everyDay of :  {}", now.toLocalDateTime().truncatedTo(ChronoUnit.DAYS));
+        logger.debug("execute everyDay of :  {}", now.toLocalDateTime());
         repeat(days, now, Unit.DAY);
     }
 
     @Scheduled(fixedRate = 1000L * 60 * 60 * 24 * 30, initialDelay = 1000 * 600)
     public void everyMonth() {
         Timestamp now = Timestamp
-                .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.MONTHS));
-        logger.debug("execute everyMonth of :  {}", now.toLocalDateTime().truncatedTo(ChronoUnit.MONTHS));
+                .valueOf(LocalDateTime.now().withDayOfMonth(1).truncatedTo(ChronoUnit.DAYS));
+        logger.debug("execute everyMonth of :  {}", now.toLocalDateTime());
         repeat(months, now, Unit.MONTH);
     }
 
@@ -143,7 +141,7 @@ public class RegularQuery implements Serializable {
     public void platformEveryHour(){
         Timestamp now = Timestamp
                 .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS));
-        logger.debug("execute platformEveryHour of :  {}", now.toLocalDateTime().truncatedTo(ChronoUnit.HOURS));
+        logger.debug("execute platformEveryHour of :  {}", now.toLocalDateTime());
         repeatPlatform(platformHours, now, Unit.HOUR);
     }
 
@@ -151,15 +149,15 @@ public class RegularQuery implements Serializable {
     public void platformEveryDay(){
         Timestamp now = Timestamp
                 .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.DAYS));
-        logger.debug("execute platformEveryHour of :  {}", now.toLocalDateTime().truncatedTo(ChronoUnit.DAYS));
+        logger.debug("execute platformEveryHour of :  {}", now.toLocalDateTime());
         repeatPlatform(platformDays, now, Unit.DAY);
     }
 
     @Scheduled(fixedRate = 1000L * 60 * 60 * 24 * 30, initialDelay = 1000 * 800)
     public void platformEveryMonth(){
         Timestamp now = Timestamp
-                .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.MONTHS));
-        logger.debug("execute platformEveryHour of :  {}", now.toLocalDateTime().truncatedTo(ChronoUnit.MONTHS));
+                .valueOf(LocalDateTime.now().withDayOfMonth(1).truncatedTo(ChronoUnit.DAYS));
+        logger.debug("execute platformEveryHour of :  {}", now.toLocalDateTime());
         repeatPlatform(platformMonths, now, Unit.MONTH);
     }
 
@@ -212,7 +210,7 @@ public class RegularQuery implements Serializable {
     public void authEveryHour(){
         Timestamp now = Timestamp
                 .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS));
-        logger.debug("execute authEveryHour of :  {}", now.toLocalDateTime().truncatedTo(ChronoUnit.HOURS));
+        logger.debug("execute authEveryHour of :  {}", now.toLocalDateTime());
         repeatAuth(authHours, now, Unit.HOUR);
     }
 
