@@ -146,13 +146,12 @@ public class StreamerService {
       userActiveLogEntity = new UserActiveLogEntity();
       userActiveLogEntity.setUserId(deviceDTO.getUserId());
       userActiveLogEntity.setDeviceId(deviceDTO.getDeviceId());
+      userActiveLogEntity.setAgent(deviceDTO.getAgent());
     }
     if (operateType == OperationType.online) {
-      userActiveLogEntity.setLoginTime(new Timestamp(new Date().getTime()));
-      userActiveLogEntity.setLogoutTime(null);
+      userActiveLogEntity.setLoginTime(new Timestamp(timestamp));
     } else {
-      userActiveLogEntity.setLoginTime(null);
-      userActiveLogEntity.setLogoutTime(new Timestamp(new Date().getTime()));
+      userActiveLogEntity.setLogoutTime(new Timestamp(timestamp));
     }
 
     userActiveLogDao.save(userActiveLogEntity);

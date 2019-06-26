@@ -1,10 +1,7 @@
 package cn.superid.streamer.compute;
 
 import static cn.superid.streamer.compute.MongoConfig.readConfig;
-import static org.apache.spark.sql.functions.col;
-import static org.apache.spark.sql.functions.count;
-import static org.apache.spark.sql.functions.countDistinct;
-import static org.apache.spark.sql.functions.lit;
+import static org.apache.spark.sql.functions.*;
 
 import cn.superid.streamer.constant.AuthType;
 import cn.superid.streamer.dao.UserInfoLogDao;
@@ -55,15 +52,15 @@ public class RegularQuery implements Serializable {
     @Value("${collector.mongo.month}")
     private String months;
 
-    @Value("{collector.mongo.platform.hour}")
+    @Value("${collector.mongo.platform.hour}")
     private String platformHours;
-    @Value("{collector.mongo.platform.day}")
+    @Value("${collector.mongo.platform.day}")
     private String platformDays;
-    @Value("{collector.mongo.platform.month}")
+    @Value("${collector.mongo.platform.month}")
     private String platformMonths;
 
-    @Value("{collector.mongo.auth.hour}")
-    private String authHours;
+    @Value("${collector.mongo.auth.day}")
+    private String authDays;
 
     private Dataset<PageView> pageDataSet;
 
@@ -206,23 +203,23 @@ public class RegularQuery implements Serializable {
         }
     }
 
-    @Scheduled(fixedRate = 1000 * 60 * 60, initialDelay = 1000 * 90)
-    public void authEveryHour(){
+    @Scheduled(cron = "0 10 00 * * ?") // 每天凌晨00:10触发计算
+    public void authEveryDay() {
         Timestamp now = Timestamp
-                .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.HOURS));
-        logger.debug("execute authEveryHour of :  {}", now.toLocalDateTime());
-        repeatAuth(authHours, now, Unit.HOUR);
+                .valueOf(LocalDateTime.now().truncatedTo(ChronoUnit.DAYS));
+        logger.debug("execute authEveryDay of :  {}", now.toLocalDateTime());
+        repeatAuth(authDays, now, Unit.DAY);
     }
 
     private void repeatAuth(String collection, Timestamp now, Unit unit){
         try {
             MongoConfig.createIfNotExist(mongo, collection, unit.range * 10);
 
-            long notAuth = userInfoLogDao.countByAuthType(AuthType.NOT_AUTH);
-            long idAuth = userInfoLogDao.countByAuthType(AuthType.ID_AUTH);
-            long passportAuth = userInfoLogDao.countByAuthType(AuthType.PASSPORT_AUTH);
+            long notAuth = userInfoLogDao.countByAuthTypeAndCreateTimeBefore(AuthType.NOT_AUTH, now);
+            long idAuth = userInfoLogDao.countByAuthTypeAndCreateTimeBefore(AuthType.ID_AUTH, now);
+            long passportAuth = userInfoLogDao.countByAuthTypeAndCreateTimeBefore(AuthType.PASSPORT_AUTH, now);
 
-            AuthStatistic authStatistic = new AuthStatistic(new Timestamp(new Date().getTime()));
+            AuthStatistic authStatistic = new AuthStatistic(now);
             authStatistic.setNotAuth(notAuth);
             authStatistic.setIdAuth(idAuth);
             authStatistic.setPassportAuth(passportAuth);
