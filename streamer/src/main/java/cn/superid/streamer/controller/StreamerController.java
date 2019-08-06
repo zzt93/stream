@@ -185,7 +185,7 @@ public class StreamerController {
     private <T> List<T> queryMongo(TimeRange range, String collection, ChronoUnit unit, Class<T> tClass) {
         Preconditions.checkArgument(range.getFrom() != null && range.getTo() != null, "No time range");
         Criteria criteria = Criteria.where("epoch").gte(truncate(range.getFrom(), unit))
-                .andOperator(Criteria.where("epoch").lt(truncate(range.getTo(), unit)));
+                .andOperator(Criteria.where("epoch").lte(truncate(range.getTo(), unit)));
         Query query = Query.query(criteria).with(range.pageRequest());
         return mongo.find(query, tClass, collection);
     }
