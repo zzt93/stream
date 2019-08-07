@@ -1,5 +1,6 @@
 package cn.superid.streamer.compute;
 
+import com.mongodb.MongoClientOptions;
 import com.mongodb.spark.config.ReadConfig;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -43,6 +44,11 @@ public class MongoConfig {
     CollectionOptions options = CollectionOptions.empty().capped().maxDocuments(max)
         .size(max * SIZE_OF_PAGE_VIEW);
     mongo.createCollection(collection, options);
+  }
+
+  @Bean
+  public MongoClientOptions mongoOptions() {
+    return MongoClientOptions.builder().retryWrites(true).build();
   }
 
   @Bean
