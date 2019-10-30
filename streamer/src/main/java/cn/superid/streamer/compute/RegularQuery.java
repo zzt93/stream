@@ -256,10 +256,7 @@ public class RegularQuery implements Serializable {
             size = unit.range;
         } else {
             //获取当前时间和最后一条mongo数据库中的时间之间的时间点个数
-            size = unit.diff(now, last);
-            if (size < 0) {
-                size += unit.range;
-            }
+            size = unit.diff(last, now);
         }
         logger.debug("{} last: {}", caller, last);
         logger.debug("{} size: {}", caller, size);

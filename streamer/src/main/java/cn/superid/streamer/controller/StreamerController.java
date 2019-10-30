@@ -190,13 +190,6 @@ public class StreamerController {
         return mongo.find(query, tClass, collection);
     }
 
-    private <T> List<T> queryMongo(TimeRange range, String collection, Class<T> tClass) {
-        Preconditions.checkArgument(range.getFrom() != null && range.getTo() != null, "No time range");
-        Criteria criteria = Criteria.where("epoch").gte(range.getFrom())
-                .andOperator(Criteria.where("epoch").lt(range.getTo()));
-        Query query = Query.query(criteria).with(range.pageRequest());
-        return mongo.find(query, tClass, collection);
-    }
 
     /**
      * 查询最近30分钟的浏览统计信息（刷新页面或者刚打开页面的时候，一次性加载30分钟的数据，后续只增量更新一分钟的数据）
