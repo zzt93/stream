@@ -115,9 +115,6 @@ public class RegularQuery implements Serializable {
             ArrayList<PageStatistic> list = new ArrayList<>();
             for (int offset = 0; offset < size; offset++) {
                 Dataset<PageView> inTimeRange = getInTimeRange(pageDataSet, last, unit, offset);
-                if (((Object[]) inTimeRange.collect()).length <= 0) {
-                    continue;
-                }
                 Timestamp epoch = Timestamp.valueOf(unit.update(last,  offset+1));
                 logger.debug("{}", epoch);
                 Dataset<PageStatistic> stat = inTimeRange
@@ -168,9 +165,7 @@ public class RegularQuery implements Serializable {
             ArrayList<PlatformStatistic> list = new ArrayList<>();
             for (int offset = 0; offset < size; offset++) {
                 Dataset<PageView> inTimeRange = getInTimeRange(pageDataSet, last, unit, offset);
-                if (((Object[]) inTimeRange.collect()).length <= 0) {
-                    continue;
-                }
+
                 Timestamp epoch = Timestamp.valueOf(unit.update(last,  offset+1));
                 Dataset<PlatformTemp> stats = inTimeRange
                         .groupBy(inTimeRange.col("devType"))
